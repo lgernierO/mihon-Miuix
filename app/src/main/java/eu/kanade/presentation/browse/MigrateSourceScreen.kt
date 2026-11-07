@@ -1,27 +1,22 @@
 package eu.kanade.presentation.browse
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.domain.source.interactor.SetMigrateSorting
-import eu.kanade.presentation.browse.components.BaseSourceItem
 import eu.kanade.presentation.browse.components.SourceIcon
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.tachiyomi.ui.browse.migration.sources.MigrateSourceViewModel
+import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.ArrowDownward
@@ -30,18 +25,19 @@ import mihon.icons.materialsymbols.rounded.Numbers
 import mihon.icons.materialsymbols.rounded.SortByAlpha
 import tachiyomi.domain.source.model.Source
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.Badge
-import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.Scroller.STICKY_HEADER_KEY_PREFIX
-import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
-import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.plus
-import tachiyomi.presentation.core.util.secondaryItemAlpha
+import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MigrateSourceScreen(
@@ -92,36 +88,37 @@ private fun MigrateSourceList(
         stickyHeader(key = STICKY_HEADER_KEY_PREFIX) {
             Row(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(start = MaterialTheme.padding.medium),
+                    .fillMaxWidth()
+                    .background(MiuixTheme.colorScheme.background)
+                    .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(MR.strings.migration_selection_prompt),
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.header,
+                    style = MiuixTheme.textStyles.subtitle,
                 )
 
                 IconButton(onClick = onToggleSortingMode) {
                     when (sortingMode) {
-                        SetMigrateSorting.Mode.ALPHABETICAL -> Icon(
-                            MaterialSymbols.Rounded.SortByAlpha,
+                        SetMigrateSorting.Mode.ALPHABETICAL -> AppBarIcon(
+                            imageVector = MaterialSymbols.Rounded.SortByAlpha,
                             contentDescription = stringResource(MR.strings.action_sort_alpha),
                         )
-                        SetMigrateSorting.Mode.TOTAL -> Icon(
-                            MaterialSymbols.Rounded.Numbers,
+                        SetMigrateSorting.Mode.TOTAL -> AppBarIcon(
+                            imageVector = MaterialSymbols.Rounded.Numbers,
                             contentDescription = stringResource(MR.strings.action_sort_count),
                         )
                     }
                 }
                 IconButton(onClick = onToggleSortingDirection) {
                     when (sortingDirection) {
-                        SetMigrateSorting.Direction.ASCENDING -> Icon(
-                            MaterialSymbols.Rounded.ArrowUpward,
+                        SetMigrateSorting.Direction.ASCENDING -> AppBarIcon(
+                            imageVector = MaterialSymbols.Rounded.ArrowUpward,
                             contentDescription = stringResource(MR.strings.action_asc),
                         )
-                        SetMigrateSorting.Direction.DESCENDING -> Icon(
-                            MaterialSymbols.Rounded.ArrowDownward,
+                        SetMigrateSorting.Direction.DESCENDING -> AppBarIcon(
+                            imageVector = MaterialSymbols.Rounded.ArrowDownward,
                             contentDescription = stringResource(MR.strings.action_desc),
                         )
                     }
@@ -152,55 +149,31 @@ private fun MigrateSourceItem(
     onLongClickItem: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BaseSourceItem(
-        modifier = modifier,
-        source = source,
-        showLanguageInContent = source.lang != "",
-        onClickItem = onClickItem,
-        onLongClickItem = onLongClickItem,
-        icon = { SourceIcon(source = source, modifier = Modifier.size(48.dp)) },
-        action = {
-            BadgeGroup {
-                Badge(text = "$count")
-            }
-        },
-        content = { _, sourceLangString ->
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = MaterialTheme.padding.medium)
-                    .weight(1f),
-            ) {
-                Text(
-                    text = source.name.ifBlank { source.id.toString() },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                    verticalAlignment = Alignment.CenterVertically,
+    val context = LocalContext.current
+    val summary = listOfNotNull(
+        LocaleHelper.getSourceDisplayName(source.lang, context).takeIf { source.lang.isNotEmpty() },
+        stringResource(MR.strings.not_installed).takeIf { source.isStub },
+    ).joinToString(" · ").ifEmpty { null }
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        onClick = onClickItem,
+        onLongPress = onLongClickItem,
+        showIndication = true,
+    ) {
+        BasicComponent(
+            title = source.name.ifBlank { source.id.toString() },
+            summary = summary,
+            startAction = { SourceIcon(source = source, modifier = Modifier.size(40.dp)) },
+            endActions = {
+                Badge(
+                    containerColor = MiuixTheme.colorScheme.secondaryVariant,
+                    contentColor = MiuixTheme.colorScheme.onSecondaryVariant,
                 ) {
-                    if (sourceLangString != null) {
-                        Text(
-                            modifier = Modifier.secondaryItemAlpha(),
-                            text = sourceLangString,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    if (source.isStub) {
-                        Text(
-                            modifier = Modifier.secondaryItemAlpha(),
-                            text = stringResource(MR.strings.not_installed),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
+                    top.yukonga.miuix.kmp.basic.Text(text = "$count")
                 }
-            }
-        },
-    )
+            },
+        )
+    }
 }

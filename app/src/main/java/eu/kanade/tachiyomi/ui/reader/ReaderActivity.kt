@@ -25,9 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -118,6 +115,9 @@ import tachiyomi.core.common.Constants
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
 
@@ -285,7 +285,9 @@ class ReaderActivity : BaseActivity() {
                     ReaderSettingsDialog(
                         onDismissRequest = onDismissRequest,
                         onShowMenus = { setMenuVisibility(true) },
-                        onHideMenus = { setMenuVisibility(false) },
+                        // The filter preview hides reading controls without changing the
+                        // system-bar insets beneath the open settings window.
+                        onHideMenus = { viewModel.showMenus(false) },
                         viewModel = settingsViewModel,
                     )
                 }
@@ -559,6 +561,7 @@ class ReaderActivity : BaseActivity() {
 
             mangaTitle = state.manga?.title,
             chapterTitle = state.currentChapter?.chapter?.name,
+            chapterId = state.viewerChapters?.currChapter?.chapter?.id,
             navigateUp = onBackPressedDispatcher::onBackPressed,
             onClickTopAppBar = ::openMangaScreen,
             bookmarked = state.bookmarked,

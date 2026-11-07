@@ -1,21 +1,9 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,10 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -60,10 +46,16 @@ import tachiyomi.core.common.Constants
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.CompactActionRow
+import tachiyomi.presentation.core.components.miuix.CompactButtonDefaults
+import tachiyomi.presentation.core.components.miuix.FilterChip
+import tachiyomi.presentation.core.components.miuix.SnackbarHost
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.LocalSource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 
 data class BrowseSourceScreen(
     val sourceId: Long,
@@ -105,7 +97,6 @@ data class BrowseSourceScreen(
         }
 
         val scope = rememberCoroutineScope()
-        val haptic = LocalHapticFeedback.current
         val uriHandler = LocalUriHandler.current
         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -143,14 +134,10 @@ data class BrowseSourceScreen(
                         onHelpClick = onHelpClick,
                         onSettingsClick = { navigator.push(SourcePreferencesScreen(sourceId)) },
                         onSearch = viewModel::search,
+                        scrollBehavior = it,
                     )
 
-                    Row(
-                        modifier = Modifier
-                            .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = MaterialTheme.padding.small),
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                    ) {
+                    CompactActionRow {
                         FilterChip(
                             selected = state.listing == Listing.Popular,
                             onClick = {
@@ -162,11 +149,15 @@ data class BrowseSourceScreen(
                                     imageVector = MaterialSymbols.RoundedFilled.Favorite,
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(FilterChipDefaults.IconSize),
+                                        .size(CompactButtonDefaults.IconSize),
                                 )
                             },
                             label = {
-                                Text(text = stringResource(MR.strings.popular))
+                                Text(
+                                    text = stringResource(MR.strings.popular),
+                                    maxLines = 1,
+                                    softWrap = false,
+                                )
                             },
                         )
                         if (source.supportsLatest) {
@@ -181,11 +172,15 @@ data class BrowseSourceScreen(
                                         imageVector = MaterialSymbols.Rounded.Verified,
                                         contentDescription = null,
                                         modifier = Modifier
-                                            .size(FilterChipDefaults.IconSize),
+                                            .size(CompactButtonDefaults.IconSize),
                                     )
                                 },
                                 label = {
-                                    Text(text = stringResource(MR.strings.latest))
+                                    Text(
+                                        text = stringResource(MR.strings.latest),
+                                        maxLines = 1,
+                                        softWrap = false,
+                                    )
                                 },
                             )
                         }
@@ -198,17 +193,19 @@ data class BrowseSourceScreen(
                                         imageVector = MaterialSymbols.Rounded.FilterList,
                                         contentDescription = null,
                                         modifier = Modifier
-                                            .size(FilterChipDefaults.IconSize),
+                                            .size(CompactButtonDefaults.IconSize),
                                     )
                                 },
                                 label = {
-                                    Text(text = stringResource(MR.strings.action_filter))
+                                    Text(
+                                        text = stringResource(MR.strings.action_filter),
+                                        maxLines = 1,
+                                        softWrap = false,
+                                    )
                                 },
                             )
                         }
                     }
-
-                    HorizontalDivider()
                 }
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -234,7 +231,6 @@ data class BrowseSourceScreen(
                             )
                             else -> viewModel.addFavorite(manga)
                         }
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     }
                 },
             )

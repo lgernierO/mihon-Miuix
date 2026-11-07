@@ -3,14 +3,10 @@ package eu.kanade.presentation.history.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,7 +26,11 @@ import mihon.icons.materialsymbols.rounded.Favorite
 import tachiyomi.domain.history.model.HistoryWithRelations
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Surface
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -49,12 +49,12 @@ fun HistoryItem(
     Row(
         modifier = modifier
             .clickable(onClick = onClickResume)
-            .height(HistoryItemHeight)
+            .heightIn(min = HistoryItemHeight)
             .padding(horizontal = MaterialTheme.padding.medium, vertical = MaterialTheme.padding.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         MangaCover.Book(
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier.height(HistoryItemHeight - 16.dp),
             data = history.coverData,
             onClick = onClickCover,
         )

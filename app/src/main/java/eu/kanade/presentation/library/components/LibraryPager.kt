@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -25,7 +24,10 @@ import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.screens.EmptyScreen
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 import tachiyomi.presentation.core.util.plus
+import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 @Composable
 fun LibraryPager(
@@ -44,9 +46,12 @@ fun LibraryPager(
     onClickContinueReading: ((LibraryManga) -> Unit)?,
 ) {
     HorizontalPager(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().pagerGestureOverride(pagerState = state),
         state = state,
         verticalAlignment = Alignment.Top,
+        userScrollEnabled = false,
+        pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+        overscrollEffect = null,
     ) { page ->
         if (page !in ((state.currentPage - 1)..(state.currentPage + 1))) {
             // To make sure only one offscreen page is being composed
@@ -139,7 +144,7 @@ private fun LibraryPagerEmptyScreen(
         modifier = Modifier
             .padding(contentPadding + PaddingValues(8.dp))
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .miuixVerticalScroll(rememberScrollState()),
     ) {
         if (!searchQuery.isNullOrEmpty()) {
             GlobalSearchItem(

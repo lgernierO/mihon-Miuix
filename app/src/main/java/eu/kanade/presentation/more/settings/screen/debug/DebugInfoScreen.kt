@@ -1,8 +1,6 @@
 package eu.kanade.presentation.more.settings.screen.debug
 
 import android.os.Build
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -29,7 +27,10 @@ import mihon.core.common.FeatureFlags
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Autorenew
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import top.yukonga.miuix.kmp.basic.Icon
 
 class DebugInfoScreen : Screen() {
 
@@ -92,7 +93,7 @@ class DebugInfoScreen : Screen() {
                             Icon(
                                 imageVector = MaterialSymbols.Rounded.Autorenew,
                                 tint = MaterialTheme.colorScheme.primary,
-                                contentDescription = null,
+                                contentDescription = stringResource(MR.strings.action_reset),
                             )
                         }
                     },

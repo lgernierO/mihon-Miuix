@@ -2,8 +2,6 @@ package eu.kanade.presentation.more.settings.widget
 
 import android.app.Activity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -48,9 +46,13 @@ import eu.kanade.tachiyomi.util.system.isDynamicColorAvailable
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.secondaryItemAlpha
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.squircle.squircleBorder
+import top.yukonga.miuix.kmp.squircle.squircleClip
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun AppThemePreferenceWidget(
@@ -58,14 +60,10 @@ internal fun AppThemePreferenceWidget(
     amoled: Boolean,
     onItemClick: (AppTheme) -> Unit,
 ) {
-    BasePreferenceWidget(
-        subcomponent = {
-            AppThemesList(
-                currentTheme = value,
-                amoled = amoled,
-                onItemClick = onItemClick,
-            )
-        },
+    AppThemesList(
+        currentTheme = value,
+        amoled = amoled,
+        onItemClick = onItemClick,
     )
 }
 
@@ -81,13 +79,15 @@ private fun AppThemesList(
             .filterNot { it.titleRes == null || (it == AppTheme.MONET && !DeviceUtil.isDynamicColorAvailable) }
     }
     LazyRow(
+        modifier = Modifier.selectableGroup(),
         contentPadding = PaddingValues(horizontal = PrefsHorizontalPadding),
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(
             items = appThemes,
             key = { it.name },
         ) { appTheme ->
+            val themeName = stringResource(appTheme.titleRes!!)
             Column(
                 modifier = Modifier
                     .width(114.dp)
@@ -97,8 +97,10 @@ private fun AppThemesList(
                     appTheme = appTheme,
                     amoled = amoled,
                 ) {
+                    // Theme swatches deliberately preview a different palette locally.
                     AppThemePreviewItem(
                         selected = currentTheme == appTheme,
+                        modifier = Modifier.semantics { contentDescription = themeName },
                         onClick = {
                             onItemClick(appTheme)
                             (context as? Activity)?.let { ActivityCompat.recreate(it) }
@@ -109,14 +111,14 @@ private fun AppThemesList(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = stringResource(appTheme.titleRes!!),
+                    text = themeName,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .secondaryItemAlpha(),
+                        .fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     maxLines = 2,
                     minLines = 2,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 )
             }
         }
@@ -127,24 +129,29 @@ private fun AppThemesList(
 fun AppThemePreviewItem(
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .aspectRatio(9f / 16f)
-            .border(
+            .squircleBorder(
                 width = 4.dp,
                 color = if (selected) {
-                    MaterialTheme.colorScheme.primary
+                    MiuixTheme.colorScheme.primary
                 } else {
-                    DividerDefaults.color
+                    MiuixTheme.colorScheme.dividerLine
                 },
-                shape = RoundedCornerShape(17.dp),
+                cornerRadius = 17.dp,
             )
             .padding(4.dp)
-            .clip(RoundedCornerShape(13.dp))
-            .background(MaterialTheme.colorScheme.background)
-            .clickable(onClick = onClick),
+            .squircleClip(13.dp)
+            .background(MiuixTheme.colorScheme.background)
+            .selectable(
+                selected = selected,
+                onClick = onClick,
+                role = Role.RadioButton,
+            ),
     ) {
         // App Bar
         Row(
@@ -160,8 +167,8 @@ fun AppThemePreviewItem(
                     .weight(0.7f)
                     .padding(end = 4.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        shape = MaterialTheme.shapes.small,
+                        color = MiuixTheme.colorScheme.onSurface,
+                        shape = RoundedCornerShape(4.dp),
                     ),
             )
 
@@ -173,7 +180,7 @@ fun AppThemePreviewItem(
                     Icon(
                         imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
                         contentDescription = stringResource(MR.strings.selected),
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MiuixTheme.colorScheme.primary,
                     )
                 }
             }
@@ -184,8 +191,8 @@ fun AppThemePreviewItem(
             modifier = Modifier
                 .padding(start = 8.dp, top = 2.dp)
                 .background(
-                    color = DividerDefaults.color,
-                    shape = MaterialTheme.shapes.small,
+                    color = MiuixTheme.colorScheme.dividerLine,
+                    shape = RoundedCornerShape(4.dp),
                 )
                 .fillMaxWidth(0.5f)
                 .aspectRatio(MangaCover.Book.ratio),
@@ -200,13 +207,13 @@ fun AppThemePreviewItem(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(12.dp)
-                        .background(MaterialTheme.colorScheme.tertiary),
+                        .background(MiuixTheme.colorScheme.tertiaryContainer),
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(12.dp)
-                        .background(MaterialTheme.colorScheme.secondary),
+                        .background(MiuixTheme.colorScheme.secondary),
                 )
             }
         }
@@ -219,7 +226,7 @@ fun AppThemePreviewItem(
             contentAlignment = Alignment.BottomCenter,
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.surfaceContainer,
+                color = MiuixTheme.colorScheme.surfaceContainer,
             ) {
                 Row(
                     modifier = Modifier
@@ -232,7 +239,7 @@ fun AppThemePreviewItem(
                         modifier = Modifier
                             .size(17.dp)
                             .background(
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MiuixTheme.colorScheme.primary,
                                 shape = CircleShape,
                             ),
                     )
@@ -243,8 +250,8 @@ fun AppThemePreviewItem(
                             .height(17.dp)
                             .weight(1f)
                             .background(
-                                color = MaterialTheme.colorScheme.onSurface,
-                                shape = MaterialTheme.shapes.small,
+                                color = MiuixTheme.colorScheme.onSurface,
+                                shape = RoundedCornerShape(4.dp),
                             ),
                     )
                 }

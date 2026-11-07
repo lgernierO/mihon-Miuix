@@ -1,35 +1,39 @@
 package eu.kanade.presentation.more.settings.widget
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.CheckBoxOutlineBlank
-import mihon.icons.materialsymbols.roundedfilled.CheckBox
-import mihon.icons.materialsymbols.roundedfilled.DisabledByDefault
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Checkbox
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 private enum class State {
     CHECKED,
@@ -45,100 +49,116 @@ fun <T> TriStateListDialog(
     initialChecked: List<T>,
     initialInversed: List<T>,
     itemLabel: @Composable (T) -> String,
+    itemKey: ((T) -> Any)? = null,
     onDismissRequest: () -> Unit,
     onValueChanged: (newIncluded: List<T>, newExcluded: List<T>) -> Unit,
 ) {
-    val selected = remember {
-        items
-            .map {
-                when (it) {
-                    in initialChecked -> State.CHECKED
-                    in initialInversed -> State.INVERSED
-                    else -> State.UNCHECKED
-                }
-            }
-            .toMutableStateList()
+    var show by remember { mutableStateOf(true) }
+    var pendingSelection by remember { mutableStateOf<Pair<Set<Any?>, Set<Any?>>?>(null) }
+    val currentItems by rememberUpdatedState(items)
+    val dismiss = { show = false }
+    val selected = remember { mutableStateMapOf<Any?, State>() }
+    fun keyFor(item: T): Any? = itemKey?.invoke(item) ?: item
+    val initialCheckedKeys = initialChecked.map(::keyFor).toSet()
+    val initialInversedKeys = initialInversed.map(::keyFor).toSet()
+    fun stateFor(item: T): State {
+        val key = keyFor(item)
+        return selected[key] ?: when (key) {
+            in initialCheckedKeys -> State.CHECKED
+            in initialInversedKeys -> State.INVERSED
+            else -> State.UNCHECKED
+        }
     }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = title) },
-        text = {
-            Column {
-                if (message != null) {
-                    Text(
-                        text = message,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
-                }
-
-                Box {
-                    val listState = rememberLazyListState()
-                    LazyColumn(state = listState) {
-                        itemsIndexed(items = items) { index, item ->
-                            val state = selected[index]
-                            Row(
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.small)
-                                    .clickable {
-                                        selected[index] = when (state) {
-                                            State.UNCHECKED -> State.CHECKED
-                                            State.CHECKED -> State.INVERSED
-                                            State.INVERSED -> State.UNCHECKED
-                                        }
-                                    }
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    modifier = Modifier.padding(end = 20.dp),
-                                    imageVector = when (state) {
-                                        State.UNCHECKED -> MaterialSymbols.Rounded.CheckBoxOutlineBlank
-                                        State.CHECKED -> MaterialSymbols.RoundedFilled.CheckBox
-                                        State.INVERSED -> MaterialSymbols.RoundedFilled.DisabledByDefault
-                                    },
-                                    tint = if (state == State.UNCHECKED) {
-                                        LocalContentColor.current
-                                    } else {
-                                        MaterialTheme.colorScheme.primary
-                                    },
-                                    contentDescription = stringResource(
-                                        when (state) {
-                                            State.UNCHECKED -> MR.strings.not_selected
-                                            State.CHECKED -> MR.strings.selected
-                                            State.INVERSED -> MR.strings.disabled
-                                        },
-                                    ),
-                                )
-                                Text(text = itemLabel(item))
-                            }
+    LaunchedEffect(items, initialCheckedKeys, initialInversedKeys) {
+        items.forEach { item ->
+            selected.getOrPut(keyFor(item)) { stateFor(item) }
+        }
+    }
+    WindowDialog(
+        modifier = Modifier.selectionSheetHeight(),
+        show = show,
+        onDismissRequest = dismiss,
+        onDismissFinished = {
+            // Category callers also remove this composition when committing their values.
+            // Keep the native window alive until the hide animation has finished.
+            pendingSelection?.let { (includedKeys, excludedKeys) ->
+                onValueChanged(
+                    currentItems.filter { keyFor(it) in includedKeys },
+                    currentItems.filter { keyFor(it) in excludedKeys },
+                )
+            }
+            onDismissRequest()
+        },
+        title = title,
+        summary = message,
+    ) {
+        MiuixPopupSystemBars()
+        Column {
+            Box(modifier = Modifier.weight(1f, fill = false)) {
+                val listState = rememberLazyListState()
+                LazyColumn(
+                    modifier = Modifier.miuixScroll(),
+                    state = listState,
+                    overscrollEffect = null,
+                ) {
+                    items(items = items, key = itemKey) { item ->
+                        val state = stateFor(item)
+                        val label = itemLabel(item)
+                        val toggleState = when (state) {
+                            State.UNCHECKED -> ToggleableState.Off
+                            State.CHECKED -> ToggleableState.On
+                            State.INVERSED -> ToggleableState.Indeterminate
                         }
+                        val description = when (state) {
+                            State.UNCHECKED -> stringResource(MR.strings.not_selected)
+                            State.CHECKED -> stringResource(MR.strings.include, label)
+                            State.INVERSED -> stringResource(MR.strings.exclude, label)
+                        }
+                        BasicComponent(
+                            title = label,
+                            role = Role.Checkbox,
+                            enabled = show,
+                            modifier = Modifier.semantics {
+                                stateDescription = description
+                                toggleableState = toggleState
+                            },
+                            startAction = { Checkbox(state = toggleState, onClick = null, enabled = show) },
+                            onClick = {
+                                selected[keyFor(item)] = when (stateFor(item)) {
+                                    State.UNCHECKED -> State.CHECKED
+                                    State.CHECKED -> State.INVERSED
+                                    State.INVERSED -> State.UNCHECKED
+                                }
+                            },
+                        )
                     }
-
-                    if (listState.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-                    if (listState.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
                 }
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(MR.strings.action_cancel))
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val included = items.mapIndexedNotNull { index, category ->
-                        if (selected[index] == State.CHECKED) category else null
-                    }
-                    val excluded = items.mapIndexedNotNull { index, category ->
-                        if (selected[index] == State.INVERSED) category else null
-                    }
-                    onValueChanged(included, excluded)
-                },
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(text = stringResource(MR.strings.action_ok))
+                TextButton(
+                    text = stringResource(MR.strings.action_cancel),
+                    onClick = dismiss,
+                    enabled = show,
+                    modifier = Modifier.weight(1f),
+                    minHeight = 48.dp,
+                )
+                TextButton(
+                    text = stringResource(MR.strings.action_ok),
+                    modifier = Modifier.weight(1f),
+                    minHeight = 48.dp,
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    enabled = show,
+                    onClick = {
+                        val included = items.filter { stateFor(it) == State.CHECKED }.map(::keyFor).toSet()
+                        val excluded = items.filter { stateFor(it) == State.INVERSED }.map(::keyFor).toSet()
+                        pendingSelection = included to excluded
+                        dismiss()
+                    },
+                )
             }
-        },
-    )
+        }
+    }
 }

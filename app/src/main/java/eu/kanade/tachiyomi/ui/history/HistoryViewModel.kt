@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.history
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -52,6 +51,7 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.source.service.SourceManager
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import kotlin.time.Duration.Companion.seconds
 
 @Inject

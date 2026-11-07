@@ -3,6 +3,10 @@
     <string name="app_name" translatable="false">Mihon</string>
 
     <!-- Generic strings -->
+    <string name="miuix_pull_to_refresh">Pull down to refresh</string>
+    <string name="miuix_release_to_refresh">Release to refresh</string>
+    <string name="miuix_refreshing">Refreshing…</string>
+    <string name="miuix_refresh_complete">Refresh complete</string>
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="selected">Selected</string>
@@ -1042,6 +1046,11 @@
 
     <!-- Notes screen -->
     <string name="notes_placeholder">Enjoyed the part where…</string>
+    <string name="notes_format_bold">Bold</string>
+    <string name="notes_format_italic">Italic</string>
+    <string name="notes_format_underline">Underline</string>
+    <string name="notes_format_bulleted_list">Bulleted list</string>
+    <string name="notes_format_numbered_list">Numbered list</string>
 
     <string name="migrationConfigScreen.selectedHeader">Selected</string>
     <string name="migrationConfigScreen.availableHeader">Available</string>

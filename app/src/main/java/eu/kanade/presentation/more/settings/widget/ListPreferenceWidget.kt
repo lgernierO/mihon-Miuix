@@ -2,31 +2,30 @@ package eu.kanade.presentation.more.settings.widget
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
+import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun <T> ListPreferenceWidget(
@@ -37,24 +36,17 @@ fun <T> ListPreferenceWidget(
     entries: Map<out T, String>,
     onValueChange: (T) -> Unit,
 ) {
-    var isDialogShown by remember { mutableStateOf(false) }
-
-    TextPreferenceWidget(
+    val options = remember(entries) { entries.entries.toList() }
+    WindowDropdownPreference(
+        modifier = Modifier.highlightBackground(LocalPreferenceHighlighted.current),
+        items = options.map { it.value },
+        selectedIndex = options.indexOfFirst { it.key == value },
         title = title,
-        subtitle = subtitle,
-        icon = icon,
-        onPreferenceClick = { isDialogShown = true },
+        summary = subtitle,
+        showValue = false,
+        startAction = icon?.let { { Icon(imageVector = it, contentDescription = null) } },
+        onSelectedIndexChange = { index -> options.getOrNull(index)?.let { onValueChange(it.key) } },
     )
-
-    if (isDialogShown) {
-        ListPreferenceDialog(
-            title = title,
-            value = value,
-            entries = entries,
-            onValueChange = onValueChange,
-            onDismissRequest = { isDialogShown = false },
-        )
-    }
 }
 
 @Composable
@@ -66,72 +58,54 @@ fun <T> ListPreferenceDialog(
     onDismissRequest: () -> Unit,
     message: String? = null,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = title?.let { { Text(text = it) } },
-        text = {
-            Column {
-                if (message != null) PreferenceDialogMessage(message)
-                Box(modifier = Modifier.weight(1f, fill = false)) {
-                    val state = rememberLazyListState()
-                    ScrollbarLazyColumn(state = state) {
-                        entries.forEach { current ->
-                            val isSelected = value == current.key
-                            item {
-                                DialogRow(
-                                    label = current.value,
-                                    isSelected = isSelected,
-                                    onSelected = {
+    var show by remember { mutableStateOf(true) }
+    val dismiss = { show = false }
+    WindowDialog(
+        modifier = Modifier.selectionSheetHeight(),
+        show = show,
+        onDismissRequest = dismiss,
+        onDismissFinished = onDismissRequest,
+        title = title,
+        summary = message,
+    ) {
+        MiuixPopupSystemBars()
+        Column {
+            Box(modifier = Modifier.weight(1f, fill = false)) {
+                val state = rememberLazyListState()
+                ScrollbarLazyColumn(
+                    modifier = Modifier.selectableGroup(),
+                    state = state,
+                ) {
+                    entries.forEach { current ->
+                        val isSelected = value == current.key
+                        item {
+                            RadioButtonPreference(
+                                title = current.value,
+                                selected = isSelected,
+                                enabled = show,
+                                onClick = {
+                                    if (!isSelected) {
                                         onValueChange(current.key)
-                                        onDismissRequest()
-                                    },
-                                )
-                            }
+                                    }
+                                    dismiss()
+                                },
+                            )
                         }
                     }
-                    if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-                    if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(MR.strings.action_cancel))
-            }
-        },
-    )
+            TextButton(
+                text = stringResource(MR.strings.action_cancel),
+                onClick = dismiss,
+                enabled = show,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                minHeight = 48.dp,
+            )
+        }
+    }
 }
 
 @Composable
 internal fun PreferenceDialogMessage(message: String) {
     Text(text = message, modifier = Modifier.padding(bottom = 8.dp))
-}
-
-@Composable
-private fun DialogRow(
-    label: String,
-    isSelected: Boolean,
-    onSelected: () -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.small)
-            .selectable(
-                selected = isSelected,
-                onClick = { if (!isSelected) onSelected() },
-            )
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize(),
-    ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = null,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge.merge(),
-            modifier = Modifier.padding(start = 24.dp),
-        )
-    }
 }

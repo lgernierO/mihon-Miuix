@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.updates
 
 import android.content.Context
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -62,6 +61,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.updates.interactor.GetUpdates
 import tachiyomi.domain.updates.model.UpdatesWithRelations
 import tachiyomi.domain.updates.service.UpdatesPreferences
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 

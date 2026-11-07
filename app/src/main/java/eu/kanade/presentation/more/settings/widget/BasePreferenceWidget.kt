@@ -7,32 +7,27 @@ import androidx.compose.animation.core.StartOffsetType
 import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import eu.kanade.presentation.more.settings.LocalPreferenceMinHeight
 import kotlinx.coroutines.delay
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -45,65 +40,53 @@ internal fun BasePreferenceWidget(
     widget: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
 ) {
-    val contentAlpha = if (enabled) 1f else DisabledAlpha
     val highlighted = LocalPreferenceHighlighted.current
     val minHeight = LocalPreferenceMinHeight.current
-    Row(
+    BasicComponent(
         modifier = modifier
             .highlightBackground(highlighted)
             .sizeIn(minHeight = minHeight)
-            .clickable(enabled = enabled && onClick != null, onClick = { onClick?.invoke() })
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        startAction = icon,
+        endActions = widget?.let { { it() } },
+        insideMargin = if (title == null && icon == null && widget == null) {
+            PaddingValues(vertical = PrefsVerticalPadding)
+        } else {
+            BasicComponentDefaults.InsideMargin
+        },
+        onClick = onClick,
+        enabled = enabled,
     ) {
-        if (icon != null) {
-            Box(
-                modifier = Modifier
-                    .padding(start = PrefsHorizontalPadding, end = 8.dp)
-                    .alpha(contentAlpha),
-                content = { icon() },
+        if (!title.isNullOrBlank()) {
+            Text(
+                text = title,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                style = MiuixTheme.textStyles.headline1,
+                color = if (enabled) {
+                    MiuixTheme.colorScheme.onBackground
+                } else {
+                    MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                },
             )
         }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = PrefsVerticalPadding)
-                .alpha(contentAlpha),
-        ) {
-            if (!title.isNullOrBlank()) {
-                Text(
-                    modifier = Modifier.padding(horizontal = PrefsHorizontalPadding),
-                    text = title,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = TitleFontSize,
-                )
-            }
-            subcomponent?.invoke(this)
-        }
-        if (widget != null) {
-            Box(
-                modifier = Modifier.padding(end = PrefsHorizontalPadding),
-                content = { widget() },
-            )
-        }
+        subcomponent?.invoke(this)
     }
 }
 
 @Composable
 internal fun Modifier.highlightBackground(highlighted: Boolean): Modifier {
     var highlightFlag by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(highlighted) {
+        highlightFlag = highlighted
         if (highlighted) {
-            highlightFlag = true
             delay(3.seconds)
             highlightFlag = false
         }
     }
     val highlight by animateColorAsState(
         targetValue = if (highlightFlag) {
-            MaterialTheme.colorScheme.surfaceTint.copy(alpha = .12f)
+            MiuixTheme.colorScheme.primary.copy(alpha = .12f)
         } else {
             Color.Transparent
         },
@@ -128,5 +111,3 @@ internal fun Modifier.highlightBackground(highlighted: Boolean): Modifier {
 internal val TrailingWidgetBuffer = 16.dp
 internal val PrefsHorizontalPadding = 16.dp
 internal val PrefsVerticalPadding = 16.dp
-internal val TitleFontSize = 16.sp
-internal val DisabledAlpha = 0.38f

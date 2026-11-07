@@ -39,6 +39,10 @@ dependencies {
     implementation(libs.androidx.compose.uiToolingPreview)
     implementation(libs.androidx.compose.uiUtil)
 
+    // Miuix is the shared UI framework for the application and its settings.
+    api(libs.miuix.ui)
+    api(libs.miuix.preference)
+
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
 }

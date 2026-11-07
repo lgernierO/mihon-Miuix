@@ -4,31 +4,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
@@ -39,7 +28,12 @@ import tachiyomi.presentation.core.components.WheelNumberPicker
 import tachiyomi.presentation.core.components.WheelTextPicker
 import tachiyomi.presentation.core.components.material.AlertDialogContent
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Surface
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 @Composable
 fun TrackStatusSelector(
@@ -53,36 +47,18 @@ fun TrackStatusSelector(
         title = stringResource(MR.strings.status),
         content = {
             val state = rememberLazyListState()
-            ScrollbarLazyColumn(state = state) {
+            ScrollbarLazyColumn(state = state, modifier = Modifier.selectableGroup()) {
                 selections.forEach { (key, value) ->
                     val isSelected = selection == key
-                    item {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .selectable(
-                                    selected = isSelected,
-                                    onClick = { onSelectionChange(key) },
-                                )
-                                .fillMaxWidth()
-                                .minimumInteractiveComponentSize(),
-                        ) {
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = null,
-                            )
-                            Text(
-                                text = value?.let { stringResource(it) } ?: "",
-                                style = MaterialTheme.typography.bodyLarge.merge(),
-                                modifier = Modifier.padding(start = 24.dp),
-                            )
-                        }
+                    item(key = key) {
+                        RadioButtonPreference(
+                            title = value?.let { stringResource(it) }.orEmpty(),
+                            selected = isSelected,
+                            onClick = { onSelectionChange(key) },
+                        )
                     }
                 }
             }
-            if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-            if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
         },
         onConfirm = onConfirm,
         onDismissRequest = onDismissRequest,
@@ -97,14 +73,16 @@ fun TrackChapterSelector(
     onConfirm: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
+    val chapters = remember(range) { range.toList() }
     BaseSelector(
         title = stringResource(MR.strings.chapters),
         content = {
             WheelNumberPicker(
-                items = range.toList(),
+                items = chapters,
                 modifier = Modifier.align(Alignment.Center),
-                startIndex = selection,
-                onSelectionChanged = { onSelectionChange(it) },
+                startIndex = chapters.indexOfFirst { it >= selection }
+                    .takeIf { it >= 0 } ?: chapters.lastIndex.coerceAtLeast(0),
+                onSelectionChanged = { onSelectionChange(chapters[it]) },
             )
         },
         onConfirm = onConfirm,
@@ -126,7 +104,7 @@ fun TrackScoreSelector(
             WheelTextPicker(
                 items = selections,
                 modifier = Modifier.align(Alignment.Center),
-                startIndex = selections.indexOf(selection).takeIf { it > 0 } ?: (selections.size / 2),
+                startIndex = selections.indexOf(selection).takeIf { it >= 0 } ?: (selections.size / 2),
                 onSelectionChanged = { onSelectionChange(selections[it]) },
             )
         },
@@ -148,34 +126,44 @@ fun TrackDateSelector(
         initialSelectedDateMillis = initialSelectedDateMillis,
         selectableDates = selectableDates,
     )
+    val selectedDate = pickerState.selectedDateMillis
+    val canConfirm = selectedDate != null && selectableDates.isSelectableDate(selectedDate)
     AlertDialogContent(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
         title = { Text(text = title) },
         content = {
             Column {
-                DatePicker(
-                    state = pickerState,
-                    title = null,
-                    headline = null,
-                    showModeToggle = false,
-                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .miuixVerticalScroll(rememberScrollState()),
+                ) {
+                    DatePicker(
+                        state = pickerState,
+                        title = null,
+                        headline = null,
+                        showModeToggle = false,
+                    )
+                }
 
-                Row(
+                FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small, Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (onRemove != null) {
                         TextButton(onClick = onRemove) {
                             Text(text = stringResource(MR.strings.action_remove))
                         }
-                        Spacer(modifier = Modifier.weight(1f))
                     }
                     TextButton(onClick = onDismissRequest) {
                         Text(text = stringResource(MR.strings.action_cancel))
                     }
-                    TextButton(onClick = { onConfirm(pickerState.selectedDateMillis!!) }) {
+                    TextButton(
+                        onClick = { selectedDate?.takeIf(selectableDates::isSelectableDate)?.let(onConfirm) },
+                        enabled = canConfirm,
+                    ) {
                         Text(text = stringResource(MR.strings.action_ok))
                     }
                 }
@@ -190,10 +178,9 @@ private fun BaseSelector(
     content: @Composable BoxScope.() -> Unit,
     onConfirm: () -> Unit,
     onDismissRequest: () -> Unit,
-    thirdButton: @Composable (RowScope.() -> Unit)? = null,
+    thirdButton: (@Composable () -> Unit)? = null,
 ) {
     AlertDialogContent(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
         title = { Text(text = title) },
         text = {
             Box(
@@ -202,13 +189,13 @@ private fun BaseSelector(
             )
         },
         buttons = {
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (thirdButton != null) {
                     thirdButton()
-                    Spacer(modifier = Modifier.weight(1f))
                 }
                 TextButton(onClick = onDismissRequest) {
                     Text(text = stringResource(MR.strings.action_cancel))

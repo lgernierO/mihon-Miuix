@@ -24,6 +24,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
 import java.util.Locale
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -34,6 +35,8 @@ fun StatsScreenContent(
     paddingValues: PaddingValues,
 ) {
     LazyColumn(
+        modifier = Modifier.miuixScroll(),
+        overscrollEffect = null,
         contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
     ) {

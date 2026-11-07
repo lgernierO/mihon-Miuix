@@ -10,16 +10,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedSecureTextField
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -41,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.track.model.AutoTrackState
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.Tracker
@@ -53,18 +47,27 @@ import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Help
-import mihon.icons.materialsymbols.rounded.Close
 import mihon.icons.materialsymbols.roundedfilled.Visibility
 import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.Button
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.OutlinedButton
+import tachiyomi.presentation.core.components.miuix.OutlinedTextField
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Help
 
 object SettingsTrackingScreen : SearchableSettings {
 
@@ -76,8 +79,8 @@ object SettingsTrackingScreen : SearchableSettings {
     override fun RowScope.AppBarAction() {
         val uriHandler = LocalUriHandler.current
         IconButton(onClick = { uriHandler.openUri("https://mihon.app/docs/guides/tracking") }) {
-            Icon(
-                imageVector = MaterialSymbols.AutoMirroredRounded.Help,
+            AppBarIcon(
+                imageVector = MiuixIcons.Help,
                 contentDescription = stringResource(MR.strings.tracking_guide),
             )
         }
@@ -226,8 +229,8 @@ object SettingsTrackingScreen : SearchableSettings {
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = onDismissRequest) {
-                        Icon(
-                            imageVector = MaterialSymbols.Rounded.Close,
+                        AppBarIcon(
+                            imageVector = MiuixIcons.Close,
                             contentDescription = stringResource(MR.strings.action_close),
                         )
                     }
@@ -236,11 +239,13 @@ object SettingsTrackingScreen : SearchableSettings {
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics { contentType = ContentType.Username + ContentType.EmailAddress },
+                        modifier = Modifier.fillMaxWidth(),
+                        fieldModifier = Modifier.semantics {
+                            contentType = ContentType.Username + ContentType.EmailAddress
+                        },
                         state = username,
-                        label = { Text(text = stringResource(uNameStringRes)) },
+                        labelText = stringResource(uNameStringRes),
+                        enabled = !processing,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         isError = inputError && !processing,
@@ -252,16 +257,20 @@ object SettingsTrackingScreen : SearchableSettings {
                             .fillMaxWidth()
                             .semantics { contentType = ContentType.Password },
                         state = password,
+                        enabled = !processing,
                         label = { Text(text = stringResource(MR.strings.password)) },
                         trailingIcon = {
-                            IconButton(onClick = { hidePassword = !hidePassword }) {
+                            IconButton(
+                                onClick = { hidePassword = !hidePassword },
+                                enabled = !processing,
+                            ) {
                                 Icon(
                                     imageVector = if (hidePassword) {
                                         MaterialSymbols.RoundedFilled.Visibility
                                     } else {
                                         MaterialSymbols.RoundedFilled.VisibilityOff
                                     },
-                                    contentDescription = null,
+                                    contentDescription = stringResource(MR.strings.password),
                                 )
                             }
                         },
@@ -283,17 +292,27 @@ object SettingsTrackingScreen : SearchableSettings {
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !processing && username.text.isNotBlank() && password.text.isNotBlank(),
                     onClick = {
-                        scope.launch(Dispatchers.IO) {
+                        if (!processing) {
+                            val submittedUsername = username.text.toString()
+                            val submittedPassword = password.text.toString()
                             processing = true
-                            val result = checkLogin(
-                                context = context,
-                                tracker = tracker,
-                                username = username.text.toString(),
-                                password = password.text.toString(),
-                            )
-                            inputError = !result
-                            if (result) onDismissRequest()
-                            processing = false
+                            inputError = false
+                            scope.launch {
+                                try {
+                                    val result = withContext(Dispatchers.IO) {
+                                        checkLogin(
+                                            context = context,
+                                            tracker = tracker,
+                                            username = submittedUsername,
+                                            password = submittedPassword,
+                                        )
+                                    }
+                                    inputError = !result
+                                    if (result) onDismissRequest()
+                                } finally {
+                                    processing = false
+                                }
+                            }
                         }
                     },
                 ) {
@@ -314,6 +333,8 @@ object SettingsTrackingScreen : SearchableSettings {
             tracker.login(username, password)
             withContext(Dispatchers.Main) { context.toast(MR.strings.login_success) }
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Throwable) {
             tracker.logout()
             withContext(Dispatchers.Main) { context.toast(e.message.toString()) }

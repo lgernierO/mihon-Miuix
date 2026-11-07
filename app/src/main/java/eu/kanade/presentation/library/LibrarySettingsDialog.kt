@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,8 +32,11 @@ import tachiyomi.presentation.core.components.SettingsChipRow
 import tachiyomi.presentation.core.components.SliderItem
 import tachiyomi.presentation.core.components.SortItem
 import tachiyomi.presentation.core.components.TriStateItem
+import tachiyomi.presentation.core.components.miuix.FilterChip
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 
 @Composable
 fun LibrarySettingsDialog(
@@ -55,7 +55,7 @@ fun LibrarySettingsDialog(
         Column(
             modifier = Modifier
                 .padding(vertical = TabbedDialogPaddings.Vertical)
-                .verticalScroll(rememberScrollState()),
+                .miuixVerticalScroll(rememberScrollState()),
         ) {
             when (page) {
                 0 -> FilterPage(
@@ -241,7 +241,7 @@ private fun ColumnScope.DisplayPage(
 
     if (displayMode != LibraryDisplayMode.List) {
         val configuration = LocalConfiguration.current
-        val columnPreference = remember {
+        val columnPreference = remember(configuration.orientation) {
             if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 viewModel.libraryPreferences.landscapeColumns
             } else {

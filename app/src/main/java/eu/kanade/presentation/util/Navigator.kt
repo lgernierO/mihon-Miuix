@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -54,6 +55,7 @@ fun DefaultNavigatorScreenTransition(
 }
 
 @Composable
+@OptIn(InternalVoyagerApi::class)
 fun ScreenTransition(
     navigator: Navigator,
     transition: AnimatedContentTransitionScope<Screen>.() -> ContentTransform,
@@ -63,10 +65,13 @@ fun ScreenTransition(
     AnimatedContent(
         targetState = navigator.lastItem,
         transitionSpec = transition,
+        contentKey = { screen -> screen.key },
         modifier = modifier,
         label = "transition",
     ) { screen ->
-        navigator.saveableState("transition", screen) {
+        // Nested settings/sheet navigators share Voyager's state holder. Scope the slot to its
+        // navigator so an outgoing host cannot register the same screen key as its successor.
+        navigator.saveableState("transition:${navigator.key}", screen) {
             content(screen)
         }
     }

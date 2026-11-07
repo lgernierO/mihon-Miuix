@@ -1,17 +1,11 @@
 package tachiyomi.presentation.core.components.material
 
 import androidx.annotation.IntRange
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderColors
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SliderState
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import kotlin.math.roundToInt
+import tachiyomi.presentation.core.util.sliderValue
+import top.yukonga.miuix.kmp.basic.SliderDefaults
+import top.yukonga.miuix.kmp.basic.Slider as MiuixSlider
 
 @Composable
 fun Slider(
@@ -20,38 +14,22 @@ fun Slider(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     valueRange: IntProgression = 0..1,
-    @IntRange(from = 0) steps: Int = with(valueRange) { (last - first) - 1 },
+    @IntRange(from = 0) steps: Int = with(valueRange) {
+        ((last - first) / step - 1).coerceAtLeast(0)
+    },
     onValueChangeFinished: (() -> Unit)? = null,
-    colors: SliderColors = SliderDefaults.colors(),
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    thumb: @Composable (SliderState) -> Unit = {
-        SliderDefaults.Thumb(
-            interactionSource = interactionSource,
-            colors = colors,
-            enabled = enabled,
-        )
-    },
-    track: @Composable (SliderState) -> Unit = { sliderState ->
-        SliderDefaults.Track(colors = colors, enabled = enabled, sliderState = sliderState)
-    },
 ) {
-    val state = key(steps, valueRange) {
-        rememberSliderState(
-            value = value.toFloat(),
-            steps = steps,
-            trackRange = with(valueRange) { first.toFloat()..last.toFloat() },
-        )
-    }
-    state.value = value.toFloat()
-    Slider(
-        state = state,
+    val minimum = minOf(valueRange.first, valueRange.last)
+    val maximum = maxOf(valueRange.first, valueRange.last)
+    MiuixSlider(
+        value = value.toFloat().coerceIn(minimum.toFloat(), maximum.toFloat()),
+        onValueChange = { candidate -> onValueChange(valueRange.sliderValue(candidate)) },
         modifier = modifier,
-        enabled = enabled,
-        onValueChange = { onValueChange(it.roundToInt()) },
+        enabled = enabled && minimum < maximum,
+        valueRange = minimum.toFloat()..if (minimum < maximum) maximum.toFloat() else minimum + 1f,
+        steps = steps.coerceAtLeast(0),
+        reverseDirection = valueRange.step < 0,
         onValueChangeFinished = onValueChangeFinished,
-        colors = colors,
-        interactionSource = interactionSource,
-        thumb = thumb,
-        track = track,
+        hapticEffect = SliderDefaults.SliderHapticEffect.Step,
     )
 }

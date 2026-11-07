@@ -1,7 +1,5 @@
 package eu.kanade.presentation.manga.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,13 +7,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,12 +19,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.richTextEditorColors
+import eu.kanade.presentation.components.AppBarActionIconSize
 import eu.kanade.tachiyomi.ui.manga.notes.MangaNotesScreen
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -52,7 +49,12 @@ import mihon.icons.materialsymbols.rounded.FormatListNumbered
 import mihon.icons.materialsymbols.rounded.FormatUnderlined
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -123,6 +125,7 @@ fun MangaNotesTextArea(
                 .fillMaxWidth(),
         ) {
             LazyRow(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
@@ -131,6 +134,7 @@ fun MangaNotesTextArea(
                         onClick = { richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold)) },
                         isSelected = richTextState.currentSpanStyle.fontWeight == FontWeight.Bold,
                         icon = MaterialSymbols.Rounded.FormatBold,
+                        description = stringResource(MR.strings.notes_format_bold),
                     )
                 }
                 item {
@@ -138,6 +142,7 @@ fun MangaNotesTextArea(
                         onClick = { richTextState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic)) },
                         isSelected = richTextState.currentSpanStyle.fontStyle == FontStyle.Italic,
                         icon = MaterialSymbols.Rounded.FormatItalic,
+                        description = stringResource(MR.strings.notes_format_italic),
                     )
                 }
                 item {
@@ -149,13 +154,7 @@ fun MangaNotesTextArea(
                             ?.contains(TextDecoration.Underline)
                             ?: false,
                         icon = MaterialSymbols.Rounded.FormatUnderlined,
-                    )
-                }
-                item {
-                    VerticalDivider(
-                        modifier = Modifier
-                            .padding(horizontal = MaterialTheme.padding.extraSmall)
-                            .height(MaterialTheme.padding.large),
+                        description = stringResource(MR.strings.notes_format_underline),
                     )
                 }
                 item {
@@ -163,6 +162,7 @@ fun MangaNotesTextArea(
                         onClick = { richTextState.toggleUnorderedList() },
                         isSelected = richTextState.isUnorderedList,
                         icon = MaterialSymbols.AutoMirroredRounded.FormatListBulleted,
+                        description = stringResource(MR.strings.notes_format_bulleted_list),
                     )
                 }
                 item {
@@ -170,6 +170,7 @@ fun MangaNotesTextArea(
                         onClick = { richTextState.toggleOrderedList() },
                         isSelected = richTextState.isOrderedList,
                         icon = MaterialSymbols.Rounded.FormatListNumbered,
+                        description = stringResource(MR.strings.notes_format_numbered_list),
                     )
                 }
             }
@@ -191,25 +192,26 @@ fun MangaNotesTextAreaButton(
     onClick: () -> Unit,
     icon: ImageVector,
     isSelected: Boolean,
+    description: String,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .clickable(
-                onClick = onClick,
-                enabled = true,
-                role = Role.Button,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = icon.name,
-            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .background(color = if (isSelected) MaterialTheme.colorScheme.onBackground else Color.Transparent)
-                .padding(MaterialTheme.padding.extraSmall),
-        )
+    TooltipBox(text = description) {
+        IconButton(
+            onClick = onClick,
+            modifier = modifier.semantics {
+                selected = isSelected
+                contentDescription = description
+            },
+            backgroundColor = if (isSelected) MiuixTheme.colorScheme.secondaryVariant else Color.Transparent,
+            minWidth = 48.dp,
+            minHeight = 48.dp,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isSelected) MiuixTheme.colorScheme.onSecondaryVariant else MiuixTheme.colorScheme.onSurface,
+                modifier = Modifier.size(AppBarActionIconSize),
+            )
+        }
     }
 }

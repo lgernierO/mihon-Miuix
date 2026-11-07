@@ -8,11 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.produceState
@@ -171,26 +167,20 @@ class TransitionPage(
             value = withContext(Dispatchers.IO) { isDownloaded(transition) }
         }
 
-        CompositionLocalProvider(
-            LocalTextStyle provides MaterialTheme.typography.bodySmall,
-            LocalContentColor provides MaterialTheme.colorScheme.onBackground,
-        ) {
-            // The padding the holder each viewer used to inflate this into gave it.
-            val padding = if (viewer is WebGpuViewerContinuous) {
-                Modifier.padding(
-                    horizontal = STRIP_TRANSITION_SIDE_PADDING.dp,
-                    vertical = STRIP_TRANSITION_VERTICAL_PADDING.dp,
-                )
-            } else {
-                Modifier.padding(horizontal = TRANSITION_SIDE_PADDING.dp)
-            }
-            Box(modifier = padding.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                ChapterTransition(
-                    transition = transition,
-                    currChapterDownloaded = transition.from.pageLoader?.isLocal == true,
-                    goingToChapterDownloaded = goingToChapterDownloaded,
-                )
-            }
+        val padding = if (viewer is WebGpuViewerContinuous) {
+            Modifier.padding(
+                horizontal = STRIP_TRANSITION_SIDE_PADDING.dp,
+                vertical = STRIP_TRANSITION_VERTICAL_PADDING.dp,
+            )
+        } else {
+            Modifier.padding(horizontal = TRANSITION_SIDE_PADDING.dp)
+        }
+        Box(modifier = padding.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            ChapterTransition(
+                transition = transition,
+                currChapterDownloaded = transition.from.pageLoader?.isLocal == true,
+                goingToChapterDownloaded = goingToChapterDownloaded,
+            )
         }
     }
 

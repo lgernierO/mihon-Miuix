@@ -18,12 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -73,9 +68,13 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.Badge
 import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.OutlinedButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import top.yukonga.miuix.kmp.basic.Icon
 
 @Composable
 fun DuplicateMangaDialog(
@@ -99,7 +98,7 @@ fun DuplicateMangaDialog(
         Column(
             modifier = Modifier
                 .padding(vertical = TabbedDialogPaddings.Vertical)
-                .verticalScroll(rememberScrollState())
+                .miuixVerticalScroll(rememberScrollState())
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium),
         ) {
@@ -137,8 +136,6 @@ fun DuplicateMangaDialog(
             }
 
             Column(modifier = horizontalPaddingModifier) {
-                HorizontalDivider()
-
                 TextPreferenceWidget(
                     title = stringResource(MR.strings.action_add_anyway),
                     icon = MaterialSymbols.Rounded.Add,

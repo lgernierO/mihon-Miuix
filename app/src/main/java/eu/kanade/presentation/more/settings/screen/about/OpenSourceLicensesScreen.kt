@@ -1,7 +1,9 @@
 package eu.kanade.presentation.more.settings.screen.about
 
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -15,6 +17,7 @@ import eu.kanade.tachiyomi.R
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
 
 class OpenSourceLicensesScreen : Screen() {
 
@@ -31,13 +34,16 @@ class OpenSourceLicensesScreen : Screen() {
             },
         ) { contentPadding ->
             val libraries by produceLibraries(R.raw.aboutlibraries)
-            LibrariesContainer(
-                libraries = libraries,
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentPadding = contentPadding,
-                detailMode = LibraryDetailMode.Sheet,
-            )
+            CompositionLocalProvider(LocalOverscrollFactory provides null) {
+                LibrariesContainer(
+                    libraries = libraries,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .miuixScroll(),
+                    contentPadding = contentPadding,
+                    detailMode = LibraryDetailMode.Sheet,
+                )
+            }
         }
     }
 }

@@ -6,12 +6,14 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -98,13 +100,19 @@ class CreateBackupScreen : Screen() {
                 }
 
                 item {
-                    SectionCard(MR.strings.label_library) {
+                    SectionCard(
+                        titleRes = MR.strings.label_library,
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
                         Options(BackupOptions.libraryOptions, state, viewModel)
                     }
                 }
 
                 item {
-                    SectionCard(MR.strings.label_settings) {
+                    SectionCard(
+                        titleRes = MR.strings.label_settings,
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
                         Options(BackupOptions.settingsOptions, state, viewModel)
                     }
                 }

@@ -3,11 +3,10 @@ package mihon.feature.upcoming.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +17,7 @@ import eu.kanade.presentation.manga.components.MangaCover
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.asMangaCover
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Text
 
 private val UpcomingItemHeight = 96.dp
 
@@ -30,7 +30,7 @@ fun UpcomingItem(
     Row(
         modifier = modifier
             .clickable(onClick = onClick)
-            .height(UpcomingItemHeight)
+            .heightIn(min = UpcomingItemHeight)
             .padding(
                 horizontal = MaterialTheme.padding.medium,
                 vertical = MaterialTheme.padding.small,
@@ -39,7 +39,7 @@ fun UpcomingItem(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.large),
     ) {
         MangaCover.Book(
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier.height(UpcomingItemHeight - 16.dp),
             data = upcoming.asMangaCover(),
         )
         Text(

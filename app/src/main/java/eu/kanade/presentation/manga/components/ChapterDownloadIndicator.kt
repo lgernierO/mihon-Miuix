@@ -1,32 +1,19 @@
 package eu.kanade.presentation.manga.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.WavyProgressIndicatorDefaults
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -37,9 +24,13 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Error
 import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.material.IconButtonTokens
+import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
+import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class ChapterDownloadAction {
     START,
@@ -88,23 +79,21 @@ private fun NotDownloadedIndicator(
     modifier: Modifier = Modifier,
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .size(IconButtonTokens.StateLayerSize)
-            .commonClickable(
-                enabled = enabled,
-                hapticFeedback = LocalHapticFeedback.current,
-                onLongClick = { onClick(ChapterDownloadAction.START_NOW) },
-                onClick = { onClick(ChapterDownloadAction.START) },
-            )
-            .secondaryItemAlpha(),
-        contentAlignment = Alignment.Center,
+    IconButton(
+        modifier = modifier.secondaryItemAlpha(),
+        enabled = enabled,
+        onClick = { onClick(ChapterDownloadAction.START) },
+        onLongClick = { onClick(ChapterDownloadAction.START_NOW) },
     ) {
         Icon(
             imageVector = CustomMaterialSymbols.Rounded.DownloadCircle,
             contentDescription = stringResource(MR.strings.manga_download),
             modifier = Modifier.size(IndicatorSize),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (enabled) {
+                MiuixTheme.colorScheme.onSurfaceVariantActions
+            } else {
+                MiuixTheme.colorScheme.disabledOnSurface
+            },
         )
     }
 }
@@ -118,61 +107,61 @@ private fun DownloadingIndicator(
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
-    Box(
-        modifier = modifier
-            .size(IconButtonTokens.StateLayerSize)
-            .commonClickable(
-                enabled = enabled,
-                hapticFeedback = LocalHapticFeedback.current,
-                onLongClick = { onClick(ChapterDownloadAction.CANCEL) },
-                onClick = { isMenuExpanded = true },
-            ),
-        contentAlignment = Alignment.Center,
+    LaunchedEffect(enabled) {
+        if (!enabled) isMenuExpanded = false
+    }
+    val downloadProgress = downloadProgressProvider()
+    val description = stringResource(MR.strings.manga_download)
+    val progressDescription = stringResource(MR.strings.downloading_with_progress, downloadProgress)
+    IconButton(
+        modifier = modifier.semantics {
+            contentDescription = description
+            stateDescription = progressDescription
+        },
+        enabled = enabled,
+        onClick = { isMenuExpanded = true },
+        onLongClick = { onClick(ChapterDownloadAction.CANCEL) },
     ) {
-        val color = MaterialTheme.colorScheme.onSurfaceVariant
-        val trackColor = color.copy(alpha = TRACK_ALPHA)
-        val stroke = Stroke(width = with(LocalDensity.current) { IndicatorStrokeWidth.toPx() }, cap = StrokeCap.Round)
-        val downloadProgress = downloadProgressProvider()
+        val color = if (enabled) {
+            MiuixTheme.colorScheme.onSurfaceVariantActions
+        } else {
+            MiuixTheme.colorScheme.disabledOnSurface
+        }
         val indeterminate = downloadState == Download.State.QUEUE ||
             (downloadState == Download.State.DOWNLOADING && downloadProgress == 0)
         if (indeterminate) {
-            CircularWavyProgressIndicator(
+            CircularProgressIndicator(
                 modifier = IndicatorModifier,
                 color = color,
-                trackColor = Color.Transparent,
-                stroke = stroke,
-                trackStroke = stroke,
-                // Only an active download waves, so a queued one reads as waiting
-                amplitude = if (downloadState == Download.State.DOWNLOADING) INDICATOR_AMPLITUDE else 0f,
-                wavelength = IndicatorWavelength,
+                strokeWidth = IndicatorStrokeWidth,
+                size = IndicatorSize - IndicatorPadding * 2,
             )
         } else {
             val animatedProgress by animateFloatAsState(
                 targetValue = downloadProgress / 100f,
-                animationSpec = WavyProgressIndicatorDefaults.ProgressAnimationSpec,
+                animationSpec = tween(200),
                 label = "progress",
             )
-            CircularWavyProgressIndicator(
+            CircularProgressIndicator(
                 progress = { animatedProgress },
                 modifier = IndicatorModifier,
                 color = color,
-                trackColor = trackColor,
-                stroke = stroke,
-                trackStroke = stroke,
-                amplitude = { WavyProgressIndicatorDefaults.indicatorAmplitude(it) * INDICATOR_AMPLITUDE },
-                wavelength = IndicatorWavelength,
+                strokeWidth = IndicatorStrokeWidth,
+                size = IndicatorSize - IndicatorPadding * 2,
             )
         }
-        DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { isMenuExpanded = false }) {
+        DropdownMenu(expanded = isMenuExpanded && enabled, onDismissRequest = { isMenuExpanded = false }) {
             DropdownMenuItem(
-                text = { Text(text = stringResource(MR.strings.action_start_downloading_now)) },
+                text = stringResource(MR.strings.action_start_downloading_now),
+                enabled = enabled,
                 onClick = {
                     onClick(ChapterDownloadAction.START_NOW)
                     isMenuExpanded = false
                 },
             )
             DropdownMenuItem(
-                text = { Text(text = stringResource(MR.strings.action_cancel)) },
+                text = stringResource(MR.strings.action_cancel),
+                enabled = enabled,
                 onClick = {
                     onClick(ChapterDownloadAction.CANCEL)
                     isMenuExpanded = false
@@ -195,26 +184,30 @@ private fun DownloadedIndicator(
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
-    Box(
-        modifier = modifier
-            .size(IconButtonTokens.StateLayerSize)
-            .commonClickable(
-                enabled = enabled,
-                hapticFeedback = LocalHapticFeedback.current,
-                onLongClick = { isMenuExpanded = true },
-                onClick = { isMenuExpanded = true },
-            ),
-        contentAlignment = Alignment.Center,
+    LaunchedEffect(enabled) {
+        if (!enabled) isMenuExpanded = false
+    }
+    val description = stringResource(MR.strings.label_downloaded)
+    IconButton(
+        modifier = modifier.semantics { stateDescription = description },
+        enabled = enabled,
+        onClick = { isMenuExpanded = true },
+        onLongClick = { isMenuExpanded = true },
     ) {
         Icon(
             imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
-            contentDescription = null,
+            contentDescription = stringResource(MR.strings.action_delete),
             modifier = Modifier.size(IndicatorSize),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (enabled) {
+                MiuixTheme.colorScheme.onSurfaceVariantActions
+            } else {
+                MiuixTheme.colorScheme.disabledOnSurface
+            },
         )
-        DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { isMenuExpanded = false }) {
+        DropdownMenu(expanded = isMenuExpanded && enabled, onDismissRequest = { isMenuExpanded = false }) {
             DropdownMenuItem(
-                text = { Text(text = stringResource(MR.strings.action_delete)) },
+                text = stringResource(MR.strings.action_delete),
+                enabled = enabled,
                 onClick = {
                     onClick(ChapterDownloadAction.DELETE)
                     isMenuExpanded = false
@@ -230,51 +223,23 @@ private fun ErrorIndicator(
     modifier: Modifier = Modifier,
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .size(IconButtonTokens.StateLayerSize)
-            .commonClickable(
-                enabled = enabled,
-                hapticFeedback = LocalHapticFeedback.current,
-                onLongClick = { onClick(ChapterDownloadAction.START) },
-                onClick = { onClick(ChapterDownloadAction.START) },
-            ),
-        contentAlignment = Alignment.Center,
+    IconButton(
+        modifier = modifier,
+        enabled = enabled,
+        onClick = { onClick(ChapterDownloadAction.START) },
+        onLongClick = { onClick(ChapterDownloadAction.START) },
     ) {
         Icon(
             imageVector = MaterialSymbols.Rounded.Error,
             contentDescription = stringResource(MR.strings.chapter_error),
             modifier = Modifier.size(IndicatorSize),
-            tint = MaterialTheme.colorScheme.error,
+            tint = if (enabled) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.disabledOnSurface,
         )
     }
 }
 
-private fun Modifier.commonClickable(
-    enabled: Boolean,
-    hapticFeedback: HapticFeedback,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit,
-) = this.combinedClickable(
-    enabled = enabled,
-    onLongClick = {
-        onLongClick()
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-    },
-    onClick = onClick,
-    role = Role.Button,
-    interactionSource = null,
-    indication = ripple(
-        bounded = false,
-        radius = IconButtonTokens.StateLayerSize / 2,
-    ),
-)
-
 private val IndicatorSize = 26.dp
 private val IndicatorPadding = 1.dp
-private val IndicatorWavelength = 7.dp
-private const val INDICATOR_AMPLITUDE = 0.6f
-private const val TRACK_ALPHA = 0.25f
 
 private val IndicatorStrokeWidth = 2.dp
 

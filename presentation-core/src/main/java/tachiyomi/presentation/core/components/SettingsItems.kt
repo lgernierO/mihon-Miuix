@@ -1,46 +1,37 @@
 package tachiyomi.presentation.core.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -48,19 +39,27 @@ import dev.icerock.moko.resources.StringResource
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.ArrowDownward
 import mihon.icons.materialsymbols.rounded.ArrowUpward
-import mihon.icons.materialsymbols.rounded.CheckBoxOutlineBlank
-import mihon.icons.materialsymbols.roundedfilled.CheckBox
-import mihon.icons.materialsymbols.roundedfilled.DisabledByDefault
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.core.common.preference.toggle
-import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
-import tachiyomi.presentation.core.components.material.Slider
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.collectAsState
-import tachiyomi.presentation.core.util.secondaryItemAlpha
+import tachiyomi.presentation.core.util.miuixScroll
+import tachiyomi.presentation.core.util.sliderValue
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.SliderDefaults
+import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
+import top.yukonga.miuix.kmp.theme.ColorSchemeMode
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.ThemeController
+import top.yukonga.miuix.kmp.basic.Checkbox as MiuixCheckbox
 
 object SettingsItemsPaddings {
     val Horizontal = 24.dp
@@ -74,16 +73,7 @@ fun HeadingItem(labelRes: StringResource) {
 
 @Composable
 fun HeadingItem(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.header,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = SettingsItemsPaddings.Horizontal,
-                vertical = SettingsItemsPaddings.Vertical,
-            ),
-    )
+    SmallTitle(text = text)
 }
 
 @Composable
@@ -110,7 +100,7 @@ fun BaseSortItem(label: String, icon: ImageVector?, onClick: () -> Unit) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MiuixTheme.colorScheme.primary,
                 )
             } else {
                 Spacer(modifier = Modifier.size(24.dp))
@@ -132,29 +122,27 @@ fun CheckboxItem(label: String, pref: Preference<Boolean>) {
 
 @Composable
 fun CheckboxItem(label: String, checked: Boolean, onClick: () -> Unit) {
-    BaseSettingsItem(
-        label = label,
-        widget = {
-            Checkbox(
-                checked = checked,
-                onCheckedChange = null,
-            )
-        },
-        onClick = onClick,
+    CheckboxPreference(
+        title = label,
+        checked = checked,
+        onCheckedChange = { onClick() },
+        insideMargin = PaddingValues(
+            horizontal = SettingsItemsPaddings.Horizontal,
+            vertical = SettingsItemsPaddings.Vertical,
+        ),
     )
 }
 
 @Composable
 fun RadioItem(label: String, selected: Boolean, onClick: () -> Unit) {
-    BaseSettingsItem(
-        label = label,
-        widget = {
-            RadioButton(
-                selected = selected,
-                onClick = null,
-            )
-        },
+    RadioButtonPreference(
+        title = label,
+        selected = selected,
         onClick = onClick,
+        insideMargin = PaddingValues(
+            horizontal = SettingsItemsPaddings.Horizontal,
+            vertical = SettingsItemsPaddings.Vertical,
+        ),
     )
 }
 
@@ -164,10 +152,10 @@ fun SliderItem(
     valueRange: IntProgression,
     label: String,
     onChange: (Int) -> Unit,
-    steps: Int = with(valueRange) { (last - first) - 1 },
+    steps: Int = with(valueRange) { ((last - first) / step - 1).coerceAtLeast(0) },
     valueString: String = value.toString(),
-    labelStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-    pillColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    labelStyle: TextStyle = MiuixTheme.textStyles.headline1,
+    pillColor: Color = MiuixTheme.colorScheme.secondaryVariant,
 ) {
     BaseSliderItem(
         value = value,
@@ -186,6 +174,7 @@ fun SliderItem(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun BaseSliderItem(
     value: Int,
     valueRange: IntProgression,
@@ -193,61 +182,44 @@ fun BaseSliderItem(
     onChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    steps: Int = with(valueRange) { (last - first) - 1 },
+    steps: Int = with(valueRange) { ((last - first) / step - 1).coerceAtLeast(0) },
     valueString: String = value.toString(),
-    titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
-    subtitleStyle: TextStyle = MaterialTheme.typography.bodySmall,
-    pillColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    titleStyle: TextStyle = MiuixTheme.textStyles.headline1,
+    subtitleStyle: TextStyle = MiuixTheme.textStyles.body2,
+    pillColor: Color = MiuixTheme.colorScheme.secondaryVariant,
 ) {
-    val haptic = LocalHapticFeedback.current
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = titleStyle,
-                )
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = subtitleStyle,
-                        modifier = Modifier.secondaryItemAlpha(),
-                    )
-                }
-            }
-            Pill(
-                text = valueString,
-                style = MaterialTheme.typography.bodyMedium,
-                color = pillColor,
-            )
-        }
-        Slider(
-            value = value,
-            onValueChange = f@{
-                if (it == value) return@f
-                onChange(it)
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            },
-            valueRange = valueRange,
-            steps = steps,
-        )
-    }
+    val minimum = minOf(valueRange.first, valueRange.last)
+    val maximum = maxOf(valueRange.first, valueRange.last)
+    SliderPreference(
+        title = title,
+        summary = subtitle,
+        value = value.toFloat().coerceIn(minimum.toFloat(), maximum.toFloat()),
+        valueText = valueString,
+        onValueChange = { candidate ->
+            // Preference flows can lag a drag frame; forwarding the return value avoids
+            // dropping a fast drag back to the last displayed position.
+            onChange(valueRange.sliderValue(candidate))
+        },
+        valueRange = minimum.toFloat()..if (minimum < maximum) maximum.toFloat() else minimum + 1f,
+        steps = steps.coerceAtLeast(0),
+        enabled = minimum < maximum,
+        reverseDirection = valueRange.step < 0,
+        hapticEffect = SliderDefaults.SliderHapticEffect.Step,
+        insideMargin = PaddingValues(0.dp),
+        modifier = modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
 @PreviewLightDark
 fun SliderItemPreview() {
-    MaterialTheme(if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+    val dark = isSystemInDarkTheme()
+    val controller = remember(dark) {
+        ThemeController(if (dark) ColorSchemeMode.Dark else ColorSchemeMode.Light)
+    }
+    MiuixTheme(controller = controller) {
         var value by remember { mutableIntStateOf(0) }
-        Surface {
+        top.yukonga.miuix.kmp.basic.Surface {
             BaseSliderItem(
                 value = value,
                 valueRange = 0..10,
@@ -270,50 +242,16 @@ fun SelectItem(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .fillMaxWidth()
-                .padding(
-                    horizontal = SettingsItemsPaddings.Horizontal,
-                    vertical = SettingsItemsPaddings.Vertical,
-                ),
-            label = { Text(text = label) },
-            value = options.getOrNull(selectedIndex)?.toString().orEmpty(),
-            onValueChange = {},
-            readOnly = true,
-            singleLine = true,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded,
-                )
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-        )
-
-        ExposedDropdownMenu(
-            modifier = Modifier.exposedDropdownSize(),
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEachIndexed { index, text ->
-                DropdownMenuItem(
-                    text = { Text(text.toString()) },
-                    onClick = {
-                        onSelect(index)
-                        expanded = false
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                )
-            }
-        }
-    }
+    WindowDropdownPreference(
+        title = label,
+        items = options.map { it.toString() },
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = onSelect,
+        insideMargin = PaddingValues(
+            horizontal = SettingsItemsPaddings.Horizontal,
+            vertical = SettingsItemsPaddings.Vertical,
+        ),
+    )
 }
 
 @Composable
@@ -323,59 +261,54 @@ fun TriStateItem(
     enabled: Boolean = true,
     onClick: ((TriState) -> Unit)?,
 ) {
-    Row(
-        modifier = Modifier
-            .clickable(
-                enabled = enabled && onClick != null,
-                onClick = {
-                    when (state) {
-                        TriState.DISABLED -> onClick?.invoke(TriState.ENABLED_IS)
-                        TriState.ENABLED_IS -> onClick?.invoke(TriState.ENABLED_NOT)
-                        TriState.ENABLED_NOT -> onClick?.invoke(TriState.DISABLED)
-                    }
-                },
-            )
-            .fillMaxWidth()
-            .padding(
-                horizontal = SettingsItemsPaddings.Horizontal,
-                vertical = SettingsItemsPaddings.Vertical,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.large),
-    ) {
-        val stateAlpha = if (enabled && onClick != null) 1f else DISABLED_ALPHA
-
-        Icon(
-            imageVector = when (state) {
-                TriState.DISABLED -> MaterialSymbols.Rounded.CheckBoxOutlineBlank
-                TriState.ENABLED_IS -> MaterialSymbols.RoundedFilled.CheckBox
-                TriState.ENABLED_NOT -> MaterialSymbols.RoundedFilled.DisabledByDefault
-            },
-            contentDescription = null,
-            tint = if (!enabled || state == TriState.DISABLED) {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = stateAlpha)
-            } else {
-                when (onClick) {
-                    null -> MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA)
-                    else -> MaterialTheme.colorScheme.primary
-                }
-            },
-        )
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = stateAlpha),
-            style = MaterialTheme.typography.bodyMedium,
-        )
+    val canToggle = enabled && onClick != null
+    val checkboxState = when (state) {
+        TriState.DISABLED -> ToggleableState.Off
+        TriState.ENABLED_IS -> ToggleableState.On
+        TriState.ENABLED_NOT -> ToggleableState.Indeterminate
     }
+    BasicComponent(
+        title = label,
+        modifier = Modifier.heightIn(min = 48.dp).semantics(mergeDescendants = true) {
+            role = Role.Checkbox
+            toggleableState = checkboxState
+            if (!canToggle) disabled()
+        },
+        enabled = canToggle,
+        role = Role.Checkbox,
+        insideMargin = PaddingValues(
+            horizontal = SettingsItemsPaddings.Horizontal,
+            vertical = SettingsItemsPaddings.Vertical,
+        ),
+        onClick = onClick?.let { callback ->
+            {
+                callback(
+                    when (state) {
+                        TriState.DISABLED -> TriState.ENABLED_IS
+                        TriState.ENABLED_IS -> TriState.ENABLED_NOT
+                        TriState.ENABLED_NOT -> TriState.DISABLED
+                    },
+                )
+            }
+        },
+        startAction = {
+            MiuixCheckbox(
+                modifier = Modifier.clearAndSetSemantics {},
+                state = checkboxState,
+                onClick = null,
+                enabled = canToggle,
+            )
+        },
+    )
 }
 
 @Composable
 fun TextItem(label: String, value: String, onChange: (String) -> Unit) {
-    OutlinedTextField(
+    TextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = SettingsItemsPaddings.Horizontal, vertical = 4.dp),
-        label = { Text(text = label) },
+        label = label,
         value = value,
         onValueChange = onChange,
         singleLine = true,
@@ -394,6 +327,7 @@ fun SettingsChipRow(labelRes: StringResource, content: @Composable FlowRowScope.
                 bottom = SettingsItemsPaddings.Vertical,
             ),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
             content = content,
         )
     }
@@ -405,11 +339,14 @@ fun SettingsIconGrid(labelRes: StringResource, content: LazyGridScope.() -> Unit
         HeadingItem(labelRes)
         LazyVerticalGrid(
             columns = GridCells.Adaptive(128.dp),
-            modifier = Modifier.padding(
-                start = SettingsItemsPaddings.Horizontal,
-                end = SettingsItemsPaddings.Horizontal,
-                bottom = SettingsItemsPaddings.Vertical,
-            ),
+            modifier = Modifier
+                .padding(
+                    start = SettingsItemsPaddings.Horizontal,
+                    end = SettingsItemsPaddings.Horizontal,
+                    bottom = SettingsItemsPaddings.Vertical,
+                )
+                .miuixScroll(),
+            overscrollEffect = null,
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
             content = content,
@@ -423,21 +360,14 @@ private fun BaseSettingsItem(
     widget: @Composable RowScope.() -> Unit,
     onClick: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .fillMaxWidth()
-            .padding(
-                horizontal = SettingsItemsPaddings.Horizontal,
-                vertical = SettingsItemsPaddings.Vertical,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        widget(this)
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    BasicComponent(
+        title = label,
+        modifier = Modifier.heightIn(min = 48.dp),
+        startAction = { Row(content = widget) },
+        onClick = onClick,
+        insideMargin = PaddingValues(
+            horizontal = SettingsItemsPaddings.Horizontal,
+            vertical = SettingsItemsPaddings.Vertical,
+        ),
+    )
 }

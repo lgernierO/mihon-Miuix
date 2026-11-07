@@ -1,22 +1,29 @@
 package eu.kanade.presentation.more.settings.widget
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.LabeledCheckbox
+import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun <T> MultiSelectListPreferenceWidget(
@@ -56,55 +63,78 @@ fun <T> MultiSelectListPreferenceDialog(
     onDismissRequest: () -> Unit,
     message: String? = null,
 ) {
-    val selected = remember {
-        entries.keys
-            .filter { values.contains(it) }
-            .toMutableStateList()
-    }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = title?.let { { Text(text = it) } },
-        text = {
-            Column {
-                if (message != null) PreferenceDialogMessage(message)
-                LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
-                    entries.forEach { current ->
-                        item {
-                            val isSelected = selected.contains(current.key)
-                            LabeledCheckbox(
-                                label = current.value,
-                                checked = isSelected,
-                                onCheckedChange = {
-                                    if (it) {
-                                        selected.add(current.key)
-                                    } else {
-                                        selected.remove(current.key)
-                                    }
-                                },
-                            )
-                        }
+    var show by remember { mutableStateOf(true) }
+    val dismiss = { show = false }
+    // Record only edits, so newly loaded options retain their persisted selection.
+    val selectionChanges = remember { mutableStateMapOf<T, Boolean>() }
+    WindowDialog(
+        modifier = Modifier.selectionSheetHeight(),
+        show = show,
+        onDismissRequest = dismiss,
+        onDismissFinished = onDismissRequest,
+        title = title,
+        summary = message,
+    ) {
+        MiuixPopupSystemBars()
+        Column {
+            LazyColumn(
+                modifier = Modifier.weight(1f, fill = false).miuixScroll(),
+                overscrollEffect = null,
+            ) {
+                entries.forEach { current ->
+                    item {
+                        val isSelected = selectionChanges[current.key] ?: (current.key in values)
+                        CheckboxPreference(
+                            title = current.value,
+                            checked = isSelected,
+                            enabled = show,
+                            onCheckedChange = {
+                                selectionChanges[current.key] = it
+                            },
+                        )
                     }
                 }
             }
-        },
-        properties = DialogProperties(
-            usePlatformDefaultWidth = true,
-        ),
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    // Values without an entry stay, as they can't be unselected here
-                    onValuesChange(values.filterNot { it in entries.keys }.toMutableSet().apply { addAll(selected) })
-                    onDismissRequest()
-                },
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(text = stringResource(MR.strings.action_ok))
+                TextButton(
+                    text = stringResource(MR.strings.action_cancel),
+                    onClick = dismiss,
+                    enabled = show,
+                    modifier = Modifier.weight(1f),
+                    minHeight = 48.dp,
+                )
+                TextButton(
+                    text = stringResource(MR.strings.action_ok),
+                    modifier = Modifier.weight(1f),
+                    minHeight = 48.dp,
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    enabled = show,
+                    onClick = {
+                        // Unknown entries remain selected until they can be displayed.
+                        onValuesChange(
+                            applyMultiSelectChanges(values, entries.keys, selectionChanges),
+                        )
+                        dismiss()
+                    },
+                )
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(MR.strings.action_cancel))
-            }
-        },
-    )
+        }
+    }
+}
+
+internal fun <T> applyMultiSelectChanges(
+    values: Set<T>,
+    availableEntries: Set<T>,
+    changes: Map<T, Boolean>,
+): Set<T> = values.toMutableSet().apply {
+    availableEntries.forEach { key ->
+        when (changes[key]) {
+            true -> add(key)
+            false -> remove(key)
+            null -> Unit
+        }
+    }
 }

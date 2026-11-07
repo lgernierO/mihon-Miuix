@@ -16,11 +16,11 @@ import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.FilterList
-import mihon.icons.materialsymbols.rounded.TravelExplore
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Filter
+import top.yukonga.miuix.kmp.icon.extended.Search
 
 @Composable
 fun Screen.sourcesTab(): TabContent {
@@ -33,12 +33,12 @@ fun Screen.sourcesTab(): TabContent {
         actions = listOf(
             AppBar.Action(
                 title = stringResource(MR.strings.action_global_search),
-                icon = MaterialSymbols.Rounded.TravelExplore,
+                icon = MiuixIcons.Search,
                 onClick = { navigator.push(GlobalSearchScreen()) },
             ),
             AppBar.Action(
                 title = stringResource(MR.strings.action_filter),
-                icon = MaterialSymbols.Rounded.FilterList,
+                icon = MiuixIcons.Filter,
                 onClick = { navigator.push(SourcesFilterScreen()) },
             ),
         ),

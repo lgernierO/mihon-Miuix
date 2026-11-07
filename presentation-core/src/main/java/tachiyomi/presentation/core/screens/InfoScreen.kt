@@ -7,33 +7,34 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Newspaper
 import tachiyomi.presentation.core.components.material.Scaffold
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Button
+import tachiyomi.presentation.core.components.miuix.OutlinedButton
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun InfoScreen(
@@ -50,41 +51,34 @@ fun InfoScreen(
 ) {
     Scaffold(
         bottomBar = {
-            val strokeWidth = Dp.Hairline
-            val borderColor = MaterialTheme.colorScheme.outline
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .drawBehind {
-                        drawLine(
-                            borderColor,
-                            Offset(0f, 0f),
-                            Offset(size.width, 0f),
-                            strokeWidth.value,
-                        )
-                    }
-                    .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-                    .padding(
-                        horizontal = MaterialTheme.padding.medium,
-                        vertical = MaterialTheme.padding.small,
-                    ),
-            ) {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = canAccept,
-                    onClick = onAcceptClick,
+            NavigationBar(showDivider = false) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(text = acceptText)
-                }
-                if (rejectText != null && onRejectClick != null) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)) {
-                        OutlinedButton(
-                            modifier = Modifier.weight(1f),
-                            onClick = onRejectClick,
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = canAccept,
+                        onClick = onAcceptClick,
+                    ) {
+                        Text(text = acceptText)
+                    }
+                    if (rejectText != null && onRejectClick != null) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                         ) {
-                            Text(text = rejectText)
+                            OutlinedButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = onRejectClick,
+                            ) {
+                                Text(text = rejectText)
+                            }
+                            rejectAction?.invoke(this)
                         }
-                        rejectAction?.invoke(this)
                     }
                 }
             }
@@ -95,37 +89,38 @@ fun InfoScreen(
             modifier = Modifier
                 .zIndex(2f)
                 .secondaryItemAlpha()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MiuixTheme.colorScheme.surface)
                 .fillMaxWidth()
                 .height(paddingValues.calculateTopPadding()),
         )
 
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
                 .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .miuixVerticalScroll(rememberScrollState())
                 .padding(top = 48.dp)
-                .padding(horizontal = MaterialTheme.padding.medium),
+                .padding(horizontal = 16.dp),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(bottom = MaterialTheme.padding.small)
+                    .padding(bottom = 8.dp)
                     .size(48.dp),
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MiuixTheme.colorScheme.primary,
             )
             Text(
                 text = headingText,
-                style = MaterialTheme.typography.headlineLarge,
+                style = MiuixTheme.textStyles.title1,
             )
             Text(
                 text = subtitleText,
                 modifier = Modifier
                     .secondaryItemAlpha()
-                    .padding(vertical = MaterialTheme.padding.small),
-                style = MaterialTheme.typography.titleSmall,
+                    .padding(vertical = 8.dp),
+                style = MiuixTheme.textStyles.subtitle,
             )
 
             content()

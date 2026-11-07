@@ -7,24 +7,18 @@ import android.util.DisplayMetrics
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,10 +39,9 @@ import eu.kanade.presentation.browse.components.ExtensionIcon
 import eu.kanade.presentation.browse.components.ExtensionPill
 import eu.kanade.presentation.browse.components.label
 import eu.kanade.presentation.components.AppBar
+import eu.kanade.presentation.components.AppBarActionIconSize
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.WarningBanner
-import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
-import eu.kanade.presentation.more.settings.widget.TrailingWidgetBuffer
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsViewModel
@@ -61,7 +54,15 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.Button
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.OutlinedButton
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun ExtensionDetailsScreen(
@@ -301,7 +302,7 @@ private fun DetailsHeader(
                 secondaryText = stringResource(MR.strings.ext_info_version),
             )
 
-            InfoDivider()
+            Spacer(modifier = Modifier.width(16.dp))
 
             InfoText(
                 modifier = Modifier.weight(1f),
@@ -310,7 +311,7 @@ private fun DetailsHeader(
             )
 
             if (contentWarning != null) {
-                InfoDivider()
+                Spacer(modifier = Modifier.width(16.dp))
 
                 InfoText(
                     modifier = Modifier.weight(1f),
@@ -325,11 +326,13 @@ private fun DetailsHeader(
         Row(
             modifier = Modifier
                 .padding(horizontal = MaterialTheme.padding.medium)
-                .padding(top = MaterialTheme.padding.small),
+                .padding(top = MaterialTheme.padding.small)
+                .height(IntrinsicSize.Max),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = onClickUninstall,
             ) {
                 Text(stringResource(MR.strings.ext_uninstall))
@@ -337,7 +340,7 @@ private fun DetailsHeader(
 
             if (onClickAppInfo != null) {
                 Button(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                     onClick = onClickAppInfo,
                 ) {
                     Text(stringResource(MR.strings.ext_app_info))
@@ -345,25 +348,19 @@ private fun DetailsHeader(
             }
         }
 
-        TextPreferenceWidget(
+        SwitchPreference(
             modifier = Modifier.padding(horizontal = MaterialTheme.padding.small),
             title = stringResource(MR.strings.pref_incognito_mode),
-            subtitle = stringResource(MR.strings.pref_incognito_mode_extension_summary),
-            icon = MaterialSymbols.Rounded.Eyeglasses2,
-            widget = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Switch(
-                        checked = extIncognitoMode,
-                        onCheckedChange = onExtIncognitoChange,
-                        modifier = Modifier.padding(start = TrailingWidgetBuffer),
-                    )
-                }
+            summary = stringResource(MR.strings.pref_incognito_mode_extension_summary),
+            checked = extIncognitoMode,
+            onCheckedChange = onExtIncognitoChange,
+            startAction = {
+                Icon(
+                    imageVector = MaterialSymbols.Rounded.Eyeglasses2,
+                    contentDescription = null,
+                )
             },
         )
-
-        HorizontalDivider()
     }
 }
 
@@ -405,15 +402,6 @@ private fun InfoText(
 }
 
 @Composable
-private fun InfoDivider() {
-    VerticalDivider(
-        modifier = Modifier
-            .padding(horizontal = MaterialTheme.padding.small)
-            .height(24.dp),
-    )
-}
-
-@Composable
 private fun SourceSwitchPreference(
     source: ExtensionSourceItem,
     onClickSourcePreferences: (sourceId: Long) -> Unit,
@@ -422,35 +410,27 @@ private fun SourceSwitchPreference(
 ) {
     val context = LocalContext.current
 
-    TextPreferenceWidget(
+    SwitchPreference(
         modifier = modifier,
         title = if (source.labelAsName) {
             source.source.toString()
         } else {
             LocaleHelper.getSourceDisplayName(source.source.lang, context)
         },
-        widget = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (source.source is ConfigurableSource) {
-                    IconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
-                        Icon(
-                            imageVector = MaterialSymbols.Rounded.Settings,
-                            contentDescription = stringResource(MR.strings.label_settings),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
+        checked = source.enabled,
+        onCheckedChange = { onClickSource(source.source.id) },
+        endActions = {
+            if (source.source is ConfigurableSource) {
+                IconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
+                    Icon(
+                        imageVector = MaterialSymbols.Rounded.Settings,
+                        contentDescription = stringResource(MR.strings.label_settings),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(AppBarActionIconSize),
+                    )
                 }
-
-                Switch(
-                    checked = source.enabled,
-                    onCheckedChange = null,
-                    modifier = Modifier.padding(start = TrailingWidgetBuffer),
-                )
             }
         },
-        onPreferenceClick = { onClickSource(source.source.id) },
     )
 }
 

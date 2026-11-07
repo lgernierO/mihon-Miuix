@@ -1,33 +1,26 @@
 package eu.kanade.presentation.more.settings.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.ColorUtils
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
+import eu.kanade.presentation.components.UpIcon
 import eu.kanade.presentation.more.settings.screen.about.AboutScreen
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.util.LocalBackPress
@@ -40,13 +33,22 @@ import mihon.icons.materialsymbols.rounded.Download
 import mihon.icons.materialsymbols.rounded.Explore
 import mihon.icons.materialsymbols.rounded.Info
 import mihon.icons.materialsymbols.rounded.Palette
-import mihon.icons.materialsymbols.rounded.Search
 import mihon.icons.materialsymbols.rounded.Security
 import mihon.icons.materialsymbols.rounded.Storage
 import mihon.icons.materialsymbols.rounded.Sync
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Search
+import top.yukonga.miuix.kmp.squircle.squircleBackground
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 
 object SettingsMainScreen : Screen() {
@@ -57,40 +59,41 @@ object SettingsMainScreen : Screen() {
     }
 
     @Composable
-    private fun getPalerSurface(): Color {
-        val surface = MaterialTheme.colorScheme.surface
-        val dark = isSystemInDarkTheme()
-        return remember(surface, dark) {
-            val arr = FloatArray(3)
-            ColorUtils.colorToHSL(surface.toArgb(), arr)
-            arr[2] = if (dark) {
-                arr[2] - 0.05f
-            } else {
-                arr[2] + 0.02f
-            }.coerceIn(0f, 1f)
-            Color.hsl(arr[0], arr[1], arr[2])
-        }
-    }
-
-    @Composable
     fun Content(twoPane: Boolean) {
         val navigator = LocalNavigator.currentOrThrow
         val backPress = LocalBackPress.currentOrThrow
-        val containerColor = if (twoPane) getPalerSurface() else MaterialTheme.colorScheme.surface
-        val topBarState = rememberTopAppBarState()
+        val containerColor = MiuixTheme.colorScheme.surface
+        val scrollBehavior = MiuixScrollBehavior()
+        val state = rememberLazyListState()
+        val groups = listOf(items.take(3), items.subList(3, 7), items.drop(7))
+        val selectedScreenClass = navigator.items.firstOrNull()?.let { it::class }
+        val indexSelected = if (twoPane) {
+            groups.indexOfFirst { group -> group.any { it.screen::class == selectedScreenClass } }
+        } else {
+            -1
+        }
+        LaunchedEffect(indexSelected) {
+            if (indexSelected >= 0) {
+                state.animateScrollToItem(indexSelected)
+            }
+        }
 
         Scaffold(
-            topBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState),
-            topBar = { scrollBehavior ->
-                AppBar(
+            topBar = {
+                TopAppBar(
                     title = stringResource(MR.strings.label_settings),
-                    navigateUp = backPress::invoke,
+                    color = containerColor,
+                    navigationIcon = {
+                        IconButton(onClick = backPress::invoke, minWidth = 48.dp, minHeight = 48.dp) {
+                            UpIcon()
+                        }
+                    },
                     actions = {
                         AppBarActions(
                             listOf(
                                 AppBar.Action(
                                     title = stringResource(MR.strings.action_search),
-                                    icon = MaterialSymbols.Rounded.Search,
+                                    icon = MiuixIcons.Search,
                                     onClick = { navigator.navigate(SettingsSearchScreen(), twoPane) },
                                 ),
                             ),
@@ -101,58 +104,66 @@ object SettingsMainScreen : Screen() {
             },
             containerColor = containerColor,
             content = { contentPadding ->
-                val state = rememberLazyListState()
-                val indexSelected = if (twoPane) {
-                    items.indexOfFirst { it.screen::class == navigator.items.first()::class }
-                        .also {
-                            LaunchedEffect(Unit) {
-                                state.animateScrollToItem(it)
-                                if (it > 0) {
-                                    // Lift scroll
-                                    topBarState.contentOffset = topBarState.heightOffsetLimit
-                                }
-                            }
-                        }
-                } else {
-                    null
-                }
-
                 LazyColumn(
                     state = state,
                     contentPadding = contentPadding,
+                    modifier = Modifier
+                        .miuixScroll()
+                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    overscrollEffect = null,
                 ) {
                     itemsIndexed(
-                        items = items,
-                        key = { _, item -> item.hashCode() },
-                    ) { index, item ->
-                        val selected = indexSelected == index
-                        var modifier: Modifier = Modifier
-                        var contentColor = LocalContentColor.current
-                        if (twoPane) {
+                        items = groups,
+                        key = { index, _ -> index },
+                    ) { _, group ->
+                        Card(
                             modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .then(
-                                    if (selected) {
-                                        Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(horizontal = 12.dp)
+                                .padding(top = 12.dp),
+                        ) {
+                            group.forEach { item ->
+                                val selected = twoPane && item.screen::class == selectedScreenClass
+                                TextPreferenceWidget(
+                                    modifier = Modifier
+                                        .then(
+                                            if (selected) {
+                                                Modifier.squircleBackground(
+                                                    color = MiuixTheme.colorScheme.primaryContainer,
+                                                    cornerRadius = 16.dp,
+                                                )
+                                            } else {
+                                                Modifier
+                                            },
+                                        )
+                                        .semantics { if (twoPane) this.selected = selected },
+                                    title = stringResource(item.titleRes),
+                                    subtitle = item.formatSubtitle(),
+                                    icon = item.icon,
+                                    iconTint = if (selected) {
+                                        MiuixTheme.colorScheme.onPrimaryContainer
                                     } else {
-                                        Modifier
+                                        MiuixTheme.colorScheme.onSurface
                                     },
+                                    titleColor = if (selected) {
+                                        BasicComponentDefaults.titleColor(
+                                            color = MiuixTheme.colorScheme.onPrimaryContainer,
+                                        )
+                                    } else {
+                                        BasicComponentDefaults.titleColor()
+                                    },
+                                    summaryColor = if (selected) {
+                                        BasicComponentDefaults.summaryColor(
+                                            color = MiuixTheme.colorScheme.onPrimaryContainer,
+                                        )
+                                    } else {
+                                        BasicComponentDefaults.summaryColor()
+                                    },
+                                    onPreferenceClick = { navigator.navigate(item.screen, twoPane) },
                                 )
-                            if (selected) {
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                             }
                         }
-                        CompositionLocalProvider(LocalContentColor provides contentColor) {
-                            TextPreferenceWidget(
-                                modifier = modifier,
-                                title = stringResource(item.titleRes),
-                                subtitle = item.formatSubtitle(),
-                                icon = item.icon,
-                                onPreferenceClick = { navigator.navigate(item.screen, twoPane) },
-                            )
-                        }
                     }
+                    item { Spacer(Modifier.height(12.dp)) }
                 }
             },
         )

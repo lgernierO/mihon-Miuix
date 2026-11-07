@@ -5,18 +5,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -31,9 +25,11 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.components.TriStateItem
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 
 class UpcomingScreen : Screen() {
 
@@ -78,8 +74,6 @@ private fun ColumnScope.CategoryFilterSheet(
             ),
     )
 
-    HorizontalDivider(modifier = Modifier.padding(MaterialTheme.padding.extraSmall))
-
     val allCategories by viewModel.getCategories.subscribe().collectAsState(initial = emptyList())
 
     if (allCategories.isEmpty()) {
@@ -90,26 +84,17 @@ private fun ColumnScope.CategoryFilterSheet(
     val excluded by viewModel.upcomingPreferences.filterExcludedCategories.collectAsState()
     val included by viewModel.upcomingPreferences.filterIncludedCategories.collectAsState()
 
-    val selected = remember {
-        allCategories.map { category ->
-            when (category.id) {
+    Column {
+        allCategories.fastForEach { category ->
+            val state = when (category.id) {
                 in included -> TriState.ENABLED_IS
                 in excluded -> TriState.ENABLED_NOT
                 else -> TriState.DISABLED
             }
-        }.toMutableStateList()
-    }
-
-    Column {
-        allCategories.fastForEachIndexed { idx, category ->
-            val state = selected[idx]
             TriStateItem(
                 label = category.visualName,
                 state = state,
-                onClick = {
-                    selected[idx] = state.next()
-                    viewModel.cycleCategory(category)
-                },
+                onClick = { viewModel.cycleCategory(category) },
             )
         }
     }
@@ -128,7 +113,7 @@ fun UpcomingFilterDialog(
         Column(
             modifier = Modifier
                 .padding(vertical = TabbedDialogPaddings.Vertical)
-                .verticalScroll(rememberScrollState()),
+                .miuixVerticalScroll(rememberScrollState()),
         ) {
             CategoryFilterSheet(viewModel = viewModel)
         }

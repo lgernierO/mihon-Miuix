@@ -6,10 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -21,6 +17,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.OutlinedTextField
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
@@ -48,13 +48,11 @@ fun ExtensionStoreCreateDialog(
         },
         text = {
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
+                modifier = Modifier.fillMaxWidth(),
+                fieldModifier = Modifier.focusRequester(focusRequester),
                 state = state,
-                label = {
-                    Text(text = stringResource(MR.strings.extensionStoresScreen_addStoreInput_inputLabel))
-                },
+                enabled = !processing,
+                labelText = stringResource(MR.strings.extensionStoresScreen_addStoreInput_inputLabel),
                 supportingText = {
                     val msgRes = if (storeAlreadyExists) {
                         MR.strings.extensionStoresScreen_addStore_alreadyExists
@@ -64,9 +62,13 @@ fun ExtensionStoreCreateDialog(
                     Text(text = errorMessage ?: stringResource(msgRes))
                 },
                 isError = errorMessage != null || storeAlreadyExists,
+                errorMessage = errorMessage ?: stringResource(MR.strings.extensionStoresScreen_addStore_alreadyExists),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 lineLimits = TextFieldLineLimits.SingleLine,
             )
+            LaunchedEffect(focusRequester) {
+                focusRequester.requestFocus()
+            }
         },
         confirmButton = {
             TextButton(
@@ -90,10 +92,6 @@ fun ExtensionStoreCreateDialog(
             }
         },
     )
-
-    LaunchedEffect(focusRequester) {
-        focusRequester.requestFocus()
-    }
 }
 
 @Composable
@@ -148,6 +146,7 @@ fun ExtensionStoreConfirmDialog(
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     state = state,
+                    labelText = stringResource(MR.strings.extensionStoresScreen_addStoreInput_inputLabel),
                     readOnly = true,
                     supportingText = when {
                         storeAlreadyExists -> {
@@ -163,6 +162,8 @@ fun ExtensionStoreConfirmDialog(
                         else -> null
                     },
                     isError = errorMessage != null || storeAlreadyExists,
+                    errorMessage =
+                    errorMessage ?: stringResource(MR.strings.extensionStoresScreen_addStore_alreadyExists),
                 )
             }
         },

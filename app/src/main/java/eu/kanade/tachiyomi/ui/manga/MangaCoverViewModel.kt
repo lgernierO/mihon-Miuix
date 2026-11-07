@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.asDrawable
@@ -39,6 +38,7 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.source.local.image.LocalCoverManager
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import kotlin.time.Duration.Companion.seconds
 
 @AssistedInject

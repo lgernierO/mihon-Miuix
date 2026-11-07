@@ -45,7 +45,7 @@ class ReaderSettingsViewModel(
     val mangaFlow = readerViewModel.state
         .map { it.manga }
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+        .stateIn(viewModelScope, SharingStarted.Lazily, readerViewModel.state.value.manga)
 
     /**
      * The reading mode the viewer is made for, with the default resolved.

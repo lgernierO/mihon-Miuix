@@ -3,14 +3,12 @@ package tachiyomi.presentation.core.components.material
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScaffoldDefaults
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material3.contentColorFor
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -23,27 +21,35 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.FabPosition
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
+import top.yukonga.miuix.kmp.theme.LocalContentColor
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun Scaffold(
     modifier: Modifier = Modifier,
-    topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
-        rememberTopAppBarState(),
+    topBarScrollBehavior: ScrollBehavior = MiuixScrollBehavior(
+        state = rememberTopAppBarState(initialHeightOffsetLimit = 0f),
     ),
-    topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
+    topBar: @Composable (ScrollBehavior) -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = MaterialTheme.colorScheme.background,
+    containerColor: Color = MiuixTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(containerColor),
-    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
     content: @Composable (PaddingValues) -> Unit,
 ) {
     var fabHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
 
-    androidx.compose.material3.Scaffold(
+    // Navigation/banners also use this shell without a TopAppBar. Start with no collapse range;
+    // a real Miuix app bar supplies its measured range instead of an invisible parent eating drags.
+    top.yukonga.miuix.kmp.basic.Scaffold(
         modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
         topBar = { topBar(topBarScrollBehavior) },
         bottomBar = bottomBar,
@@ -55,15 +61,19 @@ fun Scaffold(
         },
         floatingActionButtonPosition = floatingActionButtonPosition,
         containerColor = containerColor,
-        contentColor = contentColor,
         contentWindowInsets = contentWindowInsets,
     ) { contentPadding ->
-        val paddingValues = remember(contentPadding) {
+        val paddingValues = remember(contentPadding, density) {
             FabAwarePaddingValues(contentPadding) {
                 if (fabHeight == 0) 0.dp else with(density) { fabHeight.toDp() } + FabSpacing
             }
         }
-        content(paddingValues)
+        CompositionLocalProvider(
+            LocalContentColor provides contentColor,
+            androidx.compose.material3.LocalContentColor provides contentColor,
+        ) {
+            content(paddingValues)
+        }
     }
 }
 

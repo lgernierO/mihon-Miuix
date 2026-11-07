@@ -22,12 +22,8 @@ fun MangaNotesScreen(
     Scaffold(
         topBar = { topBarScrollBehavior ->
             AppBar(
-                titleContent = {
-                    AppBarTitle(
-                        title = stringResource(MR.strings.action_edit_notes),
-                        subtitle = state.manga.title,
-                    )
-                },
+                title = stringResource(MR.strings.action_edit_notes),
+                subtitle = state.manga.title,
                 navigateUp = navigateUp,
                 scrollBehavior = topBarScrollBehavior,
             )

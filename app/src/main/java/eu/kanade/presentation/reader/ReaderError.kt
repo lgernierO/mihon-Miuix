@@ -6,9 +6,6 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +13,14 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.Public
+import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.ActionButton
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * A page that failed to load or decode: the message, Retry, and Open in WebView when [onOpenInWebView] is given.
@@ -40,17 +43,24 @@ fun ReaderError(
     ) {
         Text(
             text = message ?: stringResource(MR.strings.decode_image_error),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = MiuixTheme.textStyles.body1,
+            color = MiuixTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
-        Button(onClick = onRetry, modifier = buttonModifier) {
-            Text(stringResource(MR.strings.action_retry))
-        }
+        ActionButton(
+            onClick = onRetry,
+            title = stringResource(MR.strings.action_retry),
+            icon = MaterialSymbols.Rounded.Refresh,
+            buttonModifier = buttonModifier,
+            primary = true,
+        )
         if (onOpenInWebView != null) {
-            Button(onClick = onOpenInWebView, modifier = buttonModifier) {
-                Text(stringResource(MR.strings.action_open_in_web_view))
-            }
+            ActionButton(
+                onClick = onOpenInWebView,
+                title = stringResource(MR.strings.action_open_in_web_view),
+                icon = MaterialSymbols.Rounded.Public,
+                buttonModifier = buttonModifier,
+            )
         }
     }
 }
@@ -59,7 +69,10 @@ internal fun Modifier.reportPress(onPressChange: (Boolean) -> Unit) = pointerInp
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
         onPressChange(true)
-        waitForUpOrCancellation(pass = PointerEventPass.Initial)
-        onPressChange(false)
+        try {
+            waitForUpOrCancellation(pass = PointerEventPass.Initial)
+        } finally {
+            onPressChange(false)
+        }
     }
 }

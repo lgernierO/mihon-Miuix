@@ -1,18 +1,18 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AdaptiveSheet
@@ -27,8 +27,12 @@ import tachiyomi.presentation.core.components.SelectItem
 import tachiyomi.presentation.core.components.SortItem
 import tachiyomi.presentation.core.components.TextItem
 import tachiyomi.presentation.core.components.TriStateItem
-import tachiyomi.presentation.core.components.material.Button
+import tachiyomi.presentation.core.components.miuix.CompactButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun SourceFilterDialog(
@@ -41,32 +45,43 @@ fun SourceFilterDialog(
     val updateFilters = { onUpdate(filters) }
 
     AdaptiveSheet(onDismissRequest = onDismissRequest) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MiuixTheme.colorScheme.background)
+                .miuixScroll(),
+            contentPadding = PaddingValues(bottom = 12.dp),
+            overscrollEffect = null,
+        ) {
             stickyHeader {
                 Row(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(8.dp),
+                        .fillMaxWidth()
+                        .background(MiuixTheme.colorScheme.background)
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = onReset) {
-                        Text(
-                            text = stringResource(MR.strings.action_reset),
-                            style = LocalTextStyle.current.copy(
-                                color = MaterialTheme.colorScheme.primary,
-                            ),
-                        )
+                    CompactButton(
+                        onClick = onReset,
+                        modifier = Modifier.weight(1f),
+                        buttonModifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(text = stringResource(MR.strings.action_reset))
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Button(onClick = {
-                        onFilter()
-                        onDismissRequest()
-                    }) {
+                    CompactButton(
+                        onClick = {
+                            onFilter()
+                            onDismissRequest()
+                        },
+                        modifier = Modifier.weight(1f),
+                        buttonModifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColorsPrimary(),
+                    ) {
                         Text(stringResource(MR.strings.action_filter))
                     }
                 }
-                HorizontalDivider()
             }
 
             items(filters) {
@@ -83,7 +98,7 @@ private fun FilterItem(filter: Filter<*>, onUpdate: () -> Unit) {
             HeadingItem(filter.name)
         }
         is Filter.Separator -> {
-            HorizontalDivider()
+            Spacer(modifier = Modifier.height(12.dp))
         }
         is Filter.CheckBox -> {
             CheckboxItem(

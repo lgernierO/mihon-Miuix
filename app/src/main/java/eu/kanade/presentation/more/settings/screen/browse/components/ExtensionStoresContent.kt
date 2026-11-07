@@ -7,11 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +21,12 @@ import mihon.icons.simpleicons.Discord
 import mihon.icons.simpleicons.SimpleIcons
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.ElevatedCard
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.Icon
 
 @Composable
 fun ExtensionStoresContent(
@@ -42,7 +43,8 @@ fun ExtensionStoresContent(
         state = lazyListState,
         contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-        modifier = modifier,
+        modifier = modifier.miuixScroll(),
+        overscrollEffect = null,
     ) {
         repos.forEach {
             item {
@@ -84,7 +86,7 @@ private fun ExtensionStoresListItem(
             Icon(imageVector = MaterialSymbols.AutoMirroredRounded.Label, contentDescription = null)
             Text(
                 text = store.name,
-                modifier = Modifier.padding(start = MaterialTheme.padding.medium),
+                modifier = Modifier.weight(1f).padding(start = MaterialTheme.padding.medium),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -104,7 +106,7 @@ private fun ExtensionStoresListItem(
                 IconButton(onClick = onOpenDiscord) {
                     Icon(
                         imageVector = SimpleIcons.Discord,
-                        contentDescription = null,
+                        contentDescription = "Discord",
                     )
                 }
             }

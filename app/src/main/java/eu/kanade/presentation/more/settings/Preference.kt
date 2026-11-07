@@ -54,7 +54,7 @@ sealed class Preference {
             override val subtitle: String? = null,
             val valueText: @Composable (Int) -> String = { it.toString() },
             val valueRange: IntProgression = 0..1,
-            @IntRange(from = 0) val steps: Int = with(valueRange) { ((last - first) / step) - 1 },
+            @IntRange(from = 0) val steps: Int = with(valueRange) { ((last - first) / step - 1).coerceAtLeast(0) },
             override val visible: Boolean = true,
             override val onValueChanged: suspend (value: Int) -> Boolean = { true },
         ) : PreferenceItem<Int, Boolean>() {

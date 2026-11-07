@@ -1,57 +1,51 @@
 package tachiyomi.presentation.core.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.OutlinedTextField
+import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clearFocusOnSoftKeyboardHide
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.showSoftKeyboard
-import kotlin.math.absoluteValue
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.NumberPicker
+import top.yukonga.miuix.kmp.basic.NumberPickerDefaults
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import kotlin.math.roundToInt
 
 @Composable
 fun WheelNumberPicker(
@@ -72,9 +66,7 @@ fun WheelNumberPicker(
         onSelectionChanged = onSelectionChanged,
         manualInputType = KeyboardType.Number,
         backgroundContent = backgroundContent,
-    ) {
-        WheelPickerDefaults.Item(text = "$it")
-    }
+    )
 }
 
 @Composable
@@ -95,9 +87,7 @@ fun WheelTextPicker(
         size = size,
         onSelectionChanged = onSelectionChanged,
         backgroundContent = backgroundContent,
-    ) {
-        WheelPickerDefaults.Item(text = it)
-    }
+    )
 }
 
 @Composable
@@ -111,163 +101,154 @@ private fun <T> WheelPicker(
     backgroundContent: (@Composable (size: DpSize) -> Unit)? = {
         WheelPickerDefaults.Background(size = it)
     },
-    itemContent: @Composable LazyItemScope.(item: T) -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
-    val lazyListState = rememberLazyListState(startIndex)
+    var internalIndex by remember {
+        mutableIntStateOf(startIndex.coerceIn(0, items.lastIndex.coerceAtLeast(0)))
+    }
+    var showManualInput by remember { mutableStateOf(false) }
+    val currentItems by rememberUpdatedState(items)
+    val currentOnSelectionChanged by rememberUpdatedState(onSelectionChanged)
+    val displayedIndex = internalIndex.coerceIn(0, items.lastIndex.coerceAtLeast(0))
+    val canSelect = items.size > 1
+    val canEdit = canSelect && manualInputType != null
+    val manualInputVisible = showManualInput && canEdit
+    val editLabel = stringResource(MR.strings.action_edit)
 
-    var internalIndex by remember { mutableIntStateOf(startIndex) }
     val internalOnSelectionChanged: (Int) -> Unit = {
-        internalIndex = it
-        onSelectionChanged(it)
+        if (currentItems.isNotEmpty()) {
+            val index = it.coerceIn(currentItems.indices)
+            internalIndex = index
+            currentOnSelectionChanged(index)
+        }
     }
 
-    LaunchedEffect(lazyListState, onSelectionChanged) {
-        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
-            .map { calculateSnappedItemIndex(lazyListState) }
-            .distinctUntilChanged()
-            .collectLatest {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                internalOnSelectionChanged(it)
-            }
+    LaunchedEffect(currentItems.size) {
+        if (currentItems.isNotEmpty()) {
+            val index = internalIndex.coerceIn(currentItems.indices)
+            internalIndex = index
+            currentOnSelectionChanged(index)
+        }
+        if (currentItems.size <= 1 || manualInputType == null) showManualInput = false
     }
 
     Box(
         modifier = modifier
             .height(size.height)
-            .width(size.width),
+            .width(size.width)
+            .then(
+                if (manualInputVisible) {
+                    Modifier
+                } else {
+                    Modifier.clearAndSetSemantics {
+                        items.getOrNull(displayedIndex)?.let { contentDescription = it.toString() }
+                        if (canSelect) {
+                            progressBarRangeInfo = ProgressBarRangeInfo(
+                                current = displayedIndex.toFloat(),
+                                range = 0f..items.lastIndex.toFloat(),
+                                steps = (items.size - 2).coerceAtLeast(0),
+                            )
+                            setProgress { candidate ->
+                                if (candidate.isFinite()) {
+                                    internalOnSelectionChanged(candidate.roundToInt())
+                                    true
+                                } else {
+                                    false
+                                }
+                            }
+                            if (canEdit) {
+                                onClick(label = editLabel) {
+                                    showManualInput = true
+                                    true
+                                }
+                            }
+                        } else {
+                            disabled()
+                        }
+                    }
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         backgroundContent?.invoke(size)
 
-        var showManualInput by remember { mutableStateOf(false) }
-        if (showManualInput) {
+        if (manualInputVisible) {
             val value = rememberSaveable(saver = TextFieldState.Saver) {
-                val currentString = items[internalIndex].toString()
+                val currentString = items[displayedIndex].toString()
                 TextFieldState(initialText = currentString, initialSelection = TextRange(currentString.length))
             }
 
-            val scope = rememberCoroutineScope()
             val processManualInput: () -> Unit = {
-                scope.launch {
-                    items
-                        .indexOfFirst { it.toString() == value.text }
+                if (showManualInput) {
+                    currentItems
+                        .indexOfFirst { it.toString() == value.text.toString() }
                         .takeIf { it >= 0 }
-                        ?.apply {
-                            internalOnSelectionChanged(this)
-                            lazyListState.scrollToItem(this)
-                        }
+                        ?.let(internalOnSelectionChanged)
                     showManualInput = false
                 }
             }
 
-            BasicTextField(
-                modifier = Modifier
-                    .align(Alignment.Center)
+            OutlinedTextField(
+                fieldModifier = Modifier
                     .showSoftKeyboard(true)
                     .clearFocusOnSoftKeyboardHide(processManualInput),
                 onKeyboardAction = { processManualInput() },
                 state = value,
+                labelText = editLabel,
                 lineLimits = TextFieldLineLimits.SingleLine,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = manualInputType!!,
                     imeAction = ImeAction.Done,
                 ),
-                textStyle = MaterialTheme.typography.titleMedium +
-                    TextStyle(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                    ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                textStyle = MiuixTheme.textStyles.title3.copy(textAlign = TextAlign.Center),
             )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .let {
-                        if (manualInputType != null) {
-                            it.clickableNoIndication { showManualInput = true }
-                        } else {
-                            it
-                        }
+        } else if (items.isNotEmpty()) {
+            key(items.size) {
+                NumberPicker(
+                    value = displayedIndex,
+                    onValueChange = internalOnSelectionChanged,
+                    modifier = if (canEdit) {
+                        Modifier.clickableNoIndication { showManualInput = true }
+                    } else {
+                        Modifier
                     },
-                state = lazyListState,
-                contentPadding = PaddingValues(vertical = size.height / ROW_COUNT * ((ROW_COUNT - 1) / 2)),
-                flingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState),
-            ) {
-                itemsIndexed(items) { index, item ->
-                    Box(
-                        modifier = Modifier
-                            .height(size.height / ROW_COUNT)
-                            .width(size.width)
-                            .alpha(
-                                calculateAnimatedAlpha(
-                                    lazyListState = lazyListState,
-                                    index = index,
-                                ),
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        itemContent(item)
-                    }
-                }
+                    enabled = canSelect,
+                    range = items.indices,
+                    label = { items[it].toString() },
+                    visibleItemCount = ROW_COUNT,
+                    itemHeight = size.height / ROW_COUNT,
+                    colors = if (backgroundContent == null) {
+                        NumberPickerDefaults.colors()
+                    } else {
+                        NumberPickerDefaults.colors(
+                            selectedTextColor = MiuixTheme.colorScheme.onSecondaryVariant,
+                        )
+                    },
+                    textStyle = MiuixTheme.textStyles.title3,
+                )
             }
         }
     }
 }
 
-private fun LazyListState.snapOffsetForItem(itemInfo: LazyListItemInfo): Int {
-    val startScrollOffset = 0
-    val endScrollOffset = layoutInfo.let { it.viewportEndOffset - it.afterContentPadding }
-    return startScrollOffset + (endScrollOffset - startScrollOffset - itemInfo.size) / 2
-}
-
-private fun LazyListState.distanceToSnapForIndex(index: Int): Int {
-    val itemInfo = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
-    if (itemInfo != null) {
-        return itemInfo.offset - snapOffsetForItem(itemInfo)
-    }
-    return 0
-}
-
-private fun calculateAnimatedAlpha(
-    lazyListState: LazyListState,
-    index: Int,
-): Float {
-    val distanceToIndexSnap = lazyListState.distanceToSnapForIndex(index).absoluteValue
-    val viewPortHeight = lazyListState.layoutInfo.viewportSize.height.toFloat()
-    val singleViewPortHeight = viewPortHeight / ROW_COUNT
-    return if (distanceToIndexSnap in 0..singleViewPortHeight.toInt()) {
-        1.2f - (distanceToIndexSnap / singleViewPortHeight)
-    } else {
-        0.2f
-    }
-}
-
-private fun calculateSnappedItemIndex(lazyListState: LazyListState): Int {
-    return lazyListState.layoutInfo.visibleItemsInfo
-        .maxBy { calculateAnimatedAlpha(lazyListState, it.index) }
-        .index
-}
-
 object WheelPickerDefaults {
     @Composable
     fun Background(size: DpSize) {
-        androidx.compose.material3.Surface(
-            modifier = Modifier
-                .size(size.width, size.height / ROW_COUNT),
-            shape = RoundedCornerShape(MaterialTheme.padding.medium),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-            content = {},
-        )
+        Card(
+            modifier = Modifier.size(size.width, size.height / ROW_COUNT),
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.secondaryVariant,
+                contentColor = MiuixTheme.colorScheme.onSecondaryVariant,
+            ),
+        ) {}
     }
 
     @Composable
     fun Item(text: String) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
+            style = MiuixTheme.textStyles.title3,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

@@ -2,12 +2,13 @@ package eu.kanade.presentation.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import eu.kanade.presentation.browse.components.BaseSourceItem
+import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.browse.components.SourceIcon
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.tachiyomi.ui.browse.source.SourcesFilterViewModel
@@ -18,6 +19,8 @@ import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 @Composable
 fun SourcesFilterScreen(
@@ -114,13 +117,12 @@ private fun SourcesFilterItem(
     onClickItem: (Source) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BaseSourceItem(
+    CheckboxPreference(
         modifier = modifier,
-        source = source,
-        showLanguageInContent = false,
-        onClickItem = { onClickItem(source) },
-        action = {
-            Checkbox(checked = enabled, onCheckedChange = null)
-        },
+        title = source.name,
+        checked = enabled,
+        onCheckedChange = { onClickItem(source) },
+        checkboxLocation = CheckboxLocation.End,
+        startAction = { SourceIcon(source = source, modifier = Modifier.size(40.dp)) },
     )
 }

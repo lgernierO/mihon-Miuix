@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="miuix_pull_to_refresh">下拉重新整理</string>
+    <string name="miuix_release_to_refresh">放開重新整理</string>
+    <string name="miuix_refreshing">正在重新整理…</string>
+    <string name="miuix_refresh_complete">重新整理完成</string>
     <string name="categories">類別</string>
     <string name="manga">藏書</string>
     <string name="chapters">章節</string>

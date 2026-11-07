@@ -4,17 +4,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEachIndexed
 import eu.kanade.presentation.more.settings.screen.SearchableSettings
 import eu.kanade.presentation.more.settings.widget.PreferenceGroupHeader
 import kotlinx.coroutines.delay
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
+import top.yukonga.miuix.kmp.basic.Card
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -29,14 +33,19 @@ fun PreferenceScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state = rememberLazyListState()
-    val highlightKey = SearchableSettings.highlightKey
+    val highlightKey = remember { SearchableSettings.highlightKey }
+    var highlightReady by remember { mutableStateOf(false) }
+    val sections = items.toSections()
     if (highlightKey != null) {
-        LaunchedEffect(Unit) {
-            val i = items.findHighlightedIndex(highlightKey)
+        LaunchedEffect(highlightKey) {
+            delay(0.5.seconds)
+            val i = sections.indexOfFirst { section ->
+                section.title == highlightKey || section.items.any { it.visible && it.title == highlightKey }
+            }
             if (i >= 0) {
-                delay(0.5.seconds)
                 state.animateScrollToItem(i)
             }
+            highlightReady = true
             SearchableSettings.highlightKey = null
         }
     }
@@ -46,55 +55,57 @@ fun PreferenceScreen(
         state = state,
         contentPadding = contentPadding,
     ) {
-        items.fastForEachIndexed { i, preference ->
-            when (preference) {
-                // Create Preference Group
-                is Preference.PreferenceGroup -> {
-                    if (!preference.visible) return@fastForEachIndexed
-
-                    item {
-                        Column {
-                            PreferenceGroupHeader(
-                                title = preference.title,
-                                highlighted = preference.title == highlightKey,
-                            )
-                        }
+        sections.forEachIndexed { index, section ->
+            item {
+                Column {
+                    if (index == 0 && section.title == null) {
+                        Spacer(modifier = Modifier.height(PreferenceGroupMargin))
                     }
-                    items(preference.preferenceItems) { item ->
-                        PreferenceItem(
-                            item = item,
-                            highlightKey = highlightKey,
+                    if (section.title != null) {
+                        PreferenceGroupHeader(
+                            title = section.title,
+                            highlighted = highlightReady && section.title == highlightKey,
                         )
                     }
-                    item {
-                        if (i < items.lastIndex) {
-                            Spacer(modifier = Modifier.height(12.dp))
+                    Card(
+                        modifier = Modifier.padding(horizontal = PreferenceGroupMargin),
+                    ) {
+                        section.items.forEach { item ->
+                            PreferenceItem(item = item, highlightKey = highlightKey.takeIf { highlightReady })
                         }
                     }
-                }
-
-                // Create Preference Item
-                is Preference.PreferenceItem<*, *> -> item {
-                    PreferenceItem(
-                        item = preference,
-                        highlightKey = highlightKey,
-                    )
+                    Spacer(modifier = Modifier.height(PreferenceGroupMargin))
                 }
             }
         }
     }
 }
 
-private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
-    return flatMap {
-        if (it is Preference.PreferenceGroup) {
-            buildList<String?> {
-                add(it.title) // Header
-                addAll(it.preferenceItems.map { groupItem -> groupItem.title })
-                add(null) // Spacer
-            }
-        } else {
-            listOf(it.title)
+private data class PreferenceSection(
+    val title: String?,
+    val items: List<Preference.PreferenceItem<*, *>>,
+)
+
+private fun List<Preference>.toSections(): List<PreferenceSection> = buildList {
+    val ungrouped = mutableListOf<Preference.PreferenceItem<*, *>>()
+    fun flushUngrouped() {
+        if (ungrouped.any { it.visible }) {
+            add(PreferenceSection(title = null, items = ungrouped.toList()))
         }
-    }.indexOfFirst { it == highlightKey }
+        ungrouped.clear()
+    }
+    this@toSections.forEach { preference ->
+        when (preference) {
+            is Preference.PreferenceGroup -> {
+                flushUngrouped()
+                if (preference.visible && preference.preferenceItems.any { it.visible }) {
+                    add(PreferenceSection(preference.title, preference.preferenceItems))
+                }
+            }
+            is Preference.PreferenceItem<*, *> -> ungrouped.add(preference)
+        }
+    }
+    flushUngrouped()
 }
+
+private val PreferenceGroupMargin = 12.dp

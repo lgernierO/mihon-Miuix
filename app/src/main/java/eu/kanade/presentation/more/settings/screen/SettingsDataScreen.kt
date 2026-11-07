@@ -10,18 +10,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MultiChoiceSegmentedButtonRow
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
@@ -32,14 +23,15 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.hippo.unifile.UniFile
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.data.CreateBackupScreen
 import eu.kanade.presentation.more.settings.screen.data.RestoreBackupScreen
@@ -59,8 +51,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import logcat.LogPriority
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Help
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.storage.displayablePath
 import tachiyomi.core.common.util.system.logcat
@@ -69,8 +59,15 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.storage.service.StoragePreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.TextButton
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 object SettingsDataScreen : SearchableSettings {
 
@@ -85,9 +82,9 @@ object SettingsDataScreen : SearchableSettings {
     override fun RowScope.AppBarAction() {
         val uriHandler = LocalUriHandler.current
         IconButton(onClick = { uriHandler.openUri(HELP_URL) }) {
-            Icon(
-                imageVector = MaterialSymbols.AutoMirroredRounded.Help,
-                contentDescription = stringResource(MR.strings.tracking_guide),
+            AppBarIcon(
+                imageVector = MiuixIcons.Help,
+                contentDescription = stringResource(MR.strings.label_help),
             )
         }
     }
@@ -214,24 +211,24 @@ object SettingsDataScreen : SearchableSettings {
                 ) {
                     BasePreferenceWidget(
                         subcomponent = {
-                            MultiChoiceSegmentedButtonRow(
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(intrinsicSize = IntrinsicSize.Min)
                                     .padding(horizontal = PrefsHorizontalPadding),
+                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
                             ) {
-                                SegmentedButton(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    checked = false,
-                                    onCheckedChange = { navigator.push(CreateBackupScreen()) },
-                                    shape = SegmentedButtonDefaults.itemShape(0, 2),
-                                ) {
-                                    Text(stringResource(MR.strings.pref_create_backup))
-                                }
-                                SegmentedButton(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    checked = false,
-                                    onCheckedChange = {
+                                TextButton(
+                                    modifier = Modifier.weight(1f),
+                                    text = stringResource(MR.strings.pref_create_backup),
+                                    onClick = { navigator.push(CreateBackupScreen()) },
+                                    minHeight = 48.dp,
+                                )
+                                TextButton(
+                                    modifier = Modifier.weight(1f),
+                                    text = stringResource(MR.strings.pref_restore_backup),
+                                    minHeight = 48.dp,
+                                    onClick = {
                                         scope.launch {
                                             if (!BackupRestoreWorker.isRunning(context.workManager)) {
                                                 if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
@@ -243,10 +240,7 @@ object SettingsDataScreen : SearchableSettings {
                                             }
                                         }
                                     },
-                                    shape = SegmentedButtonDefaults.itemShape(1, 2),
-                                ) {
-                                    Text(stringResource(MR.strings.pref_restore_backup))
-                                }
+                                )
                             }
                         },
                     )
@@ -409,37 +403,29 @@ object SettingsDataScreen : SearchableSettings {
             },
             text = {
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = titleSelected,
-                            onCheckedChange = { checked ->
-                                titleSelected = checked
-                                if (!checked) {
-                                    authorSelected = false
-                                    artistSelected = false
-                                }
-                            },
-                        )
-                        Text(text = stringResource(MR.strings.title))
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = authorSelected,
-                            onCheckedChange = { authorSelected = it },
-                            enabled = titleSelected,
-                        )
-                        Text(text = stringResource(MR.strings.author))
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = artistSelected,
-                            onCheckedChange = { artistSelected = it },
-                            enabled = titleSelected,
-                        )
-                        Text(text = stringResource(MR.strings.artist))
-                    }
+                    CheckboxPreference(
+                        title = stringResource(MR.strings.title),
+                        checked = titleSelected,
+                        onCheckedChange = { checked ->
+                            titleSelected = checked
+                            if (!checked) {
+                                authorSelected = false
+                                artistSelected = false
+                            }
+                        },
+                    )
+                    CheckboxPreference(
+                        title = stringResource(MR.strings.author),
+                        checked = authorSelected,
+                        onCheckedChange = { authorSelected = it },
+                        enabled = titleSelected,
+                    )
+                    CheckboxPreference(
+                        title = stringResource(MR.strings.artist),
+                        checked = artistSelected,
+                        onCheckedChange = { artistSelected = it },
+                        enabled = titleSelected,
+                    )
                 }
             },
             confirmButton = {

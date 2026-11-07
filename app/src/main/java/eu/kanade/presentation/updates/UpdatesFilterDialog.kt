@@ -1,24 +1,14 @@
 package eu.kanade.presentation.updates
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
@@ -27,15 +17,16 @@ import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.updates.UpdatesSettingsViewModel
 import tachiyomi.core.common.preference.TriState
-import tachiyomi.core.common.preference.getAndSet
 import tachiyomi.domain.updates.service.UpdatesPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.components.TriStateItem
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun UpdatesFilterDialog(
@@ -52,7 +43,7 @@ fun UpdatesFilterDialog(
         Column(
             modifier = Modifier
                 .padding(vertical = TabbedDialogPaddings.Vertical)
-                .verticalScroll(rememberScrollState()),
+                .miuixVerticalScroll(rememberScrollState()),
         ) {
             when (page) {
                 0 -> FilterSheet(viewModel = viewModel)
@@ -94,31 +85,17 @@ private fun ColumnScope.FilterSheet(
         onClick = { viewModel.toggleFilter(UpdatesPreferences::filterBookmarked) },
     )
 
-    HorizontalDivider(modifier = Modifier.padding(MaterialTheme.padding.small))
-
     val filterExcludedScanlators by viewModel.updatesPreferences.filterExcludedScanlators.collectAsState()
 
-    fun toggleScanlatorFilter() = viewModel.updatesPreferences.filterExcludedScanlators.getAndSet { !it }
-
-    Row(
-        modifier = Modifier
-            .clickable { toggleScanlatorFilter() }
-            .fillMaxWidth()
-            .padding(horizontal = SettingsItemsPaddings.Horizontal),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = stringResource(MR.strings.action_filter_excluded_scanlators),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-
-        Switch(
-            checked = filterExcludedScanlators,
-            onCheckedChange = { toggleScanlatorFilter() },
-        )
-    }
+    SwitchPreference(
+        title = stringResource(MR.strings.action_filter_excluded_scanlators),
+        checked = filterExcludedScanlators,
+        onCheckedChange = { viewModel.updatesPreferences.filterExcludedScanlators.set(it) },
+        insideMargin = PaddingValues(
+            horizontal = SettingsItemsPaddings.Horizontal,
+            vertical = SettingsItemsPaddings.Vertical,
+        ),
+    )
 }
 
 @Composable
@@ -135,8 +112,6 @@ private fun ColumnScope.CategoryFilterSheet(
             ),
     )
 
-    HorizontalDivider(modifier = Modifier.padding(MaterialTheme.padding.extraSmall))
-
     val allCategories by viewModel.getCategories.subscribe().collectAsState(initial = emptyList())
 
     if (allCategories.isEmpty()) {
@@ -148,26 +123,17 @@ private fun ColumnScope.CategoryFilterSheet(
     val excluded by viewModel.updatesPreferences.filterExcludedCategories.collectAsState()
     val included by viewModel.updatesPreferences.filterIncludedCategories.collectAsState()
 
-    val selected = remember {
-        allCategories.map { category ->
-            when (category.id) {
+    Column {
+        allCategories.fastForEachIndexed { _, category ->
+            val state = when (category.id) {
                 in included -> TriState.ENABLED_IS
                 in excluded -> TriState.ENABLED_NOT
                 else -> TriState.DISABLED
             }
-        }.toMutableStateList()
-    }
-
-    Column {
-        allCategories.fastForEachIndexed { idx, category ->
-            val state = selected[idx]
             TriStateItem(
                 label = category.visualName,
                 state = state,
-                onClick = {
-                    selected[idx] = state.next()
-                    viewModel.cycleCategory(category)
-                },
+                onClick = { viewModel.cycleCategory(category) },
             )
         }
     }

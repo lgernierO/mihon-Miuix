@@ -1,67 +1,57 @@
 package eu.kanade.presentation.track
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
-import eu.kanade.presentation.components.DropdownMenu
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.presentation.track.components.TrackLogoIcon
 import eu.kanade.tachiyomi.data.track.Tracker
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.lang.toJavaLocalDate
-import eu.kanade.tachiyomi.util.lang.toLocalDate
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import kotlinx.datetime.toJavaLocalDate
 import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.MoreVert
 import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.Surface
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.BadgedBox
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -83,9 +73,8 @@ fun TrackInfoDialogHome(
         modifier = Modifier
             .animateContentSize()
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-            .windowInsetsPadding(WindowInsets.systemBars),
+            .miuixVerticalScroll(rememberScrollState())
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         trackItems.forEach { item ->
@@ -112,7 +101,7 @@ fun TrackInfoDialogHome(
                         .takeIf { supportsScoring && item.track.score != 0.0 },
                     onScoreClick = { onScoreClick(item) }
                         .takeIf { supportsScoring },
-                    startDate = remember(item.track.startDate) {
+                    startDate = remember(item.track.startDate, dateFormat) {
                         item.track.startDate?.let { dateFormat.format(it.toJavaLocalDate()) }
                     }
                         ?.takeIf { supportsReadingDates },
@@ -191,7 +180,7 @@ private fun TrackInfoItem(
             }
             Box(
                 modifier = Modifier
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .weight(1f)
                     .combinedClickable(
                         onClick = onNewSearch,
@@ -210,7 +199,6 @@ private fun TrackInfoItem(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            VerticalDivider()
             TrackInfoItemMenu(
                 onOpenInBrowser = onOpenInBrowser,
                 onRemoved = onRemoved,
@@ -220,86 +208,56 @@ private fun TrackInfoItem(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(8.dp)
-                .clip(RoundedCornerShape(6.dp)),
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
         ) {
-            Column {
-                Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                    TrackDetailsItem(
-                        modifier = Modifier.weight(1f),
-                        text = status?.let { stringResource(it) } ?: "",
-                        onClick = onStatusClick,
-                    )
-                    VerticalDivider()
-                    TrackDetailsItem(
-                        modifier = Modifier.weight(1f),
-                        text = chapters,
-                        onClick = onChaptersClick,
-                    )
-                    if (onScoreClick != null) {
-                        VerticalDivider()
-                        TrackDetailsItem(
-                            modifier = Modifier.weight(1f),
-                            text = score,
-                            placeholder = stringResource(MR.strings.score),
-                            onClick = onScoreClick,
-                        )
-                    }
-                }
-
-                if (onStartDateClick != null && onEndDateClick != null) {
-                    HorizontalDivider()
-                    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                        TrackDetailsItem(
-                            modifier = Modifier.weight(1F),
-                            text = startDate,
-                            placeholder = stringResource(MR.strings.track_started_reading_date),
-                            onClick = onStartDateClick,
-                        )
-                        VerticalDivider()
-                        TrackDetailsItem(
-                            modifier = Modifier.weight(1F),
-                            text = endDate,
-                            placeholder = stringResource(MR.strings.track_finished_reading_date),
-                            onClick = onEndDateClick,
-                        )
-                    }
-                }
+            TrackDetailsItem(
+                title = stringResource(MR.strings.status),
+                summary = status?.let { stringResource(it) },
+                onClick = onStatusClick,
+            )
+            TrackDetailsItem(
+                title = stringResource(MR.strings.chapters),
+                summary = chapters,
+                onClick = onChaptersClick,
+            )
+            if (onScoreClick != null) {
+                TrackDetailsItem(
+                    title = stringResource(MR.strings.score),
+                    summary = score,
+                    onClick = onScoreClick,
+                )
+            }
+            if (onStartDateClick != null) {
+                TrackDetailsItem(
+                    title = stringResource(MR.strings.track_started_reading_date),
+                    summary = startDate,
+                    onClick = onStartDateClick,
+                )
+            }
+            if (onEndDateClick != null) {
+                TrackDetailsItem(
+                    title = stringResource(MR.strings.track_finished_reading_date),
+                    summary = endDate,
+                    onClick = onEndDateClick,
+                )
             }
         }
     }
 }
 
-private const val UNSET_TEXT_ALPHA = 0.5F
-
 @Composable
 private fun TrackDetailsItem(
-    text: String?,
+    title: String,
+    summary: String?,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    placeholder: String = "",
 ) {
-    Box(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .fillMaxHeight()
-            .padding(12.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text ?: placeholder,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (text == null) UNSET_TEXT_ALPHA else 1f),
-        )
-    }
+    ArrowPreference(
+        title = title,
+        summary = summary,
+        onClick = onClick,
+        modifier = Modifier.semantics { role = Role.Button },
+    )
 }
 
 @Composable
@@ -330,59 +288,50 @@ private fun TrackInfoItemMenu(
     private: Boolean,
     onTogglePrivate: (() -> Unit)?,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                imageVector = MaterialSymbols.Rounded.MoreVert,
-                contentDescription = stringResource(MR.strings.label_more),
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_open_in_browser)) },
-                onClick = {
-                    onOpenInBrowser()
-                    expanded = false
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_copy_link)) },
-                onClick = {
-                    onCopyLink()
-                    expanded = false
-                },
-            )
-            if (onTogglePrivate != null) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(
+    WindowIconDropdownMenu(
+        entry = DropdownEntry(
+            items = buildList {
+                add(
+                    DropdownItem(
+                        text = stringResource(MR.strings.action_open_in_browser),
+                        onClick = onOpenInBrowser,
+                    ),
+                )
+                add(
+                    DropdownItem(
+                        text = stringResource(MR.strings.action_copy_link),
+                        onClick = onCopyLink,
+                    ),
+                )
+                if (onTogglePrivate != null) {
+                    add(
+                        DropdownItem(
+                            text = stringResource(
                                 if (private) {
                                     MR.strings.action_toggle_private_off
                                 } else {
                                     MR.strings.action_toggle_private_on
                                 },
                             ),
-                        )
-                    },
-                    onClick = {
-                        onTogglePrivate()
-                        expanded = false
-                    },
+                            onClick = onTogglePrivate,
+                        ),
+                    )
+                }
+                add(
+                    DropdownItem(
+                        text = stringResource(MR.strings.action_remove),
+                        onClick = onRemoved,
+                    ),
                 )
-            }
-            DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_remove)) },
-                onClick = {
-                    onRemoved()
-                    expanded = false
-                },
-            )
-        }
+            },
+        ),
+        minWidth = 48.dp,
+        minHeight = 48.dp,
+    ) {
+        AppBarIcon(
+            imageVector = MiuixIcons.More,
+            contentDescription = stringResource(MR.strings.label_more),
+        )
     }
 }
 

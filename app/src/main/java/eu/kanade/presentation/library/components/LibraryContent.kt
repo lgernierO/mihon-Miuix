@@ -23,6 +23,7 @@ import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.presentation.core.components.material.PullRefresh
+import top.yukonga.miuix.kmp.utils.springAnimateToPage
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -70,7 +71,7 @@ fun LibraryContent(
                 getItemCountForCategory = getItemCountForCategory,
                 onTabItemClick = {
                     scope.launch {
-                        pagerState.animateScrollToPage(it)
+                        pagerState.springAnimateToPage(it)
                     }
                 },
             )

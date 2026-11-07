@@ -1,16 +1,17 @@
 package eu.kanade.presentation.more.settings.widget
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Preview
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun SwitchPreferenceWidget(
@@ -22,21 +23,16 @@ fun SwitchPreferenceWidget(
     enabled: Boolean = true,
     onCheckedChanged: (Boolean) -> Unit,
 ) {
-    TextPreferenceWidget(
-        modifier = modifier,
+    SwitchPreference(
+        modifier = modifier.highlightBackground(LocalPreferenceHighlighted.current),
         title = title,
-        subtitle = subtitle,
-        icon = icon,
-        widget = {
-            Switch(
-                checked = checked,
-                onCheckedChange = null,
-                enabled = enabled,
-                modifier = Modifier.padding(start = TrailingWidgetBuffer),
-            )
+        summary = subtitle?.takeUnless { it.isBlank() },
+        startAction = icon?.let {
+            { Icon(imageVector = it, contentDescription = null) }
         },
+        checked = checked,
+        onCheckedChange = onCheckedChanged,
         enabled = enabled,
-        onPreferenceClick = { onCheckedChanged(!checked) },
     )
 }
 

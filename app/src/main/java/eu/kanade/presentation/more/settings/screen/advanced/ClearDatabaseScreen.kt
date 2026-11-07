@@ -1,19 +1,10 @@
 package eu.kanade.presentation.more.settings.screen.advanced
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -22,10 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -52,7 +41,6 @@ import kotlinx.coroutines.launch
 import mihon.core.metro.AppCoroutineScope
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.FlipToBack
-import mihon.icons.materialsymbols.rounded.SelectAll
 import tachiyomi.domain.history.repository.HistoryRepository
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.source.interactor.GetSourcesWithNonLibraryManga
@@ -62,10 +50,17 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LazyColumnWithAction
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
-import tachiyomi.presentation.core.util.selectedBackground
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.SelectAll
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 class ClearDatabaseScreen : Screen() {
 
@@ -91,20 +86,11 @@ class ClearDatabaseScreen : Screen() {
                                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
                             ) {
                                 Text(text = stringResource(MR.strings.clear_database_text))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        text = stringResource(MR.strings.clear_db_exclude_read),
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    Switch(
-                                        checked = keepReadManga,
-                                        onCheckedChange = { keepReadManga = it },
-                                    )
-                                }
+                                SwitchPreference(
+                                    title = stringResource(MR.strings.clear_db_exclude_read),
+                                    checked = keepReadManga,
+                                    onCheckedChange = { keepReadManga = it },
+                                )
                                 if (!keepReadManga) {
                                     Text(
                                         text = stringResource(MR.strings.clear_database_history_warning),
@@ -148,7 +134,7 @@ class ClearDatabaseScreen : Screen() {
                                         actions = listOf(
                                             AppBar.Action(
                                                 title = stringResource(MR.strings.action_select_all),
-                                                icon = MaterialSymbols.Rounded.SelectAll,
+                                                icon = MiuixIcons.SelectAll,
                                                 onClick = viewModel::selectAll,
                                             ),
                                             AppBar.Action(
@@ -176,7 +162,7 @@ class ClearDatabaseScreen : Screen() {
                             actionEnabled = s.selection.isNotEmpty(),
                             onClickAction = viewModel::showConfirmation,
                         ) {
-                            items(s.items) { sourceWithCount ->
+                            items(s.items, key = { it.id }) { sourceWithCount ->
                                 ClearDatabaseItem(
                                     source = sourceWithCount.source,
                                     count = sourceWithCount.count,
@@ -198,31 +184,14 @@ class ClearDatabaseScreen : Screen() {
         isSelected: Boolean,
         onClickSelect: () -> Unit,
     ) {
-        Row(
-            modifier = Modifier
-                .selectedBackground(isSelected)
-                .clickable(onClick = onClickSelect)
-                .padding(horizontal = 8.dp)
-                .height(56.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SourceIcon(source = source)
-            Column(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .weight(1f),
-            ) {
-                Text(
-                    text = source.visualName,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(text = stringResource(MR.strings.clear_database_source_item_count, count))
-            }
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onClickSelect() },
-            )
-        }
+        CheckboxPreference(
+            title = source.visualName,
+            summary = stringResource(MR.strings.clear_database_source_item_count, count),
+            startAction = { SourceIcon(source = source) },
+            checked = isSelected,
+            onCheckedChange = { onClickSelect() },
+            checkboxLocation = CheckboxLocation.End,
+        )
     }
 }
 

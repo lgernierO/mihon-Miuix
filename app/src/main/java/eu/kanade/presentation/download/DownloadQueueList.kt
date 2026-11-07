@@ -12,17 +12,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,6 +38,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
@@ -52,7 +48,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.DragHandle
-import mihon.icons.materialsymbols.rounded.MoreVert
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -60,7 +55,16 @@ import sh.calvin.reorderable.rememberScroller
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ListGroupHeader
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
+import tachiyomi.presentation.core.components.miuix.Surface
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.More
 
 @Composable
 fun DownloadQueueList(
@@ -141,8 +145,10 @@ fun DownloadQueueList(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
+            .miuixScroll()
             .onGloballyPositioned { listCoordinates.value = it },
         state = lazyListState,
+        overscrollEffect = null,
         contentPadding = contentPadding,
     ) {
         sectionsState.forEach { section ->
@@ -374,16 +380,21 @@ private fun ReorderableCollectionItemScope.DownloadQueueItem(
 
 @Composable
 private fun ReorderableCollectionItemScope.DragHandle(onDragStarted: () -> Unit, onDragStopped: () -> Unit) {
-    Icon(
-        imageVector = MaterialSymbols.Rounded.DragHandle,
-        contentDescription = null,
+    Box(
         modifier = Modifier
+            .size(48.dp)
             .draggableHandle(
                 onDragStarted = { onDragStarted() },
                 onDragStopped = onDragStopped,
-            )
-            .padding(MaterialTheme.padding.small),
-    )
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = MaterialSymbols.Rounded.DragHandle,
+            contentDescription = stringResource(MR.strings.action_sort),
+            modifier = Modifier.size(20.dp),
+        )
+    }
 }
 
 @Composable
@@ -399,15 +410,15 @@ private fun DownloadQueueItemMenu(
     val closeMenu = { expanded = false }
     Box {
         IconButton(onClick = { expanded = true }) {
-            Icon(
-                imageVector = MaterialSymbols.Rounded.MoreVert,
+            AppBarIcon(
+                imageVector = MiuixIcons.More,
                 contentDescription = stringResource(MR.strings.action_menu),
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = closeMenu) {
             if (canMoveToTop) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(MR.strings.action_move_to_top)) },
+                    text = stringResource(MR.strings.action_move_to_top),
                     onClick = {
                         closeMenu()
                         onMove(true)
@@ -415,7 +426,7 @@ private fun DownloadQueueItemMenu(
                 )
             }
             DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_move_to_top_all_for_series)) },
+                text = stringResource(MR.strings.action_move_to_top_all_for_series),
                 onClick = {
                     closeMenu()
                     onMoveSeries(true)
@@ -423,7 +434,7 @@ private fun DownloadQueueItemMenu(
             )
             if (canMoveToBottom) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(MR.strings.action_move_to_bottom)) },
+                    text = stringResource(MR.strings.action_move_to_bottom),
                     onClick = {
                         closeMenu()
                         onMove(false)
@@ -431,21 +442,21 @@ private fun DownloadQueueItemMenu(
                 )
             }
             DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_move_to_bottom_all_for_series)) },
+                text = stringResource(MR.strings.action_move_to_bottom_all_for_series),
                 onClick = {
                     closeMenu()
                     onMoveSeries(false)
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_cancel)) },
+                text = stringResource(MR.strings.action_cancel),
                 onClick = {
                     closeMenu()
                     onCancel()
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.cancel_all_for_series)) },
+                text = stringResource(MR.strings.cancel_all_for_series),
                 onClick = {
                     closeMenu()
                     onCancelSeries()

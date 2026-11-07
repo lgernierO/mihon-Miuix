@@ -5,14 +5,15 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
@@ -22,19 +23,20 @@ import eu.kanade.presentation.more.settings.widget.EditTextPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.InfoWidget
 import eu.kanade.presentation.more.settings.widget.ListPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.MultiSelectListPreferenceWidget
-import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
-import eu.kanade.presentation.more.settings.widget.PrefsVerticalPadding
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
-import eu.kanade.presentation.more.settings.widget.TitleFontSize
 import eu.kanade.presentation.more.settings.widget.TrackingPreferenceWidget
+import eu.kanade.presentation.more.settings.widget.highlightBackground
 import eu.kanade.tachiyomi.data.track.RefreshResult
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.BaseSliderItem
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.sliderValue
+import top.yukonga.miuix.kmp.preference.SliderPreference
+import kotlin.time.Duration.Companion.seconds
 
 val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
 val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 56.dp }
@@ -47,7 +49,16 @@ fun StatusWrapper(
 ) {
     val enabled = item.visible
     val highlighted = item.title == highlightKey
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(highlighted, enabled) {
+        if (highlighted && enabled) {
+            // The list first scrolls to the containing Card, then reveals this row.
+            delay(0.75.seconds)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
     AnimatedVisibility(
+        modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester),
         visible = enabled,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut(),
@@ -89,25 +100,26 @@ internal fun PreferenceItem(
             }
             is Preference.PreferenceItem.SliderPreference -> {
                 val value by item.preference.collectAsState()
-                BaseSliderItem(
-                    value = value,
-                    valueRange = item.valueRange,
-                    steps = item.steps,
+                val minimum = minOf(item.valueRange.first, item.valueRange.last)
+                val maximum = maxOf(item.valueRange.first, item.valueRange.last)
+                SliderPreference(
+                    modifier = Modifier.highlightBackground(LocalPreferenceHighlighted.current),
+                    value = value.toFloat().coerceIn(minimum.toFloat(), maximum.toFloat()),
+                    valueRange = minimum.toFloat()..if (minimum < maximum) maximum.toFloat() else minimum + 1f,
+                    steps = item.steps.coerceAtLeast(0),
+                    enabled = minimum < maximum,
+                    reverseDirection = item.valueRange.step < 0,
                     title = item.title,
-                    subtitle = item.subtitle,
-                    valueString = item.valueText(value),
-                    onChange = { newValue ->
+                    summary = item.subtitle,
+                    valueText = item.valueText(value),
+                    onValueChange = { newValue ->
+                        val intValue = item.valueRange.sliderValue(newValue)
                         scope.launch {
-                            if (item.onValueChanged(newValue)) {
-                                item.preference.set(newValue)
+                            if (intValue != item.preference.get() && item.onValueChanged(intValue)) {
+                                item.preference.set(intValue)
                             }
                         }
                     },
-                    titleStyle = MaterialTheme.typography.titleLarge.copy(fontSize = TitleFontSize),
-                    modifier = Modifier.padding(
-                        horizontal = PrefsHorizontalPadding,
-                        vertical = PrefsVerticalPadding,
-                    ),
                 )
             }
             is Preference.PreferenceItem.ListPreference<*> -> {

@@ -4,11 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Text
 
 @Composable
 fun BaseMangaListItem(
@@ -30,7 +30,7 @@ fun BaseMangaListItem(
     Row(
         modifier = modifier
             .clickable(onClick = onClickItem)
-            .height(56.dp)
+            .heightIn(min = 56.dp)
             .padding(horizontal = MaterialTheme.padding.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -44,7 +44,7 @@ private val defaultCover: @Composable RowScope.(Manga, () -> Unit) -> Unit = { m
     MangaCover.Square(
         modifier = Modifier
             .padding(vertical = MaterialTheme.padding.small)
-            .fillMaxHeight(),
+            .size(40.dp),
         data = manga,
         onClick = onClick,
     )

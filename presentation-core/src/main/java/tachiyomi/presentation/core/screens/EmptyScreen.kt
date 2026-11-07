@@ -2,14 +2,13 @@ package tachiyomi.presentation.core.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -20,11 +19,11 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import dev.icerock.moko.resources.StringResource
 import tachiyomi.presentation.core.components.ActionButton
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import kotlin.random.Random
 
@@ -57,7 +56,7 @@ fun EmptyScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .miuixVerticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -80,14 +79,15 @@ fun EmptyScreen(
         )
 
         if (!actions.isNullOrEmpty()) {
-            Row(
+            FlowRow(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(top = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                actions.fastForEach {
+                actions.forEach {
                     ActionButton(
-                        modifier = Modifier.weight(1f),
                         title = stringResource(it.stringRes),
                         icon = it.icon,
                         onClick = it.onClick,

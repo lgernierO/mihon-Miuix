@@ -138,6 +138,7 @@ object SettingsDownloadScreen : SearchableSettings {
                 initialChecked = included.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
                 initialInversed = excluded.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
                 itemLabel = { it.visualName },
+                itemKey = { it.id },
                 onDismissRequest = { showDialog = false },
                 onValueChanged = { newIncluded, newExcluded ->
                     downloadNewChapterCategoriesPref.set(newIncluded.fastMap { it.id.toString() }.toSet())

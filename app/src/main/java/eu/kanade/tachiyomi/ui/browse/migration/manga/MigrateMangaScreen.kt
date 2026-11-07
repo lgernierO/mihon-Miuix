@@ -2,13 +2,12 @@ package eu.kanade.tachiyomi.ui.browse.migration.manga
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.SmallExtendedFloatingActionButton
-import androidx.compose.material3.Text
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,12 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import eu.kanade.presentation.components.AppBar
-import eu.kanade.presentation.manga.components.BaseMangaListItem
+import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.util.system.toast
@@ -33,11 +33,16 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.SmallExtendedFloatingActionButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
-import tachiyomi.presentation.core.util.selectedBackground
 import tachiyomi.presentation.core.util.shouldExpandFAB
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 data class MigrateMangaScreen(
     private val sourceId: Long,
@@ -136,7 +141,7 @@ data class MigrateMangaScreen(
             state = lazyListState,
             contentPadding = contentPadding,
         ) {
-            items(state.titles) { manga ->
+            items(state.titles, key = { it.id }) { manga ->
                 MigrateMangaItem(
                     manga = manga,
                     isSelected = manga.id in state.selection,
@@ -155,11 +160,24 @@ data class MigrateMangaScreen(
         onClickCover: (Manga) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        BaseMangaListItem(
-            modifier = modifier.selectedBackground(isSelected),
-            manga = manga,
-            onClickItem = { onClickItem(manga) },
-            onClickCover = { onClickCover(manga) },
-        )
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+        ) {
+            CheckboxPreference(
+                title = manga.title,
+                checked = isSelected,
+                onCheckedChange = { onClickItem(manga) },
+                checkboxLocation = CheckboxLocation.End,
+                startAction = {
+                    MangaCover.Square(
+                        modifier = Modifier.size(40.dp),
+                        data = manga,
+                        onClick = { onClickCover(manga) },
+                    )
+                },
+            )
+        }
     }
 }

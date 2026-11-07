@@ -3,9 +3,6 @@ package eu.kanade.presentation.browse
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -34,6 +31,9 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.LocalSource
+import top.yukonga.miuix.kmp.basic.SnackbarDuration
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.SnackbarResult
 
 @Composable
 fun BrowseSourceContent(
@@ -66,7 +66,7 @@ fun BrowseSourceContent(
                 duration = SnackbarDuration.Indefinite,
             )
             when (result) {
-                SnackbarResult.Dismissed -> snackbarHostState.currentSnackbarData?.dismiss()
+                SnackbarResult.Dismissed -> Unit
                 SnackbarResult.ActionPerformed -> mangaList.retry()
             }
         }

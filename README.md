@@ -1,3 +1,16 @@
+# Mihon Miuix
+
+基于上游 [Mihon](https://github.com/mihonapp/mihon) 改造的 Miuix 界面分支，使用 [Miuix](https://github.com/compose-miuix-ui/miuix) 0.9.4 组件。
+
+### 更新日志
+
+- 书架、图源、详情、设置及阅读器面板统一 Miuix 风格，优先使用原生组件。
+- 修正书架选中底栏、弹出菜单和开关，统一关闭图标大小。
+- 缩小详情页操作按钮，重绘图源紧凑网格图标。
+- 改进主题、滚动和多选交互，适配本仓库的构建与发布流程。
+
+---
+
 <div align="center">
 
 <a href="https://mihon.app">

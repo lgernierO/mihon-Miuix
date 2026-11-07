@@ -2,7 +2,6 @@ package mihon.feature.migration.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,23 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,10 +28,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.presentation.util.rememberResourceBitmapPainter
@@ -49,22 +39,31 @@ import eu.kanade.tachiyomi.R
 import mihon.feature.migration.list.models.MigratingManga
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
-import mihon.icons.materialsymbols.rounded.Check
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.ContentCopy
 import mihon.icons.materialsymbols.rounded.CopyAll
 import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.MoreVert
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.Badge
 import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
-import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
+import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Copy
+import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MigrationListScreenContent(
@@ -94,7 +93,7 @@ fun MigrationListScreenContent(
                                 icon = if (items.size ==
                                     1
                                 ) {
-                                    MaterialSymbols.Rounded.ContentCopy
+                                    MiuixIcons.Copy
                                 } else {
                                     MaterialSymbols.Rounded.CopyAll
                                 },
@@ -106,7 +105,7 @@ fun MigrationListScreenContent(
                                 icon = if (items.size ==
                                     1
                                 ) {
-                                    MaterialSymbols.Rounded.Check
+                                    MiuixIcons.Ok
                                 } else {
                                     MaterialSymbols.Rounded.DoneAll
                                 },
@@ -127,8 +126,10 @@ fun MigrationListScreenContent(
                         .fillMaxWidth()
                         .animateItem()
                         .padding(
-                            start = MaterialTheme.padding.medium,
-                            end = MaterialTheme.padding.small,
+                            start = 16.dp,
+                            end = 8.dp,
+                            top = 8.dp,
+                            bottom = 8.dp,
                         )
                         .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -149,7 +150,7 @@ fun MigrationListScreenContent(
                     Icon(
                         imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward,
                         contentDescription = null,
-                        modifier = Modifier.weight(0.2f),
+                        modifier = Modifier.padding(horizontal = 4.dp).size(18.dp),
                     )
 
                     val result by item.searchResult.collectAsState()
@@ -163,7 +164,7 @@ fun MigrationListScreenContent(
                     )
 
                     MigrationListItemAction(
-                        modifier = Modifier.weight(0.2f),
+                        modifier = Modifier.size(48.dp),
                         result = result,
                         onSearchManually = { onSearchManually(item) },
                         onSkip = { onSkip(item.manga.id) },
@@ -185,13 +186,13 @@ fun MigrationListItem(
     latestChapter: Double?,
     onClick: () -> Unit,
 ) {
-    Column(
+    Card(
         modifier = modifier
-            .widthIn(max = 150.dp)
+            .widthIn(max = 180.dp)
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onClick)
             .padding(4.dp),
+        onClick = onClick,
+        showIndication = true,
     ) {
         Box(
             modifier = Modifier
@@ -208,7 +209,7 @@ fun MigrationListItem(
                     .background(
                         Brush.verticalGradient(
                             0f to Color.Transparent,
-                            1f to MaterialTheme.colorScheme.background,
+                            1f to MiuixTheme.colorScheme.surface,
                         ),
                     )
                     .fillMaxHeight(0.4f)
@@ -222,7 +223,7 @@ fun MigrationListItem(
                 text = manga.title,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,
-                style = MaterialTheme.typography.labelMedium,
+                style = MiuixTheme.textStyles.footnote1,
             )
             BadgeGroup(modifier = Modifier.padding(4.dp)) {
                 Badge(text = "$chapterCount")
@@ -231,14 +232,14 @@ fun MigrationListItem(
 
         Column(
             modifier = Modifier
-                .padding(MaterialTheme.padding.extraSmall),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             Text(
                 text = source,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.titleSmall,
+                style = MiuixTheme.textStyles.body2,
             )
             val formattedLatestChapters = remember(latestChapter) {
                 latestChapter?.let(::formatChapterNumber)
@@ -250,7 +251,7 @@ fun MigrationListItem(
                 ),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MiuixTheme.textStyles.footnote1,
             )
         }
     }
@@ -267,7 +268,7 @@ fun MigrationListItemResult(
             MigratingManga.SearchResult.Searching -> {
                 Box(
                     modifier = Modifier
-                        .widthIn(max = 150.dp)
+                        .widthIn(max = 180.dp)
                         .fillMaxSize()
                         .aspectRatio(MangaCover.Book.ratio),
                     contentAlignment = Alignment.Center,
@@ -278,7 +279,7 @@ fun MigrationListItemResult(
             MigratingManga.SearchResult.NotFound -> {
                 Column(
                     Modifier
-                        .widthIn(max = 150.dp)
+                        .widthIn(max = 180.dp)
                         .fillMaxSize()
                         .padding(4.dp),
                 ) {
@@ -288,13 +289,13 @@ fun MigrationListItemResult(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(MangaCover.Book.ratio)
-                            .clip(MaterialTheme.shapes.extraSmall),
+                            .clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop,
                     )
                     Text(
                         text = stringResource(MR.strings.migrationListScreen_noMatchFoundText),
-                        modifier = Modifier.padding(MaterialTheme.padding.extraSmall),
-                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(8.dp),
+                        style = MiuixTheme.textStyles.body2,
                     )
                 }
             }
@@ -321,60 +322,55 @@ private fun MigrationListItemAction(
     onMigrate: () -> Unit,
     onCopy: () -> Unit,
 ) {
-    var menuExpanded by rememberSaveable { mutableStateOf(false) }
-    val closeMenu = { menuExpanded = false }
-    Box(modifier) {
+    Box(modifier, contentAlignment = Alignment.Center) {
         when (result) {
             MigratingManga.SearchResult.Searching -> {
                 IconButton(onClick = onSkip) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.Close,
-                        contentDescription = null,
+                    AppBarIcon(
+                        imageVector = MiuixIcons.Close,
+                        contentDescription = stringResource(MR.strings.migrationListScreen_skipActionLabel),
                     )
                 }
             }
             MigratingManga.SearchResult.NotFound, is MigratingManga.SearchResult.Success -> {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.MoreVert,
-                        contentDescription = null,
-                    )
-                }
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = closeMenu,
-                    offset = DpOffset(8.dp, (-56).dp),
+                WindowIconDropdownMenu(
+                    entry = DropdownEntry(
+                        items = buildList {
+                            add(
+                                DropdownItem(
+                                    text = stringResource(MR.strings.migrationListScreen_searchManuallyActionLabel),
+                                    onClick = onSearchManually,
+                                ),
+                            )
+                            add(
+                                DropdownItem(
+                                    text = stringResource(MR.strings.migrationListScreen_skipActionLabel),
+                                    onClick = onSkip,
+                                ),
+                            )
+                            if (result is MigratingManga.SearchResult.Success) {
+                                add(
+                                    DropdownItem(
+                                        text = stringResource(MR.strings.migrationListScreen_migrateNowActionLabel),
+                                        onClick = onMigrate,
+                                    ),
+                                )
+                                add(
+                                    DropdownItem(
+                                        text = stringResource(MR.strings.migrationListScreen_copyNowActionLabel),
+                                        onClick = onCopy,
+                                    ),
+                                )
+                            }
+                        },
+                    ),
+                    minWidth = 48.dp,
+                    minHeight = 48.dp,
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(MR.strings.migrationListScreen_searchManuallyActionLabel)) },
-                        onClick = {
-                            closeMenu()
-                            onSearchManually()
-                        },
+                    AppBarIcon(
+                        imageVector = MiuixIcons.More,
+                        contentDescription = stringResource(MR.strings.label_more),
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(MR.strings.migrationListScreen_skipActionLabel)) },
-                        onClick = {
-                            closeMenu()
-                            onSkip()
-                        },
-                    )
-                    if (result is MigratingManga.SearchResult.Success) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(MR.strings.migrationListScreen_migrateNowActionLabel)) },
-                            onClick = {
-                                closeMenu()
-                                onMigrate()
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(MR.strings.migrationListScreen_copyNowActionLabel)) },
-                            onClick = {
-                                closeMenu()
-                                onCopy()
-                            },
-                        )
-                    }
                 }
             }
         }

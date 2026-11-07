@@ -131,6 +131,7 @@ object SettingsLibraryScreen : SearchableSettings {
                 initialChecked = included.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
                 initialInversed = excluded.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
                 itemLabel = { it.visualName },
+                itemKey = { it.id },
                 onDismissRequest = { showCategoriesDialog = false },
                 onValueChanged = { newIncluded, newExcluded ->
                     autoUpdateCategoriesPref.set(newIncluded.map { it.id.toString() }.toSet())

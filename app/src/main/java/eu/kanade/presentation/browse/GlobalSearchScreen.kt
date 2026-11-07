@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SourceFilter
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.util.miuixScroll
 
 @Composable
 fun GlobalSearchScreen(
@@ -71,6 +72,8 @@ internal fun GlobalSearchContent(
     fromSourceId: Long? = null,
 ) {
     LazyColumn(
+        modifier = Modifier.miuixScroll(),
+        overscrollEffect = null,
         contentPadding = contentPadding,
     ) {
         items.forEach { (source, result) ->

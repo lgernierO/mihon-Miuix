@@ -3,19 +3,12 @@ package eu.kanade.tachiyomi.ui.manga.track
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -28,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -91,7 +85,11 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.material.AlertDialogContent
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.FilledTonalButton
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -640,7 +638,6 @@ data class TrackDateRemoverScreen(
             create(track = track, trackerId = serviceId, start = start)
         }
         AlertDialogContent(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
             icon = {
                 Icon(
                     imageVector = MaterialSymbols.RoundedFilled.Delete,
@@ -664,9 +661,10 @@ data class TrackDateRemoverScreen(
                 )
             },
             buttons = {
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small, Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(onClick = navigator::pop) {
                         Text(text = stringResource(MR.strings.action_cancel))
@@ -852,7 +850,6 @@ data class TrackerRemoveScreen(
         val serviceName = viewModel.getName()
         var removeRemoteTrack by remember { mutableStateOf(false) }
         AlertDialogContent(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
             icon = {
                 Icon(
                     imageVector = MaterialSymbols.RoundedFilled.Delete,
@@ -883,12 +880,13 @@ data class TrackerRemoveScreen(
                 }
             },
             buttons = {
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
                         MaterialTheme.padding.small,
                         Alignment.End,
                     ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(onClick = navigator::pop) {
                         Text(text = stringResource(MR.strings.action_cancel))

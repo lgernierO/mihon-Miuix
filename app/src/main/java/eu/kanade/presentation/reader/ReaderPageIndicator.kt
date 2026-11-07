@@ -1,9 +1,6 @@
 package eu.kanade.presentation.reader
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
+import tachiyomi.presentation.core.components.miuix.Surface
+import tachiyomi.presentation.core.components.miuix.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun ReaderPageIndicator(
@@ -27,7 +27,7 @@ fun ReaderPageIndicator(
 
     val style = TextStyle(
         color = Color(235, 235, 235),
-        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+        fontSize = MiuixTheme.textStyles.body2.fontSize,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.sp,
     )

@@ -10,26 +10,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -49,7 +39,7 @@ import coil3.request.SuccessResult
 import coil3.size.Size
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.components.DropdownMenu
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.manga.EditCoverAction
 import eu.kanade.tachiyomi.data.coil.ImageDecoder
 import eu.kanade.tachiyomi.data.coil.newDecoder
@@ -58,16 +48,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.Edit
 import mihon.icons.materialsymbols.rounded.Save
-import mihon.icons.materialsymbols.rounded.Share
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.SnackbarHost
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.source.local.isLocal
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.icon.extended.Share
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 
 @Composable
 fun MangaCoverDialog(
@@ -89,6 +87,7 @@ fun MangaCoverDialog(
             decorFitsSystemWindows = false,
         ),
     ) {
+        MiuixPopupSystemBars()
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.Transparent,
@@ -101,8 +100,8 @@ fun MangaCoverDialog(
                 ) {
                     ActionsPill {
                         IconButton(onClick = onDismissRequest) {
-                            Icon(
-                                imageVector = MaterialSymbols.Rounded.Close,
+                            AppBarIcon(
+                                imageVector = MiuixIcons.Close,
                                 contentDescription = stringResource(MR.strings.action_close),
                             )
                         }
@@ -113,7 +112,7 @@ fun MangaCoverDialog(
                             actions = listOf(
                                 AppBar.Action(
                                     title = stringResource(MR.strings.action_share),
-                                    icon = MaterialSymbols.Rounded.Share,
+                                    icon = MiuixIcons.Share,
                                     onClick = onShareClick,
                                 ),
                                 AppBar.Action(
@@ -124,42 +123,42 @@ fun MangaCoverDialog(
                             ),
                         )
                         if (onEditClick != null) {
-                            Box {
-                                var expanded by remember { mutableStateOf(false) }
+                            if (isCustomCover && (manga.favorite || manga.isLocal())) {
+                                WindowIconDropdownMenu(
+                                    entry = DropdownEntry(
+                                        items = listOf(
+                                            DropdownItem(
+                                                text = stringResource(MR.strings.action_edit),
+                                                onClick = { onEditClick(EditCoverAction.EDIT) },
+                                            ),
+                                            DropdownItem(
+                                                text = stringResource(MR.strings.action_delete),
+                                                onClick = { onEditClick(EditCoverAction.DELETE) },
+                                            ),
+                                        ),
+                                    ),
+                                    minWidth = 48.dp,
+                                    minHeight = 48.dp,
+                                ) {
+                                    AppBarIcon(
+                                        imageVector = MiuixIcons.Edit,
+                                        contentDescription = stringResource(MR.strings.action_edit_cover),
+                                    )
+                                }
+                            } else {
                                 IconButton(
                                     onClick = {
                                         when {
                                             !manga.favorite && !manga.isLocal() -> {
                                                 onEditClick(EditCoverAction.ADD_TO_LIBRARY)
                                             }
-                                            isCustomCover -> expanded = true
                                             else -> onEditClick(EditCoverAction.EDIT)
                                         }
                                     },
                                 ) {
-                                    Icon(
-                                        imageVector = MaterialSymbols.Rounded.Edit,
+                                    AppBarIcon(
+                                        imageVector = MiuixIcons.Edit,
                                         contentDescription = stringResource(MR.strings.action_edit_cover),
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    offset = DpOffset(8.dp, 0.dp),
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(MR.strings.action_edit)) },
-                                        onClick = {
-                                            onEditClick(EditCoverAction.EDIT)
-                                            expanded = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(MR.strings.action_delete)) },
-                                        onClick = {
-                                            onEditClick(EditCoverAction.DELETE)
-                                            expanded = false
-                                        },
                                     )
                                 }
                             }

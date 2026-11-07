@@ -4,19 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.ViewModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -41,10 +38,14 @@ import mihon.domain.migration.usecases.MigrateMangaUseCase
 import mihon.feature.common.utils.getLabel
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.LabeledCheckbox
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun Screen.MigrateMangaDialog(
@@ -66,7 +67,7 @@ internal fun Screen.MigrateMangaDialog(
 
     if (state.isMigrating) {
         LoadingScreen(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
+            modifier = Modifier.background(MiuixTheme.colorScheme.background.copy(alpha = 0.7f)),
         )
         return
     }
@@ -78,11 +79,11 @@ internal fun Screen.MigrateMangaDialog(
         },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier.miuixVerticalScroll(rememberScrollState()),
             ) {
                 state.applicableFlags.fastForEach { flag ->
-                    LabeledCheckbox(
-                        label = stringResource(flag.getLabel()),
+                    CheckboxPreference(
+                        title = stringResource(flag.getLabel()),
                         checked = flag in state.selectedFlags,
                         onCheckedChange = { viewModel.toggleSelection(flag) },
                     )
@@ -91,7 +92,9 @@ internal fun Screen.MigrateMangaDialog(
         },
         confirmButton = {
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TextButton(
                     onClick = {
@@ -101,8 +104,6 @@ internal fun Screen.MigrateMangaDialog(
                 ) {
                     Text(text = stringResource(MR.strings.action_show_manga))
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
 
                 TextButton(
                     onClick = {

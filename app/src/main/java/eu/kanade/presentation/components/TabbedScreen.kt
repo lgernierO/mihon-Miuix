@@ -9,23 +9,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.components.material.Scaffold
-import tachiyomi.presentation.core.components.material.TabText
+import tachiyomi.presentation.core.components.miuix.SnackbarHost
+import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.pagerGestureOverride
+import top.yukonga.miuix.kmp.utils.springAnimateToPage
 
 @Composable
 fun TabbedScreen(
@@ -35,6 +36,7 @@ fun TabbedScreen(
     searchQuery: String? = null,
     onChangeSearchQuery: (String?) -> Unit = {},
 ) {
+    if (tabs.isEmpty()) return
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -44,11 +46,12 @@ fun TabbedScreen(
             val searchEnabled = tab.searchEnabled
 
             SearchToolbar(
-                titleContent = { AppBarTitle(stringResource(titleRes)) },
+                title = stringResource(titleRes),
                 searchEnabled = searchEnabled,
                 searchQuery = if (searchEnabled) searchQuery else null,
                 onChangeSearchQuery = onChangeSearchQuery,
                 actions = { AppBarActions(tab.actions) },
+                scrollBehavior = it,
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -60,24 +63,27 @@ fun TabbedScreen(
                 end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
             ),
         ) {
-            PrimaryTabRow(
+            TabRow(
+                tabs = tabs.map { tab ->
+                    val title = stringResource(tab.titleRes)
+                    tab.badgeNumber?.let { "$title ($it)" } ?: title
+                },
                 selectedTabIndex = state.currentPage,
-                modifier = Modifier.zIndex(1f),
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    Tab(
-                        selected = state.currentPage == index,
-                        onClick = { scope.launch { state.animateScrollToPage(index) } },
-                        text = { TabText(text = stringResource(tab.titleRes), badgeCount = tab.badgeNumber) },
-                        unselectedContentColor = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
+                onTabSelected = { index -> scope.launch { state.springAnimateToPage(index) } },
+                modifier = Modifier
+                    .zIndex(1f)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                maxWidth = 180.dp,
+                height = 48.dp,
+            )
 
             HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().pagerGestureOverride(pagerState = state),
                 state = state,
                 verticalAlignment = Alignment.Top,
+                userScrollEnabled = false,
+                pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+                overscrollEffect = null,
             ) { page ->
                 tabs[page].content(
                     PaddingValues(bottom = contentPadding.calculateBottomPadding()),

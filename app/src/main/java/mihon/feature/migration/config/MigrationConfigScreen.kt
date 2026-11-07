@@ -1,22 +1,13 @@
 package mihon.feature.migration.config
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallExtendedFloatingActionButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -27,8 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.lifecycle.ViewModel
@@ -59,7 +48,6 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
 import mihon.icons.materialsymbols.rounded.Deselect
 import mihon.icons.materialsymbols.rounded.DragHandle
-import mihon.icons.materialsymbols.rounded.SelectAll
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
@@ -68,12 +56,19 @@ import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
-import tachiyomi.presentation.core.components.Pill
 import tachiyomi.presentation.core.components.material.Scaffold
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.SmallExtendedFloatingActionButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.shouldExpandFAB
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.SelectAll
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
 
@@ -118,7 +113,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
         Scaffold(
             topBar = {
                 AppBar(
-                    title = null,
+                    title = stringResource(MR.strings.label_migration),
                     navigateUp = navigator::pop,
                     scrollBehavior = it,
                     actions = {
@@ -126,7 +121,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                             listOf(
                                 AppBar.Action(
                                     title = stringResource(MR.strings.migrationConfigScreen_selectAllLabel),
-                                    icon = MaterialSymbols.Rounded.SelectAll,
+                                    icon = MiuixIcons.SelectAll,
                                     onClick = { viewModel.toggleSelection(Model.SelectionConfig.All) },
                                 ),
                                 AppBar.Action(
@@ -178,7 +173,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                     if (sources.isNotEmpty()) {
                         val headerPrefix = if (selectedSourceList) "selected" else "available"
                         item("$headerPrefix-header") {
-                            Text(
+                            SmallTitle(
                                 text = stringResource(
                                     resource = if (selectedSourceList) {
                                         MR.strings.migrationConfigScreen_selectedHeader
@@ -186,25 +181,19 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                                         MR.strings.migrationConfigScreen_availableHeader
                                     },
                                 ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier
-                                    .padding(MaterialTheme.padding.medium)
-                                    .animateItem(),
+                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
                     itemsIndexed(
                         items = sources,
                         key = { _, item -> item.id },
-                    ) { index, item ->
+                    ) { _, item ->
                         SourceItemContainer(
-                            firstItem = index == 0,
-                            lastItem = index == (sources.size - 1),
                             source = item,
                             showLanguage = showLanguage,
                             dragEnabled = selectedSourceList && sources.size > 1,
                             state = reorderableState,
-                            key = { if (selectedSourceList) it.id else "available-${it.id}" },
                             onClick = { viewModel.toggleSelection(item.id) },
                         )
                     }
@@ -226,30 +215,21 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
 
     @Composable
     private fun LazyItemScope.SourceItemContainer(
-        firstItem: Boolean,
-        lastItem: Boolean,
         source: MigrationSource,
         showLanguage: Boolean,
         dragEnabled: Boolean,
         state: ReorderableLazyListState,
-        key: (MigrationSource) -> Any,
         onClick: () -> Unit,
     ) {
-        val shape = remember(firstItem, lastItem) {
-            val top = if (firstItem) 12.dp else 0.dp
-            val bottom = if (lastItem) 12.dp else 0.dp
-            RoundedCornerShape(top, top, bottom, bottom)
-        }
-
         ReorderableItem(
             state = state,
-            key = key(source),
+            key = source.id,
             enabled = dragEnabled,
         ) { _ ->
-            ElevatedCard(
-                shape = shape,
+            Card(
                 modifier = Modifier
-                    .padding(horizontal = MaterialTheme.padding.medium)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
                     .animateItem(),
             ) {
                 SourceItem(
@@ -261,10 +241,6 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                 )
             }
         }
-
-        if (!lastItem) {
-            HorizontalDivider(modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium))
-        }
     }
 
     @Composable
@@ -275,43 +251,32 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
         scope: ReorderableCollectionItemScope,
         onClick: () -> Unit,
     ) {
-        ListItem(
-            modifier = Modifier.clickable(onClick = onClick),
-            trailingContent = if (dragEnabled) {
+        CheckboxPreference(
+            title = source.name,
+            summary = if (showLanguage) LocaleHelper.getDisplayName(source.shortLanguage) else null,
+            checked = source.isSelected,
+            onCheckedChange = { onClick() },
+            checkboxLocation = CheckboxLocation.End,
+            startAction = { SourceIcon(source = source.source, modifier = Modifier.size(40.dp)) },
+            endActions = if (dragEnabled) {
                 {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.DragHandle,
-                        contentDescription = null,
+                    Box(
                         modifier = with(scope) {
-                            Modifier.draggableHandle()
+                            Modifier.size(48.dp).draggableHandle()
                         },
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = MaterialSymbols.Rounded.DragHandle,
+                            contentDescription = stringResource(MR.strings.action_sort),
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
             } else {
                 null
             },
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                SourceIcon(source = source.source)
-                Text(
-                    text = source.name,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                if (showLanguage) {
-                    Pill(
-                        text = LocaleHelper.getShortDisplayName(source.shortLanguage, uppercase = true),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
-        }
+        )
     }
 
     @Inject

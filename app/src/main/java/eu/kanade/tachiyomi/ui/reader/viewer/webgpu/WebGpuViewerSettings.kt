@@ -3,22 +3,14 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webgpu
 import android.content.ActivityNotFoundException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,9 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import ca.mpreg.webgpuviewer.renderer.ImageFilterWgsl
 import ca.mpreg.webgpuviewer.renderer.Sampler
 import dev.icerock.moko.resources.StringResource
@@ -61,15 +59,25 @@ import sh.calvin.reorderable.ReorderableColumn
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.BaseSliderItem
 import tachiyomi.presentation.core.components.CheckboxItem
 import tachiyomi.presentation.core.components.HeadingItem
 import tachiyomi.presentation.core.components.SettingsChipRow
-import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.components.SliderItem
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.FilterChip
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.SliderDefaults
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.SliderPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.text.NumberFormat
 import kotlin.math.roundToInt
 
@@ -124,7 +132,6 @@ internal fun WebGpuViewerSettings(viewModel: ReaderSettingsViewModel) {
             onChange = {
                 viewModel.preferences.continuousMinWidth.set(it)
             },
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
         if (resolved == ReadingMode.CONTINUOUS_VERTICAL) {
@@ -137,7 +144,6 @@ internal fun WebGpuViewerSettings(viewModel: ReaderSettingsViewModel) {
                 onChange = {
                     viewModel.preferences.continuousGap.set(it)
                 },
-                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             )
         }
 
@@ -172,7 +178,7 @@ internal fun WebGpuViewerSettings(viewModel: ReaderSettingsViewModel) {
         SettingsChipRow(MR.strings.pref_image_scale_type) {
             ReaderPreferences.ImageScaleTypeWebGpuViewer.forEach {
                 FilterChip(
-                    selected = ReaderPreferences.ImageScaleType[imageScaleType - 1] == it,
+                    selected = ReaderPreferences.ImageScaleType.getOrNull(imageScaleType - 1) == it,
                     onClick = {
                         viewModel.preferences.imageScaleType.set(ReaderPreferences.ImageScaleType.indexOf(it) + 1)
                     },
@@ -338,11 +344,11 @@ private fun rememberShaderPicker(pref: Preference<List<WebGpuShader>>, sampler: 
             },
             title = { Text(stringResource(MR.strings.image_filter_invalid)) },
             text = {
-                SelectionContainer(Modifier.verticalScroll(rememberScrollState())) {
+                SelectionContainer(Modifier.miuixVerticalScroll(rememberScrollState())) {
                     Text(
                         text = message,
                         fontFamily = FontFamily.Monospace,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MiuixTheme.textStyles.body2,
                     )
                 }
             },
@@ -365,30 +371,22 @@ private fun SamplerItem(labelRes: StringResource, defaultName: String, pref: Pre
     val pick = rememberShaderPicker(pref, sampler = true)
 
     HeadingItem(labelRes)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = SettingsItemsPaddings.Horizontal, end = MaterialTheme.padding.small),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = shader?.name ?: defaultName,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        TextButton(onClick = pick) {
-            Text(stringResource(MR.strings.action_choose_shader))
-        }
-        shader?.let {
-            IconButton(onClick = { WebGpuShaders.remove(context, pref, it) }) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.Delete,
-                    contentDescription = stringResource(MR.strings.action_remove),
-                )
+    ArrowPreference(
+        title = stringResource(MR.strings.action_choose_shader),
+        summary = shader?.name ?: defaultName,
+        onClick = pick,
+        endActions = {
+            shader?.let {
+                IconButton(onClick = { WebGpuShaders.remove(context, pref, it) }) {
+                    Icon(
+                        imageVector = MaterialSymbols.Rounded.Delete,
+                        contentDescription = stringResource(MR.strings.action_remove),
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable
@@ -396,6 +394,12 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
     val context = LocalContext.current
     val filters by pref.collectAsState()
     val pick = rememberShaderPicker(pref, sampler = false)
+    val sortLabel = stringResource(MR.strings.action_sort)
+    val moveToTopLabel = stringResource(MR.strings.action_move_to_top)
+    val moveToBottomLabel = stringResource(MR.strings.action_move_to_bottom)
+    val parametersLabel = stringResource(MR.strings.shader_parameters)
+    val expandLabel = stringResource(MR.strings.manga_info_expand)
+    val collapseLabel = stringResource(MR.strings.manga_info_collapse)
 
     HeadingItem(labelRes)
     ReorderableColumn(
@@ -417,46 +421,84 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
             var expanded by rememberSaveable { mutableStateOf(false) }
             ReorderableItem {
                 Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = SettingsItemsPaddings.Horizontal, end = MaterialTheme.padding.small),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = MaterialSymbols.Rounded.DragHandle,
-                            contentDescription = null,
-                            modifier = Modifier.draggableHandle(),
-                        )
-                        Text(
-                            text = shader.name,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = MaterialTheme.padding.medium),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        if (params.isNotEmpty()) {
-                            IconButton(onClick = { expanded = !expanded }) {
+                    BasicComponent(
+                        title = shader.name,
+                        onClick = if (params.isNotEmpty()) {
+                            { expanded = !expanded }
+                        } else {
+                            null
+                        },
+                        onClickLabel = parametersLabel.takeIf { params.isNotEmpty() },
+                        role = Role.Button.takeIf { params.isNotEmpty() },
+                        startAction = {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .semantics {
+                                        contentDescription = "$sortLabel: ${shader.name}"
+                                        customActions = listOf(
+                                            CustomAccessibilityAction(moveToTopLabel) {
+                                                val current = pref.get()
+                                                val selected = current.firstOrNull { it.file == shader.file }
+                                                if (selected != null) {
+                                                    pref.set(
+                                                        listOf(selected) + current.filter { it.file != shader.file },
+                                                    )
+                                                }
+                                                selected != null
+                                            },
+                                            CustomAccessibilityAction(moveToBottomLabel) {
+                                                val current = pref.get()
+                                                val selected = current.firstOrNull { it.file == shader.file }
+                                                if (selected != null) {
+                                                    pref.set(
+                                                        current.filter { it.file != shader.file } + selected,
+                                                    )
+                                                }
+                                                selected != null
+                                            },
+                                        )
+                                    }
+                                    .draggableHandle(),
+                                contentAlignment = Alignment.Center,
+                            ) {
                                 Icon(
-                                    imageVector = if (expanded) {
-                                        MaterialSymbols.Rounded.KeyboardArrowUp
-                                    } else {
-                                        MaterialSymbols.Rounded.KeyboardArrowDown
-                                    },
-                                    contentDescription = stringResource(MR.strings.shader_parameters),
+                                    imageVector = MaterialSymbols.Rounded.DragHandle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
                                 )
                             }
-                        }
-                        IconButton(
-                            onClick = { WebGpuShaders.remove(context, pref, shader) },
-                        ) {
-                            Icon(
-                                imageVector = MaterialSymbols.Rounded.Delete,
-                                contentDescription = stringResource(MR.strings.action_delete),
-                            )
-                        }
-                    }
+                        },
+                        endActions = {
+                            if (params.isNotEmpty()) {
+                                IconButton(
+                                    onClick = { expanded = !expanded },
+                                    modifier = Modifier.semantics {
+                                        stateDescription = if (expanded) collapseLabel else expandLabel
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = if (expanded) {
+                                            MaterialSymbols.Rounded.KeyboardArrowUp
+                                        } else {
+                                            MaterialSymbols.Rounded.KeyboardArrowDown
+                                        },
+                                        contentDescription = parametersLabel,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
+                            }
+                            IconButton(
+                                onClick = { WebGpuShaders.remove(context, pref, shader) },
+                            ) {
+                                Icon(
+                                    imageVector = MaterialSymbols.Rounded.Delete,
+                                    contentDescription = stringResource(MR.strings.action_delete),
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
+                    )
                     if (expanded) ShaderParams(pref, shader, params)
                 }
             }
@@ -464,12 +506,16 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
     }
     TextButton(
         onClick = pick,
-        modifier = Modifier.padding(horizontal = SettingsItemsPaddings.Horizontal - MaterialTheme.padding.small),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
-        Icon(imageVector = MaterialSymbols.Rounded.Add, contentDescription = null)
+        Icon(
+            imageVector = MaterialSymbols.Rounded.Add,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+        )
         Text(
             text = stringResource(MR.strings.action_add_shader),
-            modifier = Modifier.padding(start = MaterialTheme.padding.small),
+            modifier = Modifier.padding(start = 8.dp),
         )
     }
 }
@@ -506,56 +552,62 @@ private fun ShaderParams(
             }
             val subtitle = listOf(param.description, meta).filter { it.isNotEmpty() }.joinToString("\n")
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val itemModifier = Modifier
-                    .weight(1f)
-                    .padding(start = SettingsItemsPaddings.Horizontal, top = SettingsItemsPaddings.Vertical)
-                if (min != null && max != null && max > min) {
-                    val span = max - min
-                    val positions = if (integer && span <= SLIDER_POSITIONS) span.toInt() else SLIDER_POSITIONS
-                    val position = ((value - min) / span * positions).roundToInt().coerceIn(0, positions)
-                    BaseSliderItem(
-                        value = position,
-                        valueRange = 0..positions,
-                        title = title,
-                        subtitle = subtitle,
-                        valueString = format.format(value),
-                        onChange = {
-                            val new = min + span * it / positions
-                            set(if (integer) new.roundToInt().toFloat() else new)
-                        },
-                        titleStyle = MaterialTheme.typography.bodyMedium,
-                        pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        modifier = itemModifier,
-                    )
-                } else {
-                    var text by remember(value) { mutableStateOf(format.format(value)) }
-                    OutlinedTextField(
-                        value = text,
-                        onValueChange = { new ->
-                            text = new
-                            val parsed = runCatching { format.parse(new)?.toFloat() }.getOrNull()
-                            if (parsed != null && parsed.isFinite()) {
-                                set(if (integer) parsed.roundToInt().toFloat() else parsed)
-                            }
-                        },
-                        label = { Text(title) },
-                        supportingText = { Text(subtitle) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = itemModifier,
-                    )
-                }
+            val resetAction: @Composable () -> Unit = {
                 IconButton(
                     onClick = { set(null) },
                     enabled = param.name in shader.values,
-                    modifier = Modifier.padding(end = MaterialTheme.padding.small),
                 ) {
                     Icon(
                         imageVector = MaterialSymbols.Rounded.Refresh,
                         contentDescription = stringResource(MR.strings.action_reset),
+                        modifier = Modifier.size(24.dp),
                     )
                 }
+            }
+            if (min != null && max != null && max > min) {
+                val span = max - min
+                val positions = if (integer && span <= SLIDER_POSITIONS) {
+                    span.toInt().coerceAtLeast(1)
+                } else {
+                    SLIDER_POSITIONS
+                }
+                val position = ((value - min) / span * positions).roundToInt().coerceIn(0, positions)
+                SliderPreference(
+                    value = position.toFloat(),
+                    valueRange = 0f..positions.toFloat(),
+                    steps = positions - 1,
+                    title = title,
+                    summary = subtitle,
+                    valueText = format.format(value),
+                    onValueChange = {
+                        val new = min + span * it.roundToInt() / positions
+                        set(if (integer) new.roundToInt().toFloat() else new)
+                    },
+                    hapticEffect = SliderDefaults.SliderHapticEffect.Step,
+                    endActions = { resetAction() },
+                )
+            } else {
+                var text by remember(value) { mutableStateOf(format.format(value)) }
+                BasicComponent(
+                    title = title,
+                    summary = subtitle,
+                    endActions = { resetAction() },
+                    bottomAction = {
+                        TextField(
+                            value = text,
+                            onValueChange = { new ->
+                                text = new
+                                val parsed = runCatching { format.parse(new)?.toFloat() }.getOrNull()
+                                if (parsed != null && parsed.isFinite()) {
+                                    set(if (integer) parsed.roundToInt().toFloat() else parsed)
+                                }
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.fillMaxWidth().semantics { contentDescription = title },
+                        )
+                    },
+                )
             }
         }
     }

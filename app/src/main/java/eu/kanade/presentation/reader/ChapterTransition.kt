@@ -2,6 +2,7 @@ package eu.kanade.presentation.reader
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,18 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
@@ -39,9 +31,13 @@ import mihon.icons.materialsymbols.roundedfilled.Warning
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.service.calculateChapterGap
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.secondaryItemAlpha
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun ChapterTransition(
@@ -52,32 +48,30 @@ fun ChapterTransition(
     val currChapter = transition.from.chapter
     val goingToChapter = transition.to?.chapter
 
-    ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
-        when (transition) {
-            is ChapterTransition.Prev -> {
-                TransitionText(
-                    topLabel = stringResource(MR.strings.transition_previous),
-                    topChapter = goingToChapter,
-                    topChapterDownloaded = goingToChapterDownloaded,
-                    bottomLabel = stringResource(MR.strings.transition_current),
-                    bottomChapter = currChapter,
-                    bottomChapterDownloaded = currChapterDownloaded,
-                    fallbackLabel = stringResource(MR.strings.transition_no_previous),
-                    chapterGap = calculateChapterGap(currChapter, goingToChapter),
-                )
-            }
-            is ChapterTransition.Next -> {
-                TransitionText(
-                    topLabel = stringResource(MR.strings.transition_finished),
-                    topChapter = currChapter,
-                    topChapterDownloaded = currChapterDownloaded,
-                    bottomLabel = stringResource(MR.strings.transition_next),
-                    bottomChapter = goingToChapter,
-                    bottomChapterDownloaded = goingToChapterDownloaded,
-                    fallbackLabel = stringResource(MR.strings.transition_no_next),
-                    chapterGap = calculateChapterGap(goingToChapter, currChapter),
-                )
-            }
+    when (transition) {
+        is ChapterTransition.Prev -> {
+            TransitionText(
+                topLabel = stringResource(MR.strings.transition_previous),
+                topChapter = goingToChapter,
+                topChapterDownloaded = goingToChapterDownloaded,
+                bottomLabel = stringResource(MR.strings.transition_current),
+                bottomChapter = currChapter,
+                bottomChapterDownloaded = currChapterDownloaded,
+                fallbackLabel = stringResource(MR.strings.transition_no_previous),
+                chapterGap = calculateChapterGap(currChapter, goingToChapter),
+            )
+        }
+        is ChapterTransition.Next -> {
+            TransitionText(
+                topLabel = stringResource(MR.strings.transition_finished),
+                topChapter = currChapter,
+                topChapterDownloaded = currChapterDownloaded,
+                bottomLabel = stringResource(MR.strings.transition_next),
+                bottomChapter = goingToChapter,
+                bottomChapterDownloaded = goingToChapterDownloaded,
+                fallbackLabel = stringResource(MR.strings.transition_no_next),
+                chapterGap = calculateChapterGap(goingToChapter, currChapter),
+            )
         }
     }
 }
@@ -144,25 +138,23 @@ private fun NoChapterNotification(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedCard(
+    Card(
         modifier = modifier,
-        colors = CardColor,
+        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = MaterialSymbols.Rounded.Info,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MiuixTheme.colorScheme.primary,
                 contentDescription = null,
             )
 
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MiuixTheme.textStyles.body1,
             )
         }
     }
@@ -173,24 +165,23 @@ private fun ChapterGapWarning(
     gapCount: Int,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedCard(
+    Card(
         modifier = modifier,
-        colors = CardColor,
+        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = MaterialSymbols.RoundedFilled.Warning,
-                tint = MaterialTheme.colorScheme.error,
+                tint = MiuixTheme.colorScheme.error,
                 contentDescription = null,
             )
 
             Text(
                 text = pluralStringResource(MR.plurals.missing_chapters_warning, count = gapCount, gapCount),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MiuixTheme.textStyles.body1,
             )
         }
     }
@@ -204,7 +195,8 @@ private fun ChapterHeaderText(
     Text(
         text = text,
         modifier = modifier,
-        style = MaterialTheme.typography.titleMedium,
+        style = MiuixTheme.textStyles.headline1,
+        color = MiuixTheme.colorScheme.onBackground,
     )
 }
 
@@ -232,7 +224,8 @@ private fun ChapterText(
             fontSize = 20.sp,
             maxLines = 5,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.titleLarge,
+            style = MiuixTheme.textStyles.title3,
+            color = MiuixTheme.colorScheme.onBackground,
             inlineContent = mapOf(
                 DOWNLOADED_ICON_ID to InlineTextContent(
                     Placeholder(
@@ -253,22 +246,15 @@ private fun ChapterText(
             Text(
                 text = it,
                 modifier = Modifier
-                    .secondaryItemAlpha()
                     .padding(top = 2.dp),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodySmall,
+                style = MiuixTheme.textStyles.body2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
         }
     }
 }
-
-private val CardColor: CardColors
-    @Composable
-    get() = CardDefaults.outlinedCardColors(
-        containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-    )
 
 private val VerticalSpacerSize = 24.dp
 private const val DOWNLOADED_ICON_ID = "downloaded"

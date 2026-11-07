@@ -231,6 +231,10 @@ dependencies {
     implementation(libs.androidx.compose.uiUtil)
     implementation(libs.androidx.navigationEvent)
 
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.icons)
+    implementation(libs.miuix.preference)
+
     implementation(libs.androidx.interpolator)
 
     implementation(libs.androidx.paging.runtime)

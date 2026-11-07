@@ -1,28 +1,27 @@
 package eu.kanade.presentation.browse.components
 
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.components.AppBarTitle
-import eu.kanade.presentation.components.DropdownMenu
-import eu.kanade.presentation.components.RadioMenuItem
+import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredroundedfilled.ViewList
-import mihon.icons.materialsymbols.roundedfilled.ViewCompact
-import mihon.icons.materialsymbols.roundedfilled.ViewModule
+import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
+import mihon.icons.custommaterialsymbols.rounded.CompactGrid
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.source.local.LocalSource
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.ListView
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
 
 @Composable
 fun BrowseSourceToolbar(
@@ -43,31 +42,53 @@ fun BrowseSourceToolbar(
     val isLocalSource = source is LocalSource
     val isConfigurableSource = source is ConfigurableSource
 
-    var selectingDisplayMode by remember { mutableStateOf(false) }
-
     SearchToolbar(
         navigateUp = navigateUp,
-        titleContent = { AppBarTitle(title) },
+        title = title.orEmpty(),
         searchQuery = searchQuery,
         onChangeSearchQuery = onSearchQueryChange,
         onSearch = onSearch,
         onClickCloseSearch = navigateUp,
         actions = {
+            TooltipBox(text = stringResource(MR.strings.action_display_mode)) {
+                WindowIconDropdownMenu(
+                    entry = DropdownEntry(
+                        items = listOf(
+                            DropdownItem(
+                                text = stringResource(MR.strings.action_display_comfortable_grid),
+                                selected = displayMode == LibraryDisplayMode.ComfortableGrid,
+                                onClick = { onDisplayModeChange(LibraryDisplayMode.ComfortableGrid) },
+                            ),
+                            DropdownItem(
+                                text = stringResource(MR.strings.action_display_grid),
+                                selected = displayMode == LibraryDisplayMode.CompactGrid ||
+                                    displayMode == LibraryDisplayMode.CoverOnlyGrid,
+                                onClick = { onDisplayModeChange(LibraryDisplayMode.CompactGrid) },
+                            ),
+                            DropdownItem(
+                                text = stringResource(MR.strings.action_display_list),
+                                selected = displayMode == LibraryDisplayMode.List,
+                                onClick = { onDisplayModeChange(LibraryDisplayMode.List) },
+                            ),
+                        ),
+                    ),
+                    minWidth = 48.dp,
+                    minHeight = 48.dp,
+                ) {
+                    AppBarIcon(
+                        imageVector = when (displayMode) {
+                            LibraryDisplayMode.List -> MiuixIcons.ListView
+                            LibraryDisplayMode.ComfortableGrid -> MiuixIcons.GridView
+                            LibraryDisplayMode.CompactGrid,
+                            LibraryDisplayMode.CoverOnlyGrid,
+                            -> CustomMaterialSymbols.Rounded.CompactGrid
+                        },
+                        contentDescription = stringResource(MR.strings.action_display_mode),
+                    )
+                }
+            }
             AppBarActions(
                 actions = buildList {
-                    add(
-                        AppBar.Action(
-                            title = stringResource(MR.strings.action_display_mode),
-                            icon = when (displayMode) {
-                                LibraryDisplayMode.List -> MaterialSymbols.AutoMirroredRoundedFilled.ViewList
-                                LibraryDisplayMode.ComfortableGrid -> MaterialSymbols.RoundedFilled.ViewModule
-                                LibraryDisplayMode.CompactGrid,
-                                LibraryDisplayMode.CoverOnlyGrid,
-                                -> MaterialSymbols.RoundedFilled.ViewCompact
-                            },
-                            onClick = { selectingDisplayMode = true },
-                        ),
-                    )
                     if (isLocalSource) {
                         add(
                             AppBar.OverflowAction(
@@ -93,33 +114,6 @@ fun BrowseSourceToolbar(
                     }
                 },
             )
-
-            DropdownMenu(
-                expanded = selectingDisplayMode,
-                onDismissRequest = { selectingDisplayMode = false },
-            ) {
-                RadioMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_comfortable_grid)) },
-                    isChecked = displayMode == LibraryDisplayMode.ComfortableGrid,
-                ) {
-                    selectingDisplayMode = false
-                    onDisplayModeChange(LibraryDisplayMode.ComfortableGrid)
-                }
-                RadioMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_grid)) },
-                    isChecked = displayMode == LibraryDisplayMode.CompactGrid,
-                ) {
-                    selectingDisplayMode = false
-                    onDisplayModeChange(LibraryDisplayMode.CompactGrid)
-                }
-                RadioMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_list)) },
-                    isChecked = displayMode == LibraryDisplayMode.List,
-                ) {
-                    selectingDisplayMode = false
-                    onDisplayModeChange(LibraryDisplayMode.List)
-                }
-            }
         },
         scrollBehavior = scrollBehavior,
     )

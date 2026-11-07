@@ -4,24 +4,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.reader.ChapterTransition
 import eu.kanade.presentation.reader.reportPress
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.ActionButton
+import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun ReaderTransitionPage(
@@ -38,16 +39,11 @@ fun ReaderTransitionPage(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (downloadState != null) {
-            CompositionLocalProvider(
-                LocalTextStyle provides MaterialTheme.typography.bodySmall,
-                LocalContentColor provides MaterialTheme.colorScheme.onBackground,
-            ) {
-                ChapterTransition(
-                    transition,
-                    downloadState.currChapterDownloaded,
-                    downloadState.goingToChapterDownloaded,
-                )
-            }
+            ChapterTransition(
+                transition,
+                downloadState.currChapterDownloaded,
+                downloadState.goingToChapterDownloaded,
+            )
         }
 
         val toChapter = transition.to ?: return@Column
@@ -55,30 +51,35 @@ fun ReaderTransitionPage(
         when (val state = state) {
             is ReaderChapter.State.Loading -> Column(
                 modifier = Modifier.padding(statusPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CircularProgressIndicator()
                 Text(
                     text = stringResource(MR.strings.transition_pages_loading),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium,
+                    color = MiuixTheme.colorScheme.onBackground,
+                    style = MiuixTheme.textStyles.body1,
+                    textAlign = TextAlign.Center,
                 )
             }
             is ReaderChapter.State.Error -> Column(
                 modifier = Modifier.padding(statusPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = stringResource(MR.strings.transition_pages_error, state.error.message ?: ""),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium,
+                    color = MiuixTheme.colorScheme.onBackground,
+                    style = MiuixTheme.textStyles.body1,
+                    textAlign = TextAlign.Center,
                 )
-                Button(
+                ActionButton(
                     onClick = { onRetry(toChapter) },
-                    modifier = Modifier.reportPress(onButtonPressChange),
-                ) {
-                    Text(stringResource(MR.strings.action_retry))
-                }
+                    title = stringResource(MR.strings.action_retry),
+                    icon = MaterialSymbols.Rounded.Refresh,
+                    buttonModifier = Modifier.reportPress(onButtonPressChange),
+                    primary = true,
+                )
             }
             is ReaderChapter.State.Wait, is ReaderChapter.State.Loaded -> {}
         }

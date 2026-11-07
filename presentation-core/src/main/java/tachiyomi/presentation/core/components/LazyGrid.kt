@@ -2,17 +2,19 @@ package tachiyomi.presentation.core.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.util.miuixScroll
 
 @Composable
 fun FastScrollLazyVerticalGrid(
@@ -20,11 +22,11 @@ fun FastScrollLazyVerticalGrid(
     modifier: Modifier = Modifier,
     state: LazyGridState = rememberLazyGridState(),
     thumbAllowed: () -> Boolean = { true },
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
+    thumbColor: Color = Color.Unspecified,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    topContentPadding: Dp = Dp.Hairline,
-    bottomContentPadding: Dp = Dp.Hairline,
-    endContentPadding: Dp = Dp.Hairline,
+    topContentPadding: Dp = contentPadding.calculateTopPadding(),
+    bottomContentPadding: Dp = contentPadding.calculateBottomPadding(),
+    endContentPadding: Dp = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
     reverseLayout: Boolean = false,
     verticalArrangement: Arrangement.Vertical =
         if (!reverseLayout) Arrangement.Top else Arrangement.Bottom,
@@ -38,13 +40,15 @@ fun FastScrollLazyVerticalGrid(
         arrangement = horizontalArrangement,
         contentPadding = contentPadding,
         modifier = modifier,
-        thumbAllowed = thumbAllowed,
+        thumbAllowed = { userScrollEnabled && thumbAllowed() },
         thumbColor = thumbColor,
         topContentPadding = topContentPadding,
         bottomContentPadding = bottomContentPadding,
         endContentPadding = endContentPadding,
+        reverseLayout = reverseLayout,
     ) {
         LazyVerticalGrid(
+            modifier = Modifier.miuixScroll(userScrollEnabled),
             columns = columns,
             state = state,
             contentPadding = contentPadding,
@@ -52,6 +56,7 @@ fun FastScrollLazyVerticalGrid(
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
             userScrollEnabled = userScrollEnabled,
+            overscrollEffect = null,
             content = content,
         )
     }

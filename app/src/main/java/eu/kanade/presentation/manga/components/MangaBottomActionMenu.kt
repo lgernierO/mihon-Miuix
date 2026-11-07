@@ -1,70 +1,52 @@
 package eu.kanade.presentation.manga.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.DownloadDropdownMenu
-import eu.kanade.presentation.components.DropdownMenu
+import eu.kanade.presentation.components.downloadDropdownEntry
 import eu.kanade.presentation.manga.DownloadAction
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
 import mihon.icons.custommaterialsymbols.rounded.DonePrevious
 import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Label
 import mihon.icons.materialsymbols.rounded.BookmarkAdd
 import mihon.icons.materialsymbols.rounded.BookmarkRemove
-import mihon.icons.materialsymbols.rounded.Delete
 import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.Download
-import mihon.icons.materialsymbols.rounded.MoreVert
 import mihon.icons.materialsymbols.rounded.RemoveDone
 import mihon.icons.materialsymbols.rounded.SwapCalls
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
-import kotlin.time.Duration.Companion.seconds
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.FloatingToolbar
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.TooltipAnchorPosition
+import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Download
+import top.yukonga.miuix.kmp.icon.extended.Folder
+import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MangaBottomActionMenu(
@@ -78,154 +60,72 @@ fun MangaBottomActionMenu(
     onDownloadClicked: (() -> Unit)? = null,
     onDeleteClicked: (() -> Unit)? = null,
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = expandVertically(expandFrom = Alignment.Bottom),
-        exit = shrinkVertically(shrinkTowards = Alignment.Bottom),
-    ) {
-        val scope = rememberCoroutineScope()
-        Surface(
-            modifier = modifier,
-            shape = MaterialTheme.shapes.large.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ) {
-            val haptic = LocalHapticFeedback.current
-            val confirm = remember { mutableStateListOf(false, false, false, false, false, false, false) }
-            var resetJob by remember { mutableStateOf<Job?>(null) }
-            val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
-                resetJob?.cancel()
-                resetJob = scope.launch {
-                    delay(1.seconds)
-                    if (isActive) confirm[toConfirmIndex] = false
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .padding(
-                        WindowInsets.navigationBars
-                            .only(WindowInsetsSides.Bottom)
-                            .asPaddingValues(),
-                    )
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-            ) {
-                if (onBookmarkClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_bookmark),
-                        icon = MaterialSymbols.Rounded.BookmarkAdd,
-                        toConfirm = confirm[0],
-                        onLongClick = { onLongClickItem(0) },
-                        onClick = onBookmarkClicked,
-                    )
-                }
-                if (onRemoveBookmarkClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_remove_bookmark),
-                        icon = MaterialSymbols.Rounded.BookmarkRemove,
-                        toConfirm = confirm[1],
-                        onLongClick = { onLongClickItem(1) },
-                        onClick = onRemoveBookmarkClicked,
-                    )
-                }
-                if (onMarkAsReadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_as_read),
-                        icon = MaterialSymbols.Rounded.DoneAll,
-                        toConfirm = confirm[2],
-                        onLongClick = { onLongClickItem(2) },
-                        onClick = onMarkAsReadClicked,
-                    )
-                }
-                if (onMarkAsUnreadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_as_unread),
-                        icon = MaterialSymbols.Rounded.RemoveDone,
-                        toConfirm = confirm[3],
-                        onLongClick = { onLongClickItem(3) },
-                        onClick = onMarkAsUnreadClicked,
-                    )
-                }
-                if (onMarkPreviousAsReadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_previous_as_read),
-                        icon = CustomMaterialSymbols.Rounded.DonePrevious,
-                        toConfirm = confirm[4],
-                        onLongClick = { onLongClickItem(4) },
-                        onClick = onMarkPreviousAsReadClicked,
-                    )
-                }
-                if (onDownloadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_download),
-                        icon = MaterialSymbols.Rounded.Download,
-                        toConfirm = confirm[5],
-                        onLongClick = { onLongClickItem(5) },
-                        onClick = onDownloadClicked,
-                    )
-                }
-                if (onDeleteClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_delete),
-                        icon = MaterialSymbols.Rounded.Delete,
-                        toConfirm = confirm[6],
-                        onLongClick = { onLongClickItem(6) },
-                        onClick = onDeleteClicked,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.Button(
-    title: String,
-    icon: ImageVector,
-    toConfirm: Boolean,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit,
-    content: (@Composable () -> Unit)? = null,
-) {
-    val animatedWeight by animateFloatAsState(
-        targetValue = if (toConfirm) 2f else 1f,
-        label = "weight",
-    )
-    Box(
-        modifier = Modifier
-            .size(48.dp)
-            .weight(animatedWeight)
-            .combinedClickable(
-                interactionSource = null,
-                indication = ripple(bounded = false),
-                onLongClick = onLongClick,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
+    val actions = buildList {
+        if (onBookmarkClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_bookmark),
+                    icon = MaterialSymbols.Rounded.BookmarkAdd,
+                    onClick = onBookmarkClicked,
+                ),
             )
-            AnimatedVisibility(
-                visible = toConfirm,
-                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
-            ) {
-                Text(
-                    text = title,
-                    overflow = TextOverflow.Visible,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-            }
         }
-        content?.invoke()
+        if (onRemoveBookmarkClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_remove_bookmark),
+                    icon = MaterialSymbols.Rounded.BookmarkRemove,
+                    onClick = onRemoveBookmarkClicked,
+                ),
+            )
+        }
+        if (onMarkAsReadClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_mark_as_read),
+                    icon = MaterialSymbols.Rounded.DoneAll,
+                    onClick = onMarkAsReadClicked,
+                ),
+            )
+        }
+        if (onMarkAsUnreadClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_mark_as_unread),
+                    icon = MaterialSymbols.Rounded.RemoveDone,
+                    onClick = onMarkAsUnreadClicked,
+                ),
+            )
+        }
+        if (onMarkPreviousAsReadClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_mark_previous_as_read),
+                    icon = CustomMaterialSymbols.Rounded.DonePrevious,
+                    onClick = onMarkPreviousAsReadClicked,
+                ),
+            )
+        }
+        if (onDownloadClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_download),
+                    icon = MiuixIcons.Download,
+                    onClick = onDownloadClicked,
+                ),
+            )
+        }
+        if (onDeleteClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_delete),
+                    icon = MiuixIcons.Delete,
+                    onClick = onDeleteClicked,
+                ),
+            )
+        }
     }
+    SelectionActionToolbar(visible = visible, actions = actions, modifier = modifier)
 }
 
 @Composable
@@ -239,112 +139,120 @@ fun LibraryBottomActionMenu(
     onMigrateClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val actions = buildList {
+        add(
+            BottomAction(
+                title = stringResource(MR.strings.action_move_category),
+                icon = MiuixIcons.Folder,
+                onClick = onChangeCategoryClicked,
+            ),
+        )
+        add(
+            BottomAction(
+                title = stringResource(MR.strings.action_mark_as_read),
+                icon = MaterialSymbols.Rounded.DoneAll,
+                onClick = onMarkAsReadClicked,
+            ),
+        )
+        add(
+            BottomAction(
+                title = stringResource(MR.strings.action_mark_as_unread),
+                icon = MaterialSymbols.Rounded.RemoveDone,
+                onClick = onMarkAsUnreadClicked,
+            ),
+        )
+        if (onDownloadClicked != null) {
+            add(
+                BottomAction(
+                    title = stringResource(MR.strings.action_download),
+                    icon = MiuixIcons.Download,
+                    children = downloadDropdownEntry(onDownloadClicked).items,
+                ),
+            )
+        }
+        add(
+            BottomAction(
+                title = stringResource(MR.strings.migrate),
+                icon = MaterialSymbols.Rounded.SwapCalls,
+                onClick = onMigrateClicked,
+            ),
+        )
+        add(
+            BottomAction(
+                title = stringResource(MR.strings.action_delete),
+                icon = MiuixIcons.Delete,
+                onClick = onDeleteClicked,
+            ),
+        )
+    }
+    SelectionActionToolbar(visible = visible, actions = actions, modifier = modifier)
+}
+
+private data class BottomAction(
+    val title: String,
+    val icon: ImageVector,
+    val onClick: (() -> Unit)? = null,
+    val children: List<DropdownItem>? = null,
+)
+
+@Composable
+private fun SelectionActionToolbar(
+    visible: Boolean,
+    actions: List<BottomAction>,
+    modifier: Modifier = Modifier,
+) {
     AnimatedVisibility(
-        visible = visible,
-        enter = expandVertically(animationSpec = tween(delayMillis = 300)),
-        exit = shrinkVertically(animationSpec = tween()),
+        visible = visible && actions.isNotEmpty(),
+        modifier = modifier,
+        enter = expandVertically(expandFrom = Alignment.Bottom),
+        exit = shrinkVertically(shrinkTowards = Alignment.Bottom),
     ) {
-        val scope = rememberCoroutineScope()
-        Surface(
-            modifier = modifier,
-            shape = MaterialTheme.shapes.large.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(
+                    WindowInsets.navigationBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
+                ),
+            contentAlignment = Alignment.Center,
         ) {
-            val haptic = LocalHapticFeedback.current
-            val confirm = remember { mutableStateListOf(false, false, false, false, false, false) }
-            var resetJob by remember { mutableStateOf<Job?>(null) }
-            val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
-                resetJob?.cancel()
-                resetJob = scope.launch {
-                    delay(1.seconds)
-                    if (isActive) confirm[toConfirmIndex] = false
-                }
-            }
-            val itemOverflow = onDownloadClicked != null
-            Row(
-                modifier = Modifier
-                    .windowInsetsPadding(
-                        WindowInsets.navigationBars
-                            .only(WindowInsetsSides.Bottom),
-                    )
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-            ) {
-                Button(
-                    title = stringResource(MR.strings.action_move_category),
-                    icon = MaterialSymbols.AutoMirroredRounded.Label,
-                    toConfirm = confirm[0],
-                    onLongClick = { onLongClickItem(0) },
-                    onClick = onChangeCategoryClicked,
-                )
-                Button(
-                    title = stringResource(MR.strings.action_mark_as_read),
-                    icon = MaterialSymbols.Rounded.DoneAll,
-                    toConfirm = confirm[1],
-                    onLongClick = { onLongClickItem(1) },
-                    onClick = onMarkAsReadClicked,
-                )
-                Button(
-                    title = stringResource(MR.strings.action_mark_as_unread),
-                    icon = MaterialSymbols.Rounded.RemoveDone,
-                    toConfirm = confirm[2],
-                    onLongClick = { onLongClickItem(2) },
-                    onClick = onMarkAsUnreadClicked,
-                )
-                if (onDownloadClicked != null) {
-                    var downloadExpanded by remember { mutableStateOf(false) }
-                    Button(
-                        title = stringResource(MR.strings.action_download),
-                        icon = MaterialSymbols.Rounded.Download,
-                        toConfirm = confirm[3],
-                        onLongClick = { onLongClickItem(3) },
-                        onClick = { downloadExpanded = !downloadExpanded },
-                    ) {
-                        DownloadDropdownMenu(
-                            expanded = downloadExpanded,
-                            onDismissRequest = { downloadExpanded = false },
-                            onDownloadClicked = onDownloadClicked,
-                            offset = BottomBarMenuDpOffset,
-                        )
+            // Reserve the native toolbar's outside padding and the row's inner padding.
+            val actionLimit = ((maxWidth.coerceAtMost(400.dp) - 40.dp) / 48.dp).toInt().coerceIn(1, 5)
+            val directActions = if (actions.size > actionLimit) actions.take(actionLimit - 1) else actions
+            val overflowActions = actions.drop(directActions.size)
+            FloatingToolbar(modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    directActions.forEach { action ->
+                        key(action.title) {
+                            SelectionActionButton(action = action, enabled = visible)
+                        }
                     }
-                }
-                if (!itemOverflow) {
-                    Button(
-                        title = stringResource(MR.strings.migrate),
-                        icon = MaterialSymbols.Rounded.SwapCalls,
-                        toConfirm = confirm[4],
-                        onLongClick = { onLongClickItem(4) },
-                        onClick = onMigrateClicked,
-                    )
-                    Button(
-                        title = stringResource(MR.strings.action_delete),
-                        icon = MaterialSymbols.Rounded.Delete,
-                        toConfirm = confirm[5],
-                        onLongClick = { onLongClickItem(5) },
-                        onClick = onDeleteClicked,
-                    )
-                } else {
-                    var overflowMenuOpen by remember { mutableStateOf(false) }
-                    Button(
-                        title = stringResource(MR.strings.label_more),
-                        icon = MaterialSymbols.Rounded.MoreVert,
-                        toConfirm = false,
-                        onLongClick = {},
-                        onClick = { overflowMenuOpen = true },
-                    ) {
-                        DropdownMenu(
-                            expanded = overflowMenuOpen,
-                            onDismissRequest = { overflowMenuOpen = false },
-                            offset = BottomBarMenuDpOffset,
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(MR.strings.migrate)) },
-                                onClick = onMigrateClicked,
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(MR.strings.action_delete)) },
-                                onClick = onDeleteClicked,
+                    if (overflowActions.isNotEmpty()) {
+                        key("overflow") {
+                            SelectionActionButton(
+                                BottomAction(
+                                    title = stringResource(MR.strings.label_more),
+                                    icon = MiuixIcons.More,
+                                    children = overflowActions.map { action ->
+                                        DropdownItem(
+                                            text = action.title,
+                                            onClick = action.onClick,
+                                            children = action.children,
+                                            icon = { iconModifier ->
+                                                Icon(
+                                                    imageVector = action.icon,
+                                                    contentDescription = null,
+                                                    modifier = iconModifier.size(24.dp),
+                                                    tint = MiuixTheme.colorScheme.onSurfaceContainer,
+                                                )
+                                            },
+                                        )
+                                    },
+                                ),
+                                enabled = visible,
                             )
                         }
                     }
@@ -354,4 +262,33 @@ fun LibraryBottomActionMenu(
     }
 }
 
-private val BottomBarMenuDpOffset = DpOffset(0.dp, 0.dp)
+@Composable
+private fun SelectionActionButton(action: BottomAction, enabled: Boolean) {
+    TooltipBox(text = action.title, positioning = TooltipAnchorPosition.Above, enabled = enabled) {
+        val icon: @Composable () -> Unit = {
+            Icon(
+                imageVector = action.icon,
+                contentDescription = action.title,
+                modifier = Modifier.size(24.dp),
+                tint = MiuixTheme.colorScheme.onSurfaceContainer,
+            )
+        }
+        if (action.children != null) {
+            WindowIconDropdownMenu(
+                entry = DropdownEntry(items = action.children),
+                enabled = enabled,
+                minHeight = 48.dp,
+                minWidth = 48.dp,
+                content = icon,
+            )
+        } else {
+            IconButton(
+                onClick = { action.onClick?.invoke() },
+                enabled = enabled,
+                minHeight = 48.dp,
+                minWidth = 48.dp,
+                content = icon,
+            )
+        }
+    }
+}

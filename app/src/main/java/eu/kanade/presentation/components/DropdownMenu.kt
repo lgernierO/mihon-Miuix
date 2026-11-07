@@ -3,11 +3,7 @@ package eu.kanade.presentation.components
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,8 +18,11 @@ import mihon.icons.materialsymbols.automirroredrounded.ArrowRight
 import mihon.icons.materialsymbols.rounded.RadioButtonChecked
 import mihon.icons.materialsymbols.rounded.RadioButtonUnchecked
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
 import tachiyomi.presentation.core.i18n.stringResource
-import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import tachiyomi.presentation.core.components.miuix.DropdownMenu as MiuixDropdownMenu
 
 /**
  * DropdownMenu but overlaps anchor and has width constraints to better
@@ -34,15 +33,15 @@ fun DropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    offset: DpOffset = DpOffset(8.dp, (-56).dp),
+    offset: DpOffset = DpOffset(0.dp, 0.dp),
     scrollState: ScrollState = rememberScrollState(),
     properties: PopupProperties = PopupProperties(focusable = true),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    ComposeDropdownMenu(
+    MiuixDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = modifier.sizeIn(minWidth = 196.dp, maxWidth = 196.dp),
+        modifier = modifier,
         offset = offset,
         scrollState = scrollState,
         properties = properties,
@@ -65,7 +64,7 @@ fun RadioMenuItem(
                 Icon(
                     imageVector = MaterialSymbols.Rounded.RadioButtonChecked,
                     contentDescription = stringResource(MR.strings.selected),
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MiuixTheme.colorScheme.primary,
                 )
             } else {
                 Icon(

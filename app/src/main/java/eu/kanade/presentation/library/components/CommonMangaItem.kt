@@ -9,18 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -31,6 +26,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -41,8 +39,16 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.roundedfilled.PlayArrow
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.BadgeGroup
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButtonDefaults
+import top.yukonga.miuix.kmp.theme.LocalContentColor
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
 object CommonMangaItemDefaults {
@@ -298,6 +304,7 @@ private fun GridItemSelectable(
 ) {
     Box(
         modifier = modifier
+            .semantics { selected = isSelected }
             .clip(MaterialTheme.shapes.small)
             .combinedClickable(
                 onClick = onClick,
@@ -341,8 +348,9 @@ fun MangaListItem(
 ) {
     Row(
         modifier = Modifier
+            .semantics { selected = isSelected }
             .selectedBackground(isSelected)
-            .height(56.dp)
+            .heightIn(min = 56.dp)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
@@ -352,7 +360,7 @@ fun MangaListItem(
     ) {
         MangaCover.Square(
             modifier = Modifier
-                .fillMaxHeight()
+                .size(40.dp)
                 .alpha(coverAlpha),
             data = coverData,
         )
@@ -384,21 +392,29 @@ private fun ContinueReadingButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier) {
-        FilledIconButton(
-            onClick = onClick,
-            shape = MaterialTheme.shapes.small,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                contentColor = contentColorFor(MaterialTheme.colorScheme.primaryContainer),
-            ),
+    val description = stringResource(MR.strings.action_resume)
+    IconButton(
+        onClick = onClick,
+        modifier = modifier.semantics { contentDescription = description },
+    ) {
+        Card(
             modifier = Modifier.size(size),
+            cornerRadius = IconButtonDefaults.CornerRadius,
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                contentColor = MiuixTheme.colorScheme.onPrimaryContainer,
+            ),
         ) {
-            Icon(
-                imageVector = MaterialSymbols.RoundedFilled.PlayArrow,
-                contentDescription = stringResource(MR.strings.action_resume),
-                modifier = Modifier.size(iconSize),
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = MaterialSymbols.RoundedFilled.PlayArrow,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                )
+            }
         }
     }
 }

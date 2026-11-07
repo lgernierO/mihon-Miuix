@@ -1,14 +1,13 @@
 package eu.kanade.presentation.library.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryScrollableTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.category.visualName
 import tachiyomi.domain.category.model.Category
-import tachiyomi.presentation.core.components.material.TabText
+import tachiyomi.presentation.core.components.miuix.TabRow
 
 @Composable
 internal fun LibraryTabs(
@@ -17,23 +16,18 @@ internal fun LibraryTabs(
     getItemCountForCategory: (Category) -> Int?,
     onTabItemClick: (Int) -> Unit,
 ) {
-    val currentPageIndex = pagerState.currentPage.coerceAtMost(categories.lastIndex)
-    PrimaryScrollableTabRow(
+    if (categories.isEmpty()) return
+    val currentPageIndex = pagerState.currentPage.coerceIn(categories.indices)
+    TabRow(
+        tabs = categories.map { category ->
+            getItemCountForCategory(category)?.let { count ->
+                "${category.visualName} ($count)"
+            } ?: category.visualName
+        },
         selectedTabIndex = currentPageIndex,
-        edgePadding = 0.dp,
-    ) {
-        categories.forEachIndexed { index, category ->
-            Tab(
-                selected = currentPageIndex == index,
-                onClick = { onTabItemClick(index) },
-                text = {
-                    TabText(
-                        text = category.visualName,
-                        badgeCount = getItemCountForCategory(category),
-                    )
-                },
-                unselectedContentColor = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
+        onTabSelected = onTabItemClick,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        maxWidth = 180.dp,
+        height = 48.dp,
+    )
 }

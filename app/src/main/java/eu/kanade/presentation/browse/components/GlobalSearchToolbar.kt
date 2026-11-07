@@ -1,25 +1,11 @@
 package eu.kanade.presentation.browse.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,8 +16,14 @@ import mihon.icons.materialsymbols.rounded.DoneAll
 import mihon.icons.materialsymbols.rounded.FilterList
 import mihon.icons.materialsymbols.rounded.Keep
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.CompactActionRow
+import tachiyomi.presentation.core.components.miuix.CompactButtonDefaults
+import tachiyomi.presentation.core.components.miuix.FilterChip
+import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
+import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
 
 @Composable
 fun GlobalSearchToolbar(
@@ -51,6 +43,7 @@ fun GlobalSearchToolbar(
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
         Box {
             SearchToolbar(
+                title = stringResource(MR.strings.action_global_search),
                 searchQuery = searchQuery,
                 onChangeSearchQuery = onChangeSearchQuery,
                 onSearch = onSearch,
@@ -68,13 +61,7 @@ fun GlobalSearchToolbar(
             }
         }
 
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = MaterialTheme.padding.small),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        CompactActionRow {
             // TODO: make this UX better; it only applies when triggering a new search
             if (!hideSourceFilter) {
                 FilterChip(
@@ -85,11 +72,15 @@ fun GlobalSearchToolbar(
                             imageVector = MaterialSymbols.Rounded.Keep,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(FilterChipDefaults.IconSize),
+                                .size(CompactButtonDefaults.IconSize),
                         )
                     },
                     label = {
-                        Text(text = stringResource(MR.strings.pinned_sources))
+                        Text(
+                            text = stringResource(MR.strings.pinned_sources),
+                            maxLines = 1,
+                            softWrap = false,
+                        )
                     },
                 )
                 FilterChip(
@@ -100,15 +91,17 @@ fun GlobalSearchToolbar(
                             imageVector = MaterialSymbols.Rounded.DoneAll,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(FilterChipDefaults.IconSize),
+                                .size(CompactButtonDefaults.IconSize),
                         )
                     },
                     label = {
-                        Text(text = stringResource(MR.strings.all))
+                        Text(
+                            text = stringResource(MR.strings.all),
+                            maxLines = 1,
+                            softWrap = false,
+                        )
                     },
                 )
-
-                VerticalDivider(modifier = Modifier.height(FilterChipDefaults.Height))
             }
 
             FilterChip(
@@ -119,15 +112,17 @@ fun GlobalSearchToolbar(
                         imageVector = MaterialSymbols.Rounded.FilterList,
                         contentDescription = null,
                         modifier = Modifier
-                            .size(FilterChipDefaults.IconSize),
+                            .size(CompactButtonDefaults.IconSize),
                     )
                 },
                 label = {
-                    Text(text = stringResource(MR.strings.has_results))
+                    Text(
+                        text = stringResource(MR.strings.has_results),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
                 },
             )
         }
-
-        HorizontalDivider()
     }
 }

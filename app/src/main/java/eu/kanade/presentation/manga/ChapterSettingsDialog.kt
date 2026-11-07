@@ -1,21 +1,13 @@
 package eu.kanade.presentation.manga
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,18 +21,33 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.domain.manga.model.downloadedFilter
 import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
+import eu.kanade.presentation.manga.components.ScanlatorFilterPage
 import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Group
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.RadioItem
 import tachiyomi.presentation.core.components.SortItem
 import tachiyomi.presentation.core.components.TriStateItem
+import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
+import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.theme.active
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+private enum class ChapterSettingsPage {
+    Tabs,
+    Scanlators,
+    Defaults,
+}
 
 @Composable
 fun ChapterSettingsDialog(
@@ -50,40 +57,60 @@ fun ChapterSettingsDialog(
     onUnreadFilterChanged: (TriState) -> Unit,
     onBookmarkedFilterChanged: (TriState) -> Unit,
     scanlatorFilterActive: Boolean,
-    onScanlatorFilterClicked: (() -> Unit),
+    availableScanlators: Set<String>,
+    excludedScanlators: Set<String>,
+    onExcludedScanlatorsChanged: (Set<String>) -> Unit,
     onSortModeChanged: (Long) -> Unit,
     onDisplayModeChanged: (Long) -> Unit,
     onSetAsDefault: (applyToExistingManga: Boolean) -> Unit,
     onResetToDefault: () -> Unit,
 ) {
-    var showSetAsDefaultDialog by rememberSaveable { mutableStateOf(false) }
-    if (showSetAsDefaultDialog) {
-        SetAsDefaultDialog(
-            onDismissRequest = { showSetAsDefaultDialog = false },
-            onConfirmed = onSetAsDefault,
-        )
-    }
+    var activePage by rememberSaveable { mutableStateOf(ChapterSettingsPage.Tabs) }
+    val tabTitles = listOf(
+        stringResource(MR.strings.action_filter),
+        stringResource(MR.strings.action_sort),
+        stringResource(MR.strings.action_display),
+    )
+    val pagerState = rememberPagerState { tabTitles.size }
 
     val context = LocalContext.current
     val downloadedOnly = remember { context.appGraph.basePreferences.downloadedOnly.get() }
 
     TabbedDialog(
         onDismissRequest = onDismissRequest,
-        tabTitles = listOf(
-            stringResource(MR.strings.action_filter),
-            stringResource(MR.strings.action_sort),
-            stringResource(MR.strings.action_display),
-        ),
+        tabTitles = tabTitles,
+        pagerState = pagerState,
+        secondaryContent = when (activePage) {
+            ChapterSettingsPage.Tabs -> null
+            ChapterSettingsPage.Scanlators -> {
+                {
+                    ScanlatorFilterPage(
+                        availableScanlators = availableScanlators,
+                        excludedScanlators = excludedScanlators,
+                        onDismissRequest = { activePage = ChapterSettingsPage.Tabs },
+                        onConfirm = onExcludedScanlatorsChanged,
+                    )
+                }
+            }
+            ChapterSettingsPage.Defaults -> {
+                {
+                    SetAsDefaultPage(
+                        onDismissRequest = { activePage = ChapterSettingsPage.Tabs },
+                        onConfirmed = onSetAsDefault,
+                    )
+                }
+            }
+        },
         tabOverflowMenuContent = { closeMenu ->
             DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.set_chapter_settings_as_default)) },
+                text = stringResource(MR.strings.set_chapter_settings_as_default),
                 onClick = {
-                    showSetAsDefaultDialog = true
+                    activePage = ChapterSettingsPage.Defaults
                     closeMenu()
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_reset)) },
+                text = stringResource(MR.strings.action_reset),
                 onClick = {
                     onResetToDefault()
                     closeMenu()
@@ -94,7 +121,7 @@ fun ChapterSettingsDialog(
         Column(
             modifier = Modifier
                 .padding(vertical = TabbedDialogPaddings.Vertical)
-                .verticalScroll(rememberScrollState()),
+                .miuixVerticalScroll(rememberScrollState()),
         ) {
             when (page) {
                 0 -> {
@@ -107,7 +134,7 @@ fun ChapterSettingsDialog(
                         bookmarkedFilter = manga?.bookmarkedFilter ?: TriState.DISABLED,
                         onBookmarkedFilterChanged = onBookmarkedFilterChanged,
                         scanlatorFilterActive = scanlatorFilterActive,
-                        onScanlatorFilterClicked = onScanlatorFilterClicked,
+                        onScanlatorFilterClicked = { activePage = ChapterSettingsPage.Scanlators },
                     )
                 }
                 1 -> {
@@ -165,28 +192,17 @@ fun ScanlatorFilterItem(
     active: Boolean,
     onClick: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .fillMaxWidth()
-            .padding(horizontal = TabbedDialogPaddings.Horizontal, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        Icon(
-            imageVector = MaterialSymbols.Rounded.Group,
-            contentDescription = null,
-            tint = if (active) {
-                MaterialTheme.colorScheme.active
-            } else {
-                LocalContentColor.current
-            },
-        )
-        Text(
-            text = stringResource(MR.strings.scanlator),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    ArrowPreference(
+        title = stringResource(MR.strings.scanlator),
+        onClick = onClick,
+        startAction = {
+            Icon(
+                imageVector = MaterialSymbols.Rounded.Group,
+                contentDescription = null,
+                tint = if (active) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantActions,
+            )
+        },
+    )
 }
 
 @Composable
@@ -227,34 +243,39 @@ private fun ColumnScope.DisplayPage(
 }
 
 @Composable
-private fun SetAsDefaultDialog(
+private fun SetAsDefaultPage(
     onDismissRequest: () -> Unit,
     onConfirmed: (optionalChecked: Boolean) -> Unit,
 ) {
     var optionalChecked by rememberSaveable { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = stringResource(MR.strings.chapter_settings)) },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(text = stringResource(MR.strings.confirm_set_chapter_settings))
-
-                LabeledCheckbox(
-                    label = stringResource(MR.strings.also_set_chapter_settings_for_library),
+    Column(Modifier.fillMaxWidth()) {
+        SmallTitle(text = stringResource(MR.strings.chapter_settings))
+        Column(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .fillMaxWidth()
+                .miuixVerticalScroll(rememberScrollState())
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(text = stringResource(MR.strings.confirm_set_chapter_settings))
+            Card(Modifier.fillMaxWidth()) {
+                CheckboxPreference(
+                    title = stringResource(MR.strings.also_set_chapter_settings_for_library),
                     checked = optionalChecked,
                     onCheckedChange = { optionalChecked = it },
                 )
             }
-        },
-        dismissButton = {
+        }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             TextButton(onClick = onDismissRequest) {
                 Text(text = stringResource(MR.strings.action_cancel))
             }
-        },
-        confirmButton = {
             TextButton(
                 onClick = {
                     onConfirmed(optionalChecked)
@@ -263,6 +284,6 @@ private fun SetAsDefaultDialog(
             ) {
                 Text(text = stringResource(MR.strings.action_ok))
             }
-        },
-    )
+        }
+    }
 }

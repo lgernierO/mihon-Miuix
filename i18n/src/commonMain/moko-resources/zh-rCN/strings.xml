@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="miuix_pull_to_refresh">下拉刷新</string>
+    <string name="miuix_release_to_refresh">松开刷新</string>
+    <string name="miuix_refreshing">正在刷新…</string>
+    <string name="miuix_refresh_complete">刷新完成</string>
     <string name="name">名称</string>
     <string name="categories">分类</string>
     <string name="manga">书架中的作品</string>
@@ -810,6 +814,11 @@
     <string name="action_notes">添加注释</string>
     <string name="action_edit_notes">编辑注释</string>
     <string name="notes_placeholder">标注你喜欢的部分…</string>
+    <string name="notes_format_bold">加粗</string>
+    <string name="notes_format_italic">斜体</string>
+    <string name="notes_format_underline">下划线</string>
+    <string name="notes_format_bulleted_list">无序列表</string>
+    <string name="notes_format_numbered_list">有序列表</string>
     <string name="possible_duplicates_summary">在你的书架中有一些名称相似的作品。\n\n请选择其中一个作品进行迁移或仍然新增。</string>
     <string name="possible_duplicates_title">可能重复的作品</string>
     <string name="clear_database_text">你即将从数据库中删除这些作品</string>

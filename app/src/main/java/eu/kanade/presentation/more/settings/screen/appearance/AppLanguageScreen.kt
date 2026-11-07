@@ -2,14 +2,14 @@ package eu.kanade.presentation.more.settings.screen.appearance
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,20 +18,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Check
 import org.xmlpull.v1.XmlPullParser
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.R
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.preference.RadioButtonLocation
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 
 class AppLanguageScreen : Screen() {
 
@@ -64,29 +67,25 @@ class AppLanguageScreen : Screen() {
             },
         ) { contentPadding ->
             LazyColumn(
-                modifier = Modifier.padding(contentPadding),
+                modifier = Modifier
+                    .padding(contentPadding)
+                    .fillMaxSize()
+                    .selectableGroup()
+                    .miuixScroll(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                overscrollEffect = null,
             ) {
-                items(langs) {
-                    ListItem(
-                        modifier = Modifier.clickable {
-                            currentLanguage = it.langTag
-                        },
-                        trailingContent = {
-                            if (currentLanguage == it.langTag) {
-                                Icon(
-                                    imageVector = MaterialSymbols.Rounded.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        },
-                        supportingContent = {
-                            it.localizedDisplayName?.let {
-                                Text(it)
-                            }
-                        },
-                        content = { Text(it.displayName) },
-                    )
+                items(langs, key = { it.langTag }) { language ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        RadioButtonPreference(
+                            title = language.displayName,
+                            summary = language.localizedDisplayName?.takeIf { it != language.displayName },
+                            selected = currentLanguage == language.langTag,
+                            onClick = { currentLanguage = language.langTag },
+                            radioButtonLocation = RadioButtonLocation.End,
+                        )
+                    }
                 }
             }
         }

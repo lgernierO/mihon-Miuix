@@ -1,22 +1,21 @@
 package eu.kanade.presentation.reader.settings
 
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.window.DialogWindowProvider
+import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.basic.Card
 
 @Composable
 fun ReaderSettingsDialog(
@@ -31,33 +30,31 @@ fun ReaderSettingsDialog(
         stringResource(MR.strings.custom_filter),
     )
     val pagerState = rememberPagerState { tabTitles.size }
+    val isFilterPage = pagerState.settledPage == 2
 
-    BoxWithConstraints {
-        TabbedDialog(
-            modifier = Modifier.heightIn(max = maxHeight * 0.75f),
-            onDismissRequest = {
-                onDismissRequest()
-                onShowMenus()
-            },
-            tabTitles = tabTitles,
-            pagerState = pagerState,
-        ) { page ->
-            val window = (LocalView.current.parent as? DialogWindowProvider)?.window
+    // Pager pages can be composed together during a transition. Synchronize the preview once
+    // from the settled selection rather than running competing effects in each page.
+    LaunchedEffect(isFilterPage) {
+        if (isFilterPage) onHideMenus() else onShowMenus()
+    }
 
-            LaunchedEffect(pagerState.currentPage) {
-                if (pagerState.currentPage == 2) {
-                    window?.setDimAmount(0f)
-                    onHideMenus()
-                } else {
-                    window?.setDimAmount(0.5f)
-                    onShowMenus()
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .padding(vertical = TabbedDialogPaddings.Vertical)
-                    .verticalScroll(rememberScrollState()),
+    TabbedDialog(
+        onDismissRequest = {
+            onDismissRequest()
+            onShowMenus()
+        },
+        tabTitles = tabTitles,
+        pagerState = pagerState,
+        enableWindowDim = !isFilterPage,
+    ) { page ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .miuixVerticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = TabbedDialogPaddings.Vertical),
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 when (page) {
                     0 -> ReadingModePage(viewModel)

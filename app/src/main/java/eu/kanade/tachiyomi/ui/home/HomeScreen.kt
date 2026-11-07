@@ -2,25 +2,28 @@ package eu.kanade.tachiyomi.ui.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Badge
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -46,10 +49,23 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import mihon.app.di.appGraph
+import mihon.icons.materialsymbols.MaterialSymbols
+import mihon.icons.materialsymbols.rounded.Autorenew
+import mihon.icons.materialsymbols.rounded.CollectionsBookmark
+import mihon.icons.materialsymbols.rounded.Explore
+import mihon.icons.materialsymbols.rounded.MoreVert
+import mihon.icons.materialsymbols.rounded.Schedule
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
+import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text
 
 object HomeScreen : Screen() {
 
@@ -81,47 +97,59 @@ object HomeScreen : Screen() {
             // Provide usable navigator to content screen
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 val tabletUi = isTabletUi()
-                val navigationSuiteType = if (tabletUi) {
-                    NavigationSuiteType.NavigationRail
-                } else {
-                    NavigationSuiteType.NavigationBar
-                }
-                val navigationSuiteState = rememberNavigationSuiteScaffoldState()
-                LaunchedEffect(navigationSuiteState, tabletUi) {
-                    if (tabletUi) navigationSuiteState.show()
+                var showCompactNavigation by rememberSaveable { mutableStateOf(true) }
+                LaunchedEffect(Unit) {
                     showBottomNavEvent.receiveAsFlow().collectLatest { show ->
-                        if (tabletUi || show) {
-                            navigationSuiteState.show()
-                        } else {
-                            navigationSuiteState.hide()
-                        }
+                        showCompactNavigation = show
                     }
                 }
 
-                NavigationSuiteScaffold(
-                    navigationSuiteType = navigationSuiteType,
-                    state = navigationSuiteState,
-                    navigationSuiteColors = NavigationSuiteDefaults.colors(
-                        navigationRailContainerColor = MaterialTheme.colorScheme
-                            .surfaceColorAtElevation(3.dp),
-                    ),
-                    navigationItemVerticalArrangement = Arrangement.Center,
-                    navigationItems = {
-                        TABS.fastForEach { NavigationSuiteItem(it, navigationSuiteType) }
-                    },
-                ) {
-                    AnimatedContent(
-                        targetState = tabNavigator.current,
-                        transitionSpec = {
-                            materialFadeThroughIn(
-                                initialScale = 1f,
-                                durationMillis = TabFadeDuration,
-                            ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
+                Row(Modifier.fillMaxSize()) {
+                    if (tabletUi) {
+                        NavigationRail {
+                            TABS.fastForEach { tab ->
+                                HomeNavigationRailItem(tab)
+                            }
+                        }
+                    }
+                    Scaffold(
+                        modifier = Modifier.weight(1f),
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        bottomBar = {
+                            AnimatedVisibility(
+                                visible = !tabletUi && showCompactNavigation,
+                                enter = expandVertically(),
+                                exit = shrinkVertically(),
+                            ) {
+                                NavigationBar {
+                                    TABS.fastForEach { tab ->
+                                        HomeNavigationBarItem(tab)
+                                    }
+                                }
+                            }
                         },
-                        label = "tabContent",
                     ) {
-                        tabNavigator.saveableState(key = "currentTab", it) {
-                            it.Content()
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(it)
+                                .consumeWindowInsets(it),
+                        ) {
+                            AnimatedContent(
+                                targetState = tabNavigator.current,
+                                contentKey = { tab -> tab.key },
+                                transitionSpec = {
+                                    materialFadeThroughIn(
+                                        initialScale = 1f,
+                                        durationMillis = TabFadeDuration,
+                                    ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
+                                },
+                                label = "tabContent",
+                            ) { tab ->
+                                tabNavigator.saveableState(key = "currentTab", tab) {
+                                    tab.Content()
+                                }
+                            }
                         }
                     }
                 }
@@ -166,41 +194,56 @@ object HomeScreen : Screen() {
     }
 
     @Composable
-    private fun NavigationSuiteItem(
+    private fun HomeNavigationRailItem(
         tab: eu.kanade.presentation.util.Tab,
-        navigationSuiteType: NavigationSuiteType,
     ) {
         val tabNavigator = LocalTabNavigator.current
-        val navigator = LocalNavigator.currentOrThrow
-        val scope = rememberCoroutineScope()
         val selected = tabNavigator.current::class == tab::class
-        NavigationSuiteItem(
-            navigationSuiteType = navigationSuiteType,
+        val onSelect = rememberTabSelection(tab)
+        NavigationRailItem(
             selected = selected,
-            onClick = {
-                if (!selected) {
-                    tabNavigator.current = tab
-                } else {
-                    scope.launch { tab.onReselect(navigator) }
-                }
-            },
-            icon = {
-                Icon(
-                    painter = tab.options.icon!!,
-                    contentDescription = tab.options.title,
-                )
-            },
-            label = {
-                Text(
-                    text = tab.options.title,
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
+            onClick = onSelect,
+            icon = tab.navigationIcon,
+            label = tab.options.title,
             badge = tabBadge(tab),
         )
     }
+
+    @Composable
+    private fun RowScope.HomeNavigationBarItem(tab: eu.kanade.presentation.util.Tab) {
+        val tabNavigator = LocalTabNavigator.current
+        NavigationBarItem(
+            selected = tabNavigator.current::class == tab::class,
+            onClick = rememberTabSelection(tab),
+            icon = tab.navigationIcon,
+            label = tab.options.title,
+            modifier = Modifier.weight(1f),
+            badge = tabBadge(tab),
+        )
+    }
+
+    @Composable
+    private fun rememberTabSelection(tab: eu.kanade.presentation.util.Tab): () -> Unit {
+        val tabNavigator = LocalTabNavigator.current
+        val navigator = LocalNavigator.currentOrThrow
+        val scope = rememberCoroutineScope()
+        return {
+            if (tabNavigator.current::class != tab::class) {
+                tabNavigator.current = tab
+            } else {
+                scope.launch { tab.onReselect(navigator) }
+            }
+        }
+    }
+
+    private val eu.kanade.presentation.util.Tab.navigationIcon: ImageVector
+        get() = when (this) {
+            LibraryTab -> MaterialSymbols.Rounded.CollectionsBookmark
+            UpdatesTab -> MaterialSymbols.Rounded.Autorenew
+            HistoryTab -> MaterialSymbols.Rounded.Schedule
+            BrowseTab -> MaterialSymbols.Rounded.Explore
+            else -> MaterialSymbols.Rounded.MoreVert
+        }
 
     @Composable
     private fun tabBadge(tab: eu.kanade.presentation.util.Tab): (@Composable () -> Unit)? {

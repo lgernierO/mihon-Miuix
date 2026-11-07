@@ -1,15 +1,11 @@
 package eu.kanade.presentation.more.settings.widget
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MultiChoiceSegmentedButtonRow
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import eu.kanade.domain.ui.model.ThemeMode
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource
 
 private val options = mapOf(
@@ -23,26 +19,11 @@ internal fun AppThemeModePreferenceWidget(
     value: ThemeMode,
     onItemClick: (ThemeMode) -> Unit,
 ) {
-    BasePreferenceWidget(
-        subcomponent = {
-            MultiChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PrefsHorizontalPadding),
-            ) {
-                options.onEachIndexed { index, (mode, labelRes) ->
-                    SegmentedButton(
-                        checked = mode == value,
-                        onCheckedChange = { onItemClick(mode) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index,
-                            options.size,
-                        ),
-                    ) {
-                        Text(stringResource(labelRes))
-                    }
-                }
-            }
-        },
+    val modes = options.keys.toList()
+    TabRow(
+        tabs = options.values.map { stringResource(it) },
+        selectedTabIndex = modes.indexOf(value),
+        onTabSelected = { onItemClick(modes[it]) },
+        modifier = Modifier.padding(horizontal = PrefsHorizontalPadding, vertical = PrefsVerticalPadding),
     )
 }

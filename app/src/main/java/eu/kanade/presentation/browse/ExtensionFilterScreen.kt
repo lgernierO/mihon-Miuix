@@ -15,6 +15,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
+import tachiyomi.presentation.core.util.miuixScroll
 
 @Composable
 fun ExtensionFilterScreen(
@@ -54,9 +55,11 @@ private fun ExtensionFilterContent(
 ) {
     val context = LocalContext.current
     LazyColumn(
+        modifier = Modifier.miuixScroll(),
+        overscrollEffect = null,
         contentPadding = contentPadding,
     ) {
-        items(state.languages) { language ->
+        items(state.languages, key = { it }) { language ->
             SwitchPreferenceWidget(
                 modifier = Modifier.animateItem(),
                 title = LocaleHelper.getSourceDisplayName(language, context),
