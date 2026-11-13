@@ -33,6 +33,8 @@ import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.util.Screen
 import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_search_settings
+import tachiyomi.i18n.no_results_found
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource

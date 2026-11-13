@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.label_more
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource

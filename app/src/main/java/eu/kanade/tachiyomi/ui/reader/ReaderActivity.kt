@@ -115,6 +115,14 @@ import tachiyomi.core.common.Constants
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.cover_updated
+import tachiyomi.i18n.loading
+import tachiyomi.i18n.notification_cover_update_failed
+import tachiyomi.i18n.notification_first_add_to_library
+import tachiyomi.i18n.off
+import tachiyomi.i18n.on
+import tachiyomi.i18n.picture_saved
+import tachiyomi.i18n.share_page_info
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Text

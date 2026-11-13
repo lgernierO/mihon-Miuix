@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import kotlinx.serialization.protobuf.schema.ProtoBufSchemaGenerator
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_copy_to_clipboard
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource

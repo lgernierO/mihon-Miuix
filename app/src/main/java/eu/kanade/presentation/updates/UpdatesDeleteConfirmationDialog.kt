@@ -2,6 +2,9 @@ package eu.kanade.presentation.updates
 
 import androidx.compose.runtime.Composable
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_ok
+import tachiyomi.i18n.confirm_delete_chapters
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton

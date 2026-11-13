@@ -12,6 +12,9 @@ import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoreScreenState
 import mihon.domain.extension.model.ExtensionStore
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_webview_refresh
+import tachiyomi.i18n.extensionStores
+import tachiyomi.i18n.extensionStoresScreen_emptyLabel
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues

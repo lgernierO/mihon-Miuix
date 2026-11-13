@@ -31,6 +31,7 @@ import mihon.presentation.core.util.collectAsLazyPagingItems
 import tachiyomi.core.common.Constants
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_filter
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.SmallExtendedFloatingActionButton
 import tachiyomi.presentation.core.components.miuix.SnackbarHost

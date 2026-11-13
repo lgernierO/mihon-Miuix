@@ -25,6 +25,10 @@ import kotlinx.datetime.LocalDate
 import mihon.app.di.appGraph
 import tachiyomi.domain.history.model.HistoryWithRelations
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.history
+import tachiyomi.i18n.information_no_recent_manga
+import tachiyomi.i18n.no_results_found
+import tachiyomi.i18n.pref_clear_history
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.ListGroupHeader
 import tachiyomi.presentation.core.components.material.Scaffold

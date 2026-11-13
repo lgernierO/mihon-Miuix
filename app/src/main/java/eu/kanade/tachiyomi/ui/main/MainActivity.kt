@@ -114,6 +114,13 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.donationCampaign_contactPlatform
+import tachiyomi.i18n.donationCampaign_dismiss
+import tachiyomi.i18n.donationCampaign_paragraph1
+import tachiyomi.i18n.donationCampaign_paragraph2
+import tachiyomi.i18n.donationCampaign_paragraph3
+import tachiyomi.i18n.donationCampaign_title
+import tachiyomi.i18n.label_support_us
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.Button

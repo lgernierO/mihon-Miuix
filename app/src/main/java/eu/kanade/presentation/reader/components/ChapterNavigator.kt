@@ -48,6 +48,8 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.SkipNext
 import mihon.icons.materialsymbols.rounded.SkipPrevious
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_next_chapter
+import tachiyomi.i18n.action_previous_chapter
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults

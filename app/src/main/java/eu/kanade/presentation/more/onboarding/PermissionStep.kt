@@ -33,6 +33,17 @@ import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
 import eu.kanade.tachiyomi.util.system.telemetryIncluded
 import mihon.app.di.appGraph
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.onboarding_permission_action_grant
+import tachiyomi.i18n.onboarding_permission_analytics
+import tachiyomi.i18n.onboarding_permission_analytics_description
+import tachiyomi.i18n.onboarding_permission_crashlytics
+import tachiyomi.i18n.onboarding_permission_crashlytics_description
+import tachiyomi.i18n.onboarding_permission_ignore_battery_opts
+import tachiyomi.i18n.onboarding_permission_ignore_battery_opts_description
+import tachiyomi.i18n.onboarding_permission_install_apps
+import tachiyomi.i18n.onboarding_permission_install_apps_description
+import tachiyomi.i18n.onboarding_permission_notifications
+import tachiyomi.i18n.onboarding_permission_notifications_description
 import tachiyomi.presentation.core.components.miuix.CompactButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource

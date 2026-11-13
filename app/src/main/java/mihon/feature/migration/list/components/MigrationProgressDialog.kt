@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.DialogProperties
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.migrationListScreen_progressDialog_cancelLabel
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Text

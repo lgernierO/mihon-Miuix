@@ -55,6 +55,15 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_sort
+import tachiyomi.i18n.label_migration
+import tachiyomi.i18n.migrationConfigScreen_availableHeader
+import tachiyomi.i18n.migrationConfigScreen_continueButtonText
+import tachiyomi.i18n.migrationConfigScreen_selectAllLabel
+import tachiyomi.i18n.migrationConfigScreen_selectEnabledLabel
+import tachiyomi.i18n.migrationConfigScreen_selectNoneLabel
+import tachiyomi.i18n.migrationConfigScreen_selectPinnedLabel
+import tachiyomi.i18n.migrationConfigScreen_selectedHeader
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.SmallExtendedFloatingActionButton

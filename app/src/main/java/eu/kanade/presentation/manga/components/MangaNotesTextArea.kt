@@ -48,6 +48,12 @@ import mihon.icons.materialsymbols.rounded.FormatItalic
 import mihon.icons.materialsymbols.rounded.FormatListNumbered
 import mihon.icons.materialsymbols.rounded.FormatUnderlined
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.notes_format_bold
+import tachiyomi.i18n.notes_format_bulleted_list
+import tachiyomi.i18n.notes_format_italic
+import tachiyomi.i18n.notes_format_numbered_list
+import tachiyomi.i18n.notes_format_underline
+import tachiyomi.i18n.notes_placeholder
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource

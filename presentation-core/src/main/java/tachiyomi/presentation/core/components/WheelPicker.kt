@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_edit
 import tachiyomi.presentation.core.components.miuix.OutlinedTextField
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clearFocusOnSoftKeyboardHide

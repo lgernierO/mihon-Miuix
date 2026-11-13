@@ -18,6 +18,8 @@ import mihon.icons.materialsymbols.automirroredrounded.ArrowRight
 import mihon.icons.materialsymbols.rounded.RadioButtonChecked
 import mihon.icons.materialsymbols.rounded.RadioButtonUnchecked
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.not_selected
+import tachiyomi.i18n.selected
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon

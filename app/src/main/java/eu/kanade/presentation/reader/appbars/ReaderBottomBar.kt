@@ -32,6 +32,10 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Crop
 import mihon.icons.materialsymbols.rounded.Settings
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_settings
+import tachiyomi.i18n.pref_crop_borders
+import tachiyomi.i18n.rotation_type
+import tachiyomi.i18n.viewer
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon

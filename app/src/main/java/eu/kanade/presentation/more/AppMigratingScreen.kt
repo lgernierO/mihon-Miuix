@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.app_migrating_summary
+import tachiyomi.i18n.app_migrating_title
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.components.miuix.Text

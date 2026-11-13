@@ -16,6 +16,10 @@ import mihon.icons.materialsymbols.rounded.DoneAll
 import mihon.icons.materialsymbols.rounded.FilterList
 import mihon.icons.materialsymbols.rounded.Keep
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_global_search
+import tachiyomi.i18n.all
+import tachiyomi.i18n.has_results
+import tachiyomi.i18n.pinned_sources
 import tachiyomi.presentation.core.components.miuix.CompactActionRow
 import tachiyomi.presentation.core.components.miuix.CompactButtonDefaults
 import tachiyomi.presentation.core.components.miuix.FilterChip

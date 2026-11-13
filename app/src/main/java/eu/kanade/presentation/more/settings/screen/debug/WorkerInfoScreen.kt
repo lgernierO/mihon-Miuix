@@ -44,6 +44,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import mihon.app.di.appGraph
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_copy_to_clipboard
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource

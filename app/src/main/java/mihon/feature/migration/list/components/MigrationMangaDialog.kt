@@ -2,6 +2,12 @@ package mihon.feature.migration.list.components
 
 import androidx.compose.runtime.Composable
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.migrationListScreen_migrateDialog_cancelLabel
+import tachiyomi.i18n.migrationListScreen_migrateDialog_copyLabel
+import tachiyomi.i18n.migrationListScreen_migrateDialog_copyTitle
+import tachiyomi.i18n.migrationListScreen_migrateDialog_migrateLabel
+import tachiyomi.i18n.migrationListScreen_migrateDialog_migrateTitle
+import tachiyomi.i18n.migrationListScreen_migrateDialog_skipText
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton

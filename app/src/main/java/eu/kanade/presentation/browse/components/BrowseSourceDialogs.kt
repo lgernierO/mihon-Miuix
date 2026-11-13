@@ -3,6 +3,10 @@ package eu.kanade.presentation.browse.components
 import androidx.compose.runtime.Composable
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_remove
+import tachiyomi.i18n.are_you_sure
+import tachiyomi.i18n.remove_manga
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton

@@ -34,6 +34,14 @@ import mihon.icons.simpleicons.SimpleIcons
 import mihon.icons.simpleicons.X
 import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_copy_to_clipboard
+import tachiyomi.i18n.app_name
+import tachiyomi.i18n.check_for_updates
+import tachiyomi.i18n.licenses
+import tachiyomi.i18n.privacy_policy
+import tachiyomi.i18n.version
+import tachiyomi.i18n.website
+import tachiyomi.i18n.whats_new
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent

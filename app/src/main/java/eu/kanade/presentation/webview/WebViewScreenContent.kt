@@ -55,6 +55,15 @@ import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
 import mihon.icons.materialsymbols.rounded.TabClose
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_open_in_browser
+import tachiyomi.i18n.action_share
+import tachiyomi.i18n.action_webview_back
+import tachiyomi.i18n.action_webview_close_tab
+import tachiyomi.i18n.action_webview_forward
+import tachiyomi.i18n.action_webview_refresh
+import tachiyomi.i18n.information_cloudflare_help
+import tachiyomi.i18n.information_webview_crashed
+import tachiyomi.i18n.pref_clear_cookies
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Surface
