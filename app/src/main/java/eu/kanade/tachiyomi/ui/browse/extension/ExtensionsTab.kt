@@ -19,6 +19,13 @@ import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsScreen
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
 import eu.kanade.tachiyomi.util.system.isPackageInstalled
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_filter
+import tachiyomi.i18n.ext_confirm_remove
+import tachiyomi.i18n.ext_remove
+import tachiyomi.i18n.extensionStores
+import tachiyomi.i18n.label_extensions
+import tachiyomi.i18n.remove_private_extension_message
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton

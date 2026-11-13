@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
 import tachiyomi.presentation.core.components.selectionSheetHeight

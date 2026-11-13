@@ -29,6 +29,7 @@ import tachiyomi.domain.category.interactor.RenameCategory
 import tachiyomi.domain.category.interactor.ReorderCategory
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.internal_error
 import kotlin.time.Duration.Companion.seconds
 
 @Inject

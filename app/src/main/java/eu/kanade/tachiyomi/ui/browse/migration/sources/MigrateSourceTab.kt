@@ -13,6 +13,8 @@ import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
 import eu.kanade.tachiyomi.ui.browse.migration.manga.MigrateMangaScreen
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.label_migration
+import tachiyomi.i18n.migration_help_guide
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Help

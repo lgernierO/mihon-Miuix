@@ -12,6 +12,13 @@ import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
 import mihon.icons.custommaterialsymbols.rounded.CompactGrid
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_display_comfortable_grid
+import tachiyomi.i18n.action_display_grid
+import tachiyomi.i18n.action_display_list
+import tachiyomi.i18n.action_display_mode
+import tachiyomi.i18n.action_open_in_web_view
+import tachiyomi.i18n.action_settings
+import tachiyomi.i18n.label_help
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.source.local.LocalSource
 import top.yukonga.miuix.kmp.basic.DropdownEntry

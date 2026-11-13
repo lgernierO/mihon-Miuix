@@ -24,6 +24,10 @@ import kotlinx.coroutines.launch
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.roundedfilled.Cancel
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_ok
+import tachiyomi.i18n.action_reset
+import tachiyomi.i18n.information_required_plain
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource

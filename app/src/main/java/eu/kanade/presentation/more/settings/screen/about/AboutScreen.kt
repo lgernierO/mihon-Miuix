@@ -36,6 +36,10 @@ import mihon.app.di.appGraph
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.pref_category_about
+import tachiyomi.i18n.pref_debug_info
+import tachiyomi.i18n.update_check_eol
+import tachiyomi.i18n.update_check_no_new_updates
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt

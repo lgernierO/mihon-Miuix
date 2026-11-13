@@ -2,6 +2,9 @@ package mihon.feature.migration.list.components
 
 import androidx.compose.runtime.Composable
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.migrationListScreen_exitDialogTitle
+import tachiyomi.i18n.migrationListScreen_exitDialog_cancelLabel
+import tachiyomi.i18n.migrationListScreen_exitDialog_stopLabel
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton

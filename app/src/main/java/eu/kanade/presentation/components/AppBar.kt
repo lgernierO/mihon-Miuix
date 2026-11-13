@@ -26,6 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_bar_up_description
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_menu_overflow_description
+import tachiyomi.i18n.action_search
+import tachiyomi.i18n.action_search_hint
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.DropdownEntry

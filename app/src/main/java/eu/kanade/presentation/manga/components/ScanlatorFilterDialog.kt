@@ -17,6 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_ok
+import tachiyomi.i18n.action_reset
+import tachiyomi.i18n.action_select_all
+import tachiyomi.i18n.exclude_scanlators
+import tachiyomi.i18n.no_scanlators_found
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource

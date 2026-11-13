@@ -24,6 +24,13 @@ import mihon.icons.simpleicons.Patreon
 import mihon.icons.simpleicons.SimpleIcons
 import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.label_support_us
+import tachiyomi.i18n.supportUsScreen_contactForDetailsMessage
+import tachiyomi.i18n.supportUsScreen_contactPlatform
+import tachiyomi.i18n.supportUsScreen_currentlySupportedBy
+import tachiyomi.i18n.supportUsScreen_donationPlatform_opencollective
+import tachiyomi.i18n.supportUsScreen_donationPlatform_patreon
+import tachiyomi.i18n.supportUsScreen_perks
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.Text

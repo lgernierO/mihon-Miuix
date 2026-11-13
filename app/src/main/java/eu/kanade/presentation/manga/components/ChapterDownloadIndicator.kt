@@ -24,6 +24,13 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Error
 import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_cancel
+import tachiyomi.i18n.action_delete
+import tachiyomi.i18n.action_start_downloading_now
+import tachiyomi.i18n.chapter_error
+import tachiyomi.i18n.downloading_with_progress
+import tachiyomi.i18n.label_downloaded
+import tachiyomi.i18n.manga_download
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
 import tachiyomi.presentation.core.components.miuix.IconButton

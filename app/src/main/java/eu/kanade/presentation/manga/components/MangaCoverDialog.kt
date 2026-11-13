@@ -51,6 +51,12 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Save
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_close
+import tachiyomi.i18n.action_delete
+import tachiyomi.i18n.action_edit
+import tachiyomi.i18n.action_edit_cover
+import tachiyomi.i18n.action_save
+import tachiyomi.i18n.action_share
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars

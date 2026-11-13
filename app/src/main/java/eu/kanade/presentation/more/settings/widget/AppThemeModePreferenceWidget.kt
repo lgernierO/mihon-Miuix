@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import eu.kanade.domain.ui.model.ThemeMode
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.theme_dark
+import tachiyomi.i18n.theme_light
+import tachiyomi.i18n.theme_system
 import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource
 

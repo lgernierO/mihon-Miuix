@@ -10,6 +10,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.miuix_pull_to_refresh
+import tachiyomi.i18n.miuix_refresh_complete
+import tachiyomi.i18n.miuix_refreshing
+import tachiyomi.i18n.miuix_release_to_refresh
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.theme.MiuixTheme

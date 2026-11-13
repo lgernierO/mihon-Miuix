@@ -17,6 +17,9 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Public
 import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_open_in_web_view
+import tachiyomi.i18n.action_retry
+import tachiyomi.i18n.decode_image_error
 import tachiyomi.presentation.core.components.ActionButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Text

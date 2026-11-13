@@ -18,6 +18,7 @@ import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.rotation_type
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.theme.LocalDismissState

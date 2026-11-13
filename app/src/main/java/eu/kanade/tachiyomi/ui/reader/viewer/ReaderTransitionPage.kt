@@ -18,6 +18,9 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_retry
+import tachiyomi.i18n.transition_pages_error
+import tachiyomi.i18n.transition_pages_loading
 import tachiyomi.presentation.core.components.ActionButton
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Text

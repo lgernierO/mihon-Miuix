@@ -6,6 +6,7 @@ import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Info
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.download_ahead_info
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Icon

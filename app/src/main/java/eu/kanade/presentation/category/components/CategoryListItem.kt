@@ -18,6 +18,11 @@ import mihon.icons.materialsymbols.rounded.Edit
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_delete
+import tachiyomi.i18n.action_move_to_bottom
+import tachiyomi.i18n.action_move_to_top
+import tachiyomi.i18n.action_rename_category
+import tachiyomi.i18n.action_sort
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card

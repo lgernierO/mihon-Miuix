@@ -27,6 +27,8 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.KeyboardArrowLeft
 import mihon.icons.materialsymbols.rounded.KeyboardArrowRight
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.upcoming_calendar_next
+import tachiyomi.i18n.upcoming_calendar_prev
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource

@@ -13,6 +13,9 @@ import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.custom_filter
+import tachiyomi.i18n.pref_category_general
+import tachiyomi.i18n.pref_category_reading_mode
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.basic.Card

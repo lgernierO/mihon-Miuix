@@ -17,6 +17,10 @@ import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
+import tachiyomi.i18n.action_filter
+import tachiyomi.i18n.action_global_search
+import tachiyomi.i18n.internal_error
+import tachiyomi.i18n.label_sources
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Filter
