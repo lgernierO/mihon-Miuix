@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
@@ -54,6 +55,9 @@ fun Scaffold(
 ) {
     var fabHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    val scrollState = topBarScrollBehavior.state
+    // Keep the separately recorded body backdrop in sync with scrolling, including movement
+    // after a small top bar has pinned and stopped changing its own layout.
     val backdrop = rememberLayerBackdrop()
     val supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val navigationBarPadding = LocalMiuixNavigationBarPadding.current
@@ -94,6 +98,12 @@ fun Scaffold(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .drawWithContent {
+                            // Reading state here invalidates this drawing node before the nested
+                            // layerBackdrop records its next frame.
+                            scrollState.visualContentOffset
+                            drawContent()
+                        }
                         .then(if (supported) Modifier.layerBackdrop(backdrop) else Modifier)
                         .background(containerColor),
                 ) {

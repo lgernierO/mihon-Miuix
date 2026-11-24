@@ -19,30 +19,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -71,7 +78,7 @@ fun rememberReaderBackdrop(
         if (enabled) {
             captureEnabled = true
         } else {
-            // Keep the last frame valid through the reader bars' 200ms exit animation.
+            // Keep sampling through the reader bars' 200ms exit animation.
             delay(250)
             captureEnabled = false
         }
@@ -86,20 +93,24 @@ fun rememberReaderBackdrop(
             overlayColor?.let { drawRect(Color(it), blendMode = overlayBlendMode ?: BlendMode.SrcOver) }
         }
     }
+    val chromeBackdrop = remember(backdrop, recorder) { ReaderDrawBackdrop(backdrop, recorder) }
     LaunchedEffect(recorder, captureEnabled, supported, lifecycle, rootView) {
         if (!captureEnabled || !supported) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (isActive) {
                 withFrameNanos { }
+                // Sample the displayed surface while it moves as well as when it is at rest.
+                // PixelCopy suspends until completion, so copies cannot queue up behind scrolling.
                 recorder.refresh(rootView)
-                // Ordinary views only re-record their display list. GPU surfaces use bounded
-                // snapshots, with one request at a time and no work while all chrome is hidden.
-                delay(100)
             }
         }
     }
     val modifier = if (supported) {
         Modifier
+            .drawWithContent {
+                recorder.drawRevision
+                drawContent()
+            }
             .onGloballyPositioned {
                 recorder.setBounds(it.positionInWindow(), it.size)
             }
@@ -107,14 +118,31 @@ fun rememberReaderBackdrop(
     } else {
         Modifier
     }
-    // A non-null empty backdrop bypasses Miuix's opaque fallback, leaving a transparent sheet.
-    return ReaderBackdrop(backdrop.takeIf { supported && captureEnabled && recorder.ready }, modifier)
+    // Only startup or an unavailable surface uses the opaque fallback. Motion keeps live sampling.
+    return ReaderBackdrop(chromeBackdrop.takeIf { supported && captureEnabled && recorder.ready }, modifier)
+}
+
+/** Invalidate the consumer's cached blur pass as well as the source recording for each new frame. */
+private class ReaderDrawBackdrop(
+    private val source: Backdrop,
+    private val recorder: ReaderPageRecorder,
+) : Backdrop by source {
+    override fun DrawScope.drawBackdrop(
+        density: Density,
+        coordinates: LayoutCoordinates?,
+        layerBlock: (GraphicsLayerScope.() -> Unit)?,
+        downscaleFactor: Float,
+    ) {
+        recorder.drawRevision
+        with(source) { drawBackdrop(density, coordinates, layerBlock, downscaleFactor) }
+    }
 }
 
 private class ReaderPageRecorder(private val viewer: Viewer?) {
     var ready by mutableStateOf(false)
         private set
     private var revision by mutableIntStateOf(0)
+    val drawRevision get() = revision
     private var origin = Offset.Zero
     private var bounds = Rect.Zero
     private var nativeView: View? = null
@@ -145,9 +173,12 @@ private class ReaderPageRecorder(private val viewer: Viewer?) {
         val ordinaryView = viewer.backdropView
         if (ordinaryView != null) {
             nativeView = ordinaryView.takeIf { it.isAttachedToWindow && it.isShown && it.width > 0 && it.height > 0 }
+            ready = nativeView != null
             revision++
             return
         }
+        // Cancellation does not cancel PixelCopy. Do not reuse its destination until its callback.
+        if (surfaceCopyInFlight) return
         // WebGPU owns a platform SurfaceView/TextureView inside Compose. Locate that surface,
         // never the decor/Compose root as a capture source (those also contain reader controls).
         val now = SystemClock.uptimeMillis()
@@ -157,7 +188,10 @@ private class ReaderPageRecorder(private val viewer: Viewer?) {
             nativeView = findSurface(root)
             nextSurfaceSearch = now + 1000L
         }
-        val view = nativeView ?: return
+        val view = nativeView ?: run {
+            clearSurfaceFrame()
+            return
+        }
         val factor = min(1f, min(640f / view.width, 1536f / view.height))
         val width = (view.width * factor).roundToInt().coerceAtLeast(1)
         val height = (view.height * factor).roundToInt().coerceAtLeast(1)
@@ -170,11 +204,7 @@ private class ReaderPageRecorder(private val viewer: Viewer?) {
             imageHeight = height
             bufferView = view
             bufferSourceSize = sourceSize
-            image = null
-            imageView = null
-            imageSourceSize = IntSize.Zero
-            ready = false
-            revision++
+            clearSurfaceFrame()
         }
         val index = (publishedBuffer + 1) % buffers.size
         val bitmap = buffers[index] ?: Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also {
@@ -183,46 +213,55 @@ private class ReaderPageRecorder(private val viewer: Viewer?) {
         val success = when (view) {
             is TextureView -> try {
                 if (view.isAvailable) {
+                    val generation = bitmap.generationId
                     view.getBitmap(bitmap)
-                    true
+                    // TextureView can return the destination unchanged when readback fails.
+                    bitmap.generationId != generation
                 } else {
                     false
                 }
             } catch (_: RuntimeException) {
-                // Surface destruction can race the texture read; retry on the next interval.
+                // Surface destruction can race the texture read; retry on the next frame.
                 false
             }
             is SurfaceView -> if (view.holder.surface.isValid) copySurface(view, bitmap) else false
             else -> false
         }
-        if (success) {
-            // Three buffers leave at least two redraw intervals before reusing a published image.
+        // These pixels came from the surface, not a model pose. A gesture changing the model while
+        // the copy runs is expected and must not discard every frame until the gesture ends.
+        if (success && view.isAttachedToWindow && view.isShown &&
+            sourceSize == IntSize(view.width, view.height)
+        ) {
+            // Rotate destinations so the copy never overwrites the currently published image.
             publishedBuffer = index
             image = bitmap.asImageBitmap()
             imageView = view
             imageSourceSize = sourceSize
+            ready = true
             revision++
+        } else if (!view.isAttachedToWindow || !view.isShown) {
+            clearSurfaceFrame()
         }
     }
 
     fun drawFrame(scope: ContentDrawScope, backgroundColor: Color): Boolean = with(scope) {
         revision // Observe native changes in the recording draw phase, not the page composition.
-        val view = nativeView ?: return unavailable()
-        if (!view.isAttachedToWindow || !view.isShown || view.width <= 0 || view.height <= 0) return unavailable()
+        val view = nativeView ?: return false
+        if (!view.isAttachedToWindow || !view.isShown || view.width <= 0 || view.height <= 0) return false
         view.getLocationInWindow(location)
         val x = location[0] - origin.x
         val y = location[1] - origin.y
         if (view is SurfaceView || view is TextureView) {
-            val snapshot = image.takeIf {
+            val snapshot = image?.takeIf {
                 imageView === view && imageSourceSize == IntSize(view.width, view.height)
-            } ?: return unavailable()
+            } ?: return false
             drawRect(backgroundColor)
             translate(x, y) {
                 drawImage(snapshot, dstSize = IntSize(view.width, view.height))
             }
         } else {
             val canvas = drawContext.canvas.nativeCanvas
-            if (!canvas.isHardwareAccelerated) return unavailable()
+            if (!canvas.isHardwareAccelerated) return false
             drawRect(backgroundColor)
             val saveCount = canvas.save()
             try {
@@ -232,30 +271,41 @@ private class ReaderPageRecorder(private val viewer: Viewer?) {
                 canvas.restoreToCount(saveCount)
             }
         }
-        if (!ready) ready = true
         true
     }
 
-    private fun unavailable(): Boolean {
+    private fun clearSurfaceFrame() {
+        val hadPublishedFrame = image != null || imageView != null || ready
+        image = null
+        imageView = null
+        imageSourceSize = IntSize.Zero
         ready = false
-        return false
+        if (hadPublishedFrame) revision++
     }
 
     private suspend fun copySurface(view: SurfaceView, bitmap: Bitmap): Boolean {
         if (surfaceCopyInFlight) return false
-        return suspendCancellableCoroutine { continuation ->
-            surfaceCopyInFlight = true
-            try {
-                PixelCopy.request(view, bitmap, { result ->
-                    // Cancellation does not cancel PixelCopy itself. Keep the buffer locked
-                    // until its callback, even if the activity has stopped in the meantime.
-                    surfaceCopyInFlight = false
-                    if (continuation.isActive) continuation.resume(result == PixelCopy.SUCCESS)
-                }, handler)
-            } catch (_: IllegalArgumentException) {
-                surfaceCopyInFlight = false
-                if (continuation.isActive) continuation.resume(false)
+        val surface = view.holder.surface
+        if (!surface.isValid) return false
+        surfaceCopyInFlight = true
+        try {
+            // API 33 can block in PixelCopy.request itself. Only the Surface and destination cross
+            // threads; View access, frame publication and the in-flight flag remain on the UI thread.
+            return withContext(Dispatchers.Default) {
+                // PixelCopy cannot be cancelled. Wait for its callback before releasing the buffer,
+                // even if this effect is cancelled while the copy is running.
+                suspendCoroutine { continuation ->
+                    try {
+                        PixelCopy.request(surface, bitmap, { result ->
+                            continuation.resume(result == PixelCopy.SUCCESS)
+                        }, handler)
+                    } catch (_: IllegalArgumentException) {
+                        continuation.resume(false)
+                    }
+                }
             }
+        } finally {
+            surfaceCopyInFlight = false
         }
     }
 
