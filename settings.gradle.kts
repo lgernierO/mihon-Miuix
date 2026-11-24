@@ -28,25 +28,6 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-// OS4 glass components are currently available on upstream main only. The submodule pins
-// the complete Miuix module family to the same commit without GitHub Packages credentials.
-val miuixSource = file("vendor/miuix")
-check(miuixSource.resolve("settings.gradle.kts").isFile) {
-    "Initialize Miuix sources with: git submodule update --init --recursive"
-}
-includeBuild(miuixSource) {
-    name = "miuix-upstream"
-    dependencySubstitution {
-        listOf("core", "ui", "preference", "icons", "glass-icons", "material", "blur", "squircle", "glass")
-            .forEach { suffix ->
-                substitute(module("top.yukonga.miuix.kmp:miuix-$suffix"))
-                    .using(project(":miuix-$suffix"))
-                substitute(module("top.yukonga.miuix.kmp:miuix-$suffix-android"))
-                    .using(project(":miuix-$suffix"))
-            }
-    }
-}
-
 rootProject.name = "Mihon"
 include(":app")
 include(":baseline-profile")

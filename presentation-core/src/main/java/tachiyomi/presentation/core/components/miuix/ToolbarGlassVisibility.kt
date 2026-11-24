@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
@@ -18,13 +19,17 @@ private val LocalPreblurredToolbar = compositionLocalOf { false }
 fun ToolbarGlassVisibility(
     visible: Boolean,
     preblurredBackdrop: Boolean = false,
+    resetKey: Any? = Unit,
     content: @Composable () -> Unit,
 ) {
-    val progress = animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = GlassMotion.topBarButtonFloat(),
-        label = "detailToolbarGlass",
-    )
+    // Reset the material animation without recreating the toolbar's visibility transition.
+    val progress = key(resetKey) {
+        animateFloatAsState(
+            targetValue = if (visible) 1f else 0f,
+            animationSpec = GlassMotion.topBarButtonFloat(),
+            label = "detailToolbarGlass",
+        )
+    }
     CompositionLocalProvider(
         LocalMiuixToolbarGlassProgress provides progress,
         LocalPreblurredToolbar provides preblurredBackdrop,

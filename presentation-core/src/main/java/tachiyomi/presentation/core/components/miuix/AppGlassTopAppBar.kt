@@ -1,5 +1,6 @@
 package tachiyomi.presentation.core.components.miuix
 
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -20,14 +21,18 @@ fun AppGlassTopAppBar(
     subtitle: String = "",
     color: Color = MiuixTheme.colorScheme.surface,
     scrollBehavior: ScrollBehavior? = null,
+    scrollState: ScrollableState? = null,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val isContentScrolled by remember(scrollBehavior) {
+    val isContentScrolled by remember(scrollBehavior, scrollState) {
         derivedStateOf {
             // A short list can collapse the title before the body consumes any scroll.
-            scrollBehavior?.state?.let { it.contentOffset < 0f || it.heightOffset < 0f } ?: true
+            val contentScrolled = scrollState?.canScrollBackward
+                ?: scrollBehavior?.state?.let { it.contentOffset < 0f }
+                ?: true
+            contentScrolled || (scrollBehavior?.state?.heightOffset ?: 0f) < 0f
         }
     }
     GlassTopAppBar(
@@ -40,6 +45,13 @@ fun AppGlassTopAppBar(
         bandBrush = GlassTopAppBarDefaults.bandBrush(color),
         buttonSize = IconButtonVisualSize,
         scrollBehavior = scrollBehavior,
+        visualContentOffset = scrollState?.let { state ->
+            {
+                val barState = scrollBehavior?.state
+                val contentOffset = if (state.canScrollBackward) barState?.contentOffset ?: 0f else 0f
+                contentOffset + (barState?.overscrollOffset ?: 0f)
+            }
+        },
         navigationIcon = navigationIcon,
         actions = actions,
         bottomContent = bottomContent,

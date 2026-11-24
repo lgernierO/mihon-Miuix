@@ -13,7 +13,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -42,8 +42,11 @@ fun AppSmallTopAppBar(
     bottomContent: @Composable () -> Unit = {},
 ) {
     ProgressiveTopBarSurface(modifier = modifier, color = color) {
-        SmallTopAppBar(
+        // Miuix 0.9.5-beta01 SmallTopAppBar measures actions but never places them.
+        // Use the native compact layout until SmallTopAppBar's placement is fixed upstream.
+        TopAppBar(
             title = title,
+            expandable = false,
             color = Color.Transparent,
             titleColor = titleColor,
             subtitle = subtitle,

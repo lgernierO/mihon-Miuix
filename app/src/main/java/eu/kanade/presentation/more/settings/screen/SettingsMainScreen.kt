@@ -121,6 +121,7 @@ object SettingsMainScreen : Screen() {
                         )
                     },
                     scrollBehavior = scrollBehavior,
+                    scrollState = state,
                 )
             },
             containerColor = containerColor,

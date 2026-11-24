@@ -215,7 +215,8 @@ class ReaderActivity : BaseActivity() {
 
             val backgroundColor = remember(general.theme) { Color(baseContext.readerBackgroundColor(general.theme)) }
             val activeViewer by viewerFlow.collectAsState()
-            var readerContentDragged by remember(activeViewer) { mutableStateOf(false) }
+            // Each menu opening starts clear; hidden-page gestures must not arm the next opening.
+            var readerContentDragged by remember(activeViewer, state.menuVisible) { mutableStateOf(false) }
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
@@ -262,7 +263,8 @@ class ReaderActivity : BaseActivity() {
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .pointerInput(activeViewer) {
+                            .pointerInput(activeViewer, state.menuVisible) {
+                                if (!state.menuVisible) return@pointerInput
                                 val touchSlop = viewConfiguration.touchSlop
                                 awaitEachGesture {
                                     val down = awaitFirstDown(
@@ -318,6 +320,7 @@ class ReaderActivity : BaseActivity() {
                         ToolbarGlassVisibility(
                             visible = readerContentDragged,
                             preblurredBackdrop = gpuChrome?.usesGpuBlur == true,
+                            resetKey = activeViewer to state.menuVisible,
                         ) {
                             AppBars(state = state, gpuChrome = gpuChrome)
                         }

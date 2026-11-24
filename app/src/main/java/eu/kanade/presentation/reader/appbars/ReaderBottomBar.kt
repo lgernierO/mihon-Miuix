@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -30,19 +32,20 @@ import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
 import mihon.icons.custommaterialsymbols.rounded.CropOff
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Crop
-import mihon.icons.materialsymbols.rounded.Settings
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_settings
 import tachiyomi.i18n.pref_crop_borders
 import tachiyomi.i18n.rotation_type
 import tachiyomi.i18n.viewer
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -57,14 +60,17 @@ fun ReaderBottomBar(
     modifier: Modifier = Modifier,
     chapterNavigator: (@Composable () -> Unit)? = null,
 ) {
-    // These are reading actions, so keep their button semantics inside Miuix's bottom-bar
-    // shell rather than introducing a page-selection state for NavigationBarItem.
-    NavigationBar(
+    // Keep the existing two rows anchored at the bottom; this is an action toolbar.
+    FloatingToolbar(
         modifier = modifier,
-        showDivider = false,
+        cornerRadius = 24.dp,
+        outSidePadding = PaddingValues(0.dp),
+        shadowElevation = 0.dp,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             chapterNavigator?.invoke()
@@ -98,7 +104,7 @@ fun ReaderBottomBar(
                 )
                 ReaderBarAction(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    icon = MaterialSymbols.Rounded.Settings,
+                    icon = MiuixIcons.Settings,
                     title = stringResource(MR.strings.action_settings),
                     onClick = onClickSettings,
                 )
@@ -117,11 +123,15 @@ private fun ReaderBarAction(
 ) {
     Box(modifier) {
         TooltipBox(text = title) {
+            val colors = MiuixTheme.colorScheme
+            val contentColor = if (selected) colors.onTertiaryContainer else colors.onSurfaceContainer
+            // The icon and its label remain one action target; selected is a toggle state,
+            // not the transient holdDownState used by Miuix's press feedback.
             IconButton(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight().semantics { this.selected = selected },
                 onClick = onClick,
+                backgroundColor = if (selected) colors.tertiaryContainer else Color.Transparent,
             ) {
-                val color = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -134,11 +144,11 @@ private fun ReaderBarAction(
                         imageVector = icon,
                         contentDescription = null,
                         modifier = Modifier.size(NavigationBarDefaults.IconSize),
-                        tint = color,
+                        tint = contentColor,
                     )
                     Text(
                         text = title,
-                        color = color,
+                        color = contentColor,
                         style = MiuixTheme.textStyles.footnote2,
                         fontSize = NavigationBarDefaults.LabelFontSize,
                         textAlign = TextAlign.Center,

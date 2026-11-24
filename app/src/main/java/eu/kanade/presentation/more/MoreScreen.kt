@@ -3,9 +3,9 @@ package eu.kanade.presentation.more
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
@@ -65,19 +65,22 @@ fun MoreScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val scrollBehavior = MiuixScrollBehavior()
+    val scrollState = rememberLazyListState()
 
     Scaffold(
+        topBarScrollBehavior = scrollBehavior,
         containerColor = MiuixTheme.colorScheme.surface,
         topBar = {
             AppGlassTopAppBar(
                 title = stringResource(MR.strings.label_more),
                 scrollBehavior = scrollBehavior,
+                scrollState = scrollState,
             )
         },
     ) { contentPadding ->
         ScrollbarLazyColumn(
             contentPadding = contentPadding,
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            state = scrollState,
         ) {
             item {
                 Card(

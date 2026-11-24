@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.util.LocalMiuixScrollBehavior
 import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
 import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
 import top.yukonga.miuix.kmp.glass.glassBottomSheetSurface
@@ -72,6 +73,7 @@ fun WindowDialog(
         BackHandler(enabled = show && onDismissRequest == null) {}
         CompositionLocalProvider(
             LocalMiuixBackdrop provides null,
+            LocalMiuixScrollBehavior provides null,
             LocalMiuixNavigationBarPadding provides 0.dp,
             LocalGlassDialog provides true,
             content = content,
@@ -104,6 +106,7 @@ fun WindowBottomSheet(
     val backdrop = LocalMiuixPopupBackdrop.current
     CompositionLocalProvider(
         LocalMiuixBackdrop provides null,
+        LocalMiuixScrollBehavior provides null,
         LocalMiuixNavigationBarPadding provides 0.dp,
         LocalGlassDialog provides true,
     ) {
@@ -132,6 +135,7 @@ fun WindowBottomSheet(
                 BackHandler(enabled = show && (!allowDismiss || onDismissRequest == null)) {}
                 CompositionLocalProvider(
                     LocalMiuixBackdrop provides null,
+                    LocalMiuixScrollBehavior provides null,
                     LocalMiuixNavigationBarPadding provides 0.dp,
                     LocalGlassDialog provides true,
                     content = content,

@@ -3,6 +3,7 @@ package eu.kanade.presentation.more.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import dev.icerock.moko.resources.StringResource
@@ -23,6 +24,7 @@ fun PreferenceScaffold(
     itemsProvider: @Composable () -> List<Preference>,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
+    val scrollState = rememberLazyListState()
     Scaffold(
         topBarScrollBehavior = scrollBehavior,
         containerColor = MiuixTheme.colorScheme.surface,
@@ -44,12 +46,14 @@ fun PreferenceScaffold(
                     )
                 },
                 scrollBehavior = scrollBehavior,
+                scrollState = scrollState,
             )
         },
         content = { contentPadding ->
             PreferenceScreen(
                 items = itemsProvider(),
                 contentPadding = contentPadding,
+                state = scrollState,
             )
         },
     )

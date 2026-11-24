@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -27,6 +26,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
+import tachiyomi.presentation.core.util.LocalMiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -66,7 +66,7 @@ fun Scaffold(
     // Chrome samples the page body, never the chrome itself. Popups use the activity scene.
     CompositionLocalProvider(LocalMiuixBackdrop provides backdrop.takeIf { supported }) {
         top.yukonga.miuix.kmp.basic.Scaffold(
-            modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
+            modifier = modifier,
             topBar = { topBar(topBarScrollBehavior) },
             // Reserve the top-level floating navigation slot for this page's content and actions.
             bottomBar = {
@@ -94,6 +94,7 @@ fun Scaffold(
                 androidx.compose.material3.LocalContentColor provides contentColor,
                 // Controls inside the body must not sample that same body recording.
                 LocalMiuixBackdrop provides null,
+                LocalMiuixScrollBehavior provides topBarScrollBehavior,
             ) {
                 Box(
                     modifier = Modifier

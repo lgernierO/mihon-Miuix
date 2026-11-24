@@ -1,17 +1,16 @@
 # Mihon Miuix
 
-基于上游 [Mihon](https://github.com/mihonapp/mihon) 改造的 Miuix 界面分支，使用 [Miuix](https://github.com/compose-miuix-ui/miuix) 主分支 `2855a36b`（`0.9.4-2855a36b-SNAPSHOT`）的 OS4 Glass 组件。
+基于上游 [Mihon](https://github.com/mihonapp/mihon) 改造的 Miuix 界面分支，使用 [Miuix 0.9.5-beta01](https://github.com/compose-miuix-ui/miuix/releases/tag/v0.9.5-beta01) 的 OS4 Glass 组件。
 
 ### 构建
 
-OS4 组件尚未包含在 Maven Central 的 0.9.4 稳定版中，本仓库通过固定提交的 Git 子模块和 Gradle 复合构建使用上游源码，不需要 GitHub Packages 凭据。
+Miuix 全部模块统一使用 Maven Central 已发布的 `0.9.5-beta01`，这是官方预发布版本。构建直接下载发布依赖，不需要初始化 Miuix 源码子模块或配置 GitHub Packages 凭据。
 
 ```sh
-git submodule update --init --recursive
 ./gradlew --daemon :app:assembleRelease -Ptarget-abi=arm64-v8a -Pinclude-telemetry=false -Penable-updater=false
 ```
 
-首次克隆可使用 `git clone --recurse-submodules`。Android 13 及以上启用玻璃材质；Android 8–12 按上游实现使用不透明降级表面。
+Android 13 及以上启用玻璃材质；Android 8–12 按上游实现使用不透明降级表面。
 
 指定 `-Ptarget-abi=arm64-v8a` 时只生成 ARM64 安装包，产物位于 `app/build/outputs/apk/release/app-arm64-v8a-release.apk`。依赖缓存完整后可加 `--offline`，增量构建不需要 `clean`。未指定 `target-abi` 时保留上游四架构和通用包的构建方式。
 

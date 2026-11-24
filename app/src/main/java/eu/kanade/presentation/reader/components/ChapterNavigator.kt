@@ -340,9 +340,9 @@ private fun NavigatorButton(
             contentDescription = contentDescription,
             modifier = iconModifier.size(24.dp),
             tint = if (enabled) {
-                LocalContentColor.current
+                colors.contentColor
             } else {
-                MiuixTheme.colorScheme.disabledOnSurface
+                colors.disabledContentColor
             },
         )
     }
