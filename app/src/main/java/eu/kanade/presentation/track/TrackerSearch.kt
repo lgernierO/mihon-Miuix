@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.items
@@ -82,7 +83,6 @@ import tachiyomi.i18n.unknown_error
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
-import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
 import tachiyomi.presentation.core.components.miuix.Button
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
 import tachiyomi.presentation.core.components.miuix.IconButton
@@ -96,7 +96,7 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.glass.GlassTextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Back
 import top.yukonga.miuix.kmp.icon.glass.Close
@@ -124,55 +124,56 @@ fun TrackerSearch(
 
     Scaffold(
         topBar = {
-            Column {
-                AppGlassTopAppBar(
-                    title = "",
-                    expandable = false,
-                    actions = {
-                        IconButton(onClick = onDismissRequest) {
-                            AppBarIcon(
-                                imageVector = MiuixIcons.Glass.Back,
-                                contentDescription = stringResource(MR.strings.action_bar_up_description),
-                                autoMirror = true,
-                            )
-                        }
-                        TextField(
-                            state = state,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp)
-                                .heightIn(min = ToolbarSearchFieldDefaults.MinHeight)
-                                .focusRequester(focusRequester)
-                                .runOnEnterKeyPressed(action = dispatchQueryAndClearFocus),
-                            insideMargin = ToolbarSearchFieldDefaults.InsideMargin,
-                            cornerRadius = ToolbarSearchFieldDefaults.CornerRadius,
-                            colors = ToolbarSearchFieldDefaults.colors(),
-                            textStyle = MiuixTheme.textStyles.body1.copy(
-                                color = MiuixTheme.colorScheme.onSurfaceContainerHigh,
-                            ),
-                            cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
-                            label = stringResource(MR.strings.action_search_hint),
-                            useLabelAsPlaceholder = true,
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            onKeyboardAction = { dispatchQueryAndClearFocus() },
-                        )
-                        if (state.text.isNotEmpty()) {
-                            IconButton(
-                                onClick = {
-                                    state.clearText()
-                                    focusRequester.requestFocus()
-                                },
-                            ) {
-                                AppBarIcon(
-                                    imageVector = MiuixIcons.Glass.Close,
-                                    contentDescription = stringResource(MR.strings.action_reset),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    },
+            // The sheet owns the glass surface and safe area; this header only lays out its
+            // controls. Equal gaps and a fixed trailing slot keep the editor centered.
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onDismissRequest) {
+                    AppBarIcon(
+                        imageVector = MiuixIcons.Glass.Back,
+                        contentDescription = stringResource(MR.strings.action_bar_up_description),
+                        tint = MiuixTheme.colorScheme.onBackground,
+                        autoMirror = true,
+                    )
+                }
+                GlassTextField(
+                    state = state,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = ToolbarSearchFieldDefaults.MinHeight)
+                        .focusRequester(focusRequester)
+                        .runOnEnterKeyPressed(action = dispatchQueryAndClearFocus),
+                    insideMargin = ToolbarSearchFieldDefaults.InsideMargin,
+                    cornerRadius = ToolbarSearchFieldDefaults.CornerRadius,
+                    textStyle = MiuixTheme.textStyles.body1.copy(
+                        color = MiuixTheme.colorScheme.onBackground,
+                    ),
+                    cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
+                    label = stringResource(MR.strings.action_search_hint),
+                    useLabelAsPlaceholder = true,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    onKeyboardAction = { dispatchQueryAndClearFocus() },
                 )
+                if (state.text.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            state.clearText()
+                            focusRequester.requestFocus()
+                        },
+                    ) {
+                        AppBarIcon(
+                            imageVector = MiuixIcons.Glass.Close,
+                            contentDescription = stringResource(MR.strings.action_reset),
+                            tint = MiuixTheme.colorScheme.onBackground,
+                        )
+                    }
+                } else {
+                    Spacer(Modifier.size(48.dp))
+                }
             }
         },
         bottomBar = {

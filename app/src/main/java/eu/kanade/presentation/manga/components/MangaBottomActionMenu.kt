@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.downloadDropdownEntry
@@ -36,13 +37,15 @@ import tachiyomi.i18n.label_more
 import tachiyomi.i18n.migrate
 import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
-import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.TooltipAnchorPosition
 import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
+// import top.yukonga.miuix.kmp.material.GlassShadows // Restore with the toolbar shadow below.
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.AddBookmark
 import top.yukonga.miuix.kmp.icon.glass.BookmarkOutline
@@ -227,7 +230,12 @@ private fun SelectionActionToolbar(
             val actionLimit = ((maxWidth.coerceAtMost(400.dp) - 40.dp) / 48.dp).toInt().coerceIn(1, 5)
             val directActions = if (actions.size > actionLimit) actions.take(actionLimit - 1) else actions
             val overflowActions = actions.drop(directActions.size)
-            FloatingToolbar(modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth()) {
+            GlassFloatingToolbar(
+                modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
+                backdrop = LocalMiuixBackdrop.current,
+                // shadow = GlassShadows.Regular,
+                shadow = null,
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -287,12 +295,14 @@ private fun SelectionActionButton(action: BottomAction, enabled: Boolean) {
                 enabled = enabled,
                 minHeight = 48.dp,
                 minWidth = 48.dp,
+                backgroundColor = Color.Transparent,
                 content = icon,
             )
         } else {
             IconButton(
                 onClick = { action.onClick?.invoke() },
                 enabled = enabled,
+                backgroundColor = Color.Transparent,
                 content = icon,
             )
         }

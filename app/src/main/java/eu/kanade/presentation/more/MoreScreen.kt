@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.ui.more.DownloadQueueState
+import kotlinx.coroutines.launch
 import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.categories
@@ -30,9 +33,11 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.groupedCardItems
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
+import tachiyomi.presentation.core.components.miuix.SnackbarHost
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.DigitalStatistics
 import top.yukonga.miuix.kmp.icon.glass.Download
@@ -62,6 +67,10 @@ fun MoreScreen(
     val uriHandler = LocalUriHandler.current
     val scrollBehavior = MiuixScrollBehavior()
     val scrollState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val downloadedOnlyMessage = stringResource(MR.strings.label_downloaded_only)
+    val incognitoMessage = stringResource(MR.strings.pref_incognito_mode)
 
     Scaffold(
         topBarScrollBehavior = scrollBehavior,
@@ -73,6 +82,7 @@ fun MoreScreen(
                 scrollState = scrollState,
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { contentPadding ->
         ScrollbarLazyColumn(
             contentPadding = contentPadding,
@@ -90,7 +100,15 @@ fun MoreScreen(
                             subtitle = stringResource(MR.strings.downloaded_only_summary),
                             icon = MiuixIcons.Glass.NoNetwork,
                             checked = downloadedOnly,
-                            onCheckedChanged = onDownloadedOnlyChange,
+                            onCheckedChanged = { checked ->
+                                onDownloadedOnlyChange(checked)
+                                if (checked && !downloadedOnly) {
+                                    scope.launch {
+                                        snackbarHostState.newestSnackbarData()?.dismiss()
+                                        snackbarHostState.showSnackbar(downloadedOnlyMessage)
+                                    }
+                                }
+                            },
                         )
                     }
                     "incognito" -> {
@@ -99,7 +117,15 @@ fun MoreScreen(
                             subtitle = stringResource(MR.strings.pref_incognito_mode_summary),
                             icon = MiuixIcons.Glass.Glasses,
                             checked = incognitoMode,
-                            onCheckedChanged = onIncognitoModeChange,
+                            onCheckedChanged = { checked ->
+                                onIncognitoModeChange(checked)
+                                if (checked && !incognitoMode) {
+                                    scope.launch {
+                                        snackbarHostState.newestSnackbarData()?.dismiss()
+                                        snackbarHostState.showSnackbar(incognitoMessage)
+                                    }
+                                }
+                            },
                         )
                     }
                 }

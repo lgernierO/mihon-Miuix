@@ -46,6 +46,7 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
+// import top.yukonga.miuix.kmp.material.GlassShadows // Restore with the button shadow below.
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
 
 /** Independent platform dialogs host their menus in their own Scaffold. */
@@ -211,7 +212,7 @@ fun AppGlassIconDropdownMenu(
         ),
         contentAlignment = Alignment.Center,
     ) {
-        if (actualEnabled) {
+        if (actualEnabled && !backgroundColor.isSpecified) {
             GlassIconButton(
                 onClick = {
                     setExpanded(!expanded)
@@ -220,6 +221,8 @@ fun AppGlassIconDropdownMenu(
                 backdrop = buttonBackdrop,
                 size = size,
                 fill = fill,
+                // shadow = GlassShadows.Regular,
+                shadow = null,
                 modifier = Modifier
                     .glassPopupAnchor(anchor, cornerRadius = radius, floating = true)
                     .semantics { role = Role.Button },
@@ -229,20 +232,30 @@ fun AppGlassIconDropdownMenu(
                 }
             }
         } else {
-            // Keep disabled input and semantics intact instead of leaving an actionable control.
+            // A specified background uses an ordinary action over the parent surface; the popup
+            // still samples the page. Disabled buttons retain their input and semantic state.
             IconButton(
-                onClick = {},
-                enabled = false,
+                onClick = {
+                    setExpanded(!expanded)
+                    if (expanded) hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                },
+                enabled = actualEnabled,
+                holdDownState = expanded,
                 backgroundColor = backgroundColor.takeIf { it.isSpecified } ?: Color.Transparent,
                 cornerRadius = radius,
                 minHeight = size,
                 minWidth = size,
-                modifier = Modifier.semantics {
-                    role = Role.Button
-                    disabled()
-                },
-                content = currentContent,
-            )
+                modifier = Modifier
+                    .glassPopupAnchor(anchor, cornerRadius = radius, floating = true)
+                    .semantics {
+                        role = Role.Button
+                        if (!actualEnabled) disabled()
+                    },
+            ) {
+                Box(modifier = Modifier.glassPopupAnchorContent(anchor)) {
+                    currentContent()
+                }
+            }
         }
     }
 

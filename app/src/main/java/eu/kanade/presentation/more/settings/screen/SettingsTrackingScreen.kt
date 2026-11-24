@@ -1,11 +1,14 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.content.Context
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextObfuscationMode
@@ -13,6 +16,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +39,7 @@ import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.track.model.AutoTrackState
 import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.presentation.util.isTabletUi
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.Tracker
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
@@ -85,6 +90,7 @@ import tachiyomi.presentation.core.components.miuix.OutlinedTextField
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.Close
@@ -244,8 +250,27 @@ object SettingsTrackingScreen : SearchableSettings {
         var processing by remember { mutableStateOf(false) }
         var inputError by remember { mutableStateOf(false) }
 
+        val window = LocalActivity.current?.window
+        DisposableEffect(window) {
+            val previousSoftInputMode = window?.attributes?.softInputMode
+            if (window != null && previousSoftInputMode != null) {
+                // The root-hosted GlassDialog applies IME insets itself. Keep Android from
+                // panning/resizing the same window a second time while this editor is open.
+                window.setSoftInputMode(
+                    (previousSoftInputMode and WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST.inv()) or
+                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING,
+                )
+            }
+            onDispose {
+                if (window != null && previousSoftInputMode != null) {
+                    window.setSoftInputMode(previousSoftInputMode)
+                }
+            }
+        }
+
         AlertDialog(
             onDismissRequest = onDismissRequest,
+            largeScreen = isTabletUi(),
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -261,7 +286,10 @@ object SettingsTrackingScreen : SearchableSettings {
                 }
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier.miuixVerticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         fieldModifier = Modifier.semantics {

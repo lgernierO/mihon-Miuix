@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
+// import top.yukonga.miuix.kmp.material.GlassShadows // Restore with buttonShadow below.
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Shared with tabs in bottomContent; the native bar owns the material animation. */
@@ -52,6 +53,8 @@ fun AppGlassTopAppBar(
             subtitle = subtitle,
             backdrop = LocalMiuixBackdrop.current,
             progressiveBlur = true,
+            // buttonShadow = GlassShadows.Regular,
+            buttonShadow = null,
             bandBrush = GlassTopAppBarDefaults.bandBrush(color),
             scrollBehavior = scrollBehavior,
             titleAlpha = { titleAlpha() * railTitleAlpha() },

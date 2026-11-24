@@ -29,7 +29,7 @@ import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.basic.IconButtonDefaults as MiuixIconButtonDefaults
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
-import top.yukonga.miuix.kmp.material.GlassShadows
+// import top.yukonga.miuix.kmp.material.GlassShadows // Restore with the button shadow below.
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -90,15 +90,16 @@ fun IconButton(
         val buttonModifier = modifier
             .sizeIn(minWidth = IconButtonTouchTargetSize, minHeight = IconButtonTouchTargetSize)
             .wrapContentSize(Alignment.Center)
-        if (onLongClick == null && enabled) {
+        if (onLongClick == null && enabled && !backgroundColor.isSpecified) {
             GlassIconButton(
                 onClick = onClick,
                 modifier = buttonModifier.buttonStateSemantics(true),
                 size = size,
-                backdrop = LocalMiuixBackdrop.current.takeUnless { backgroundColor.isSpecified },
-                fill = if (backgroundColor.isSpecified) backgroundColor else GlassTopAppBarDefaults.buttonFill(),
-                stroke = if (backgroundColor.isSpecified) null else GlassTopAppBarDefaults.buttonStroke(),
-                shadow = if (backgroundColor.isSpecified) null else GlassShadows.Regular,
+                backdrop = LocalMiuixBackdrop.current,
+                fill = GlassTopAppBarDefaults.buttonFill(),
+                stroke = GlassTopAppBarDefaults.buttonStroke(),
+                // shadow = if (backgroundColor.isSpecified) null else GlassShadows.Regular,
+                shadow = null,
             ) {
                 Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
                     content()

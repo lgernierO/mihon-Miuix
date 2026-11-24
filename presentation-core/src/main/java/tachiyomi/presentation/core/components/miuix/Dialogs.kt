@@ -43,6 +43,7 @@ fun AlertDialog(
     title: (@Composable () -> Unit)? = null,
     text: (@Composable () -> Unit)? = null,
     properties: DialogProperties = DialogProperties(),
+    largeScreen: Boolean? = null,
 ) {
     var show by remember { mutableStateOf(true) }
     // Miuix exposes a shared back/outside callback. The application's locked progress dialogs
@@ -52,6 +53,7 @@ fun AlertDialog(
     AppGlassDialog(
         show = show,
         modifier = modifier,
+        largeScreen = largeScreen,
         onDismissRequest = if (implicitDismiss) {
             { show = false }
         } else {

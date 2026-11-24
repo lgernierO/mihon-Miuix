@@ -18,11 +18,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.components.miuix.LocalGlassDialog
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
 import tachiyomi.presentation.core.components.miuix.navigationRailContentPadding
@@ -48,18 +50,21 @@ fun Scaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = MiuixTheme.colorScheme.surface,
-    contentColor: Color = contentColorFor(containerColor),
+    containerColor: Color = if (LocalGlassDialog.current) Color.Transparent else MiuixTheme.colorScheme.surface,
+    contentColor: Color = if (LocalGlassDialog.current) MiuixTheme.colorScheme.onBackground else contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
     content: @Composable (PaddingValues) -> Unit,
 ) {
     var fabHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    val recordingColor = containerColor.compositeOver(MiuixTheme.colorScheme.surface).copy(alpha = 1f)
     val backdrop = rememberLayerBackdrop {
-        drawRect(containerColor.copy(alpha = 1f))
+        drawRect(recordingColor)
         drawContent()
     }
-    val supported = isRuntimeShaderSupported()
+    // Glass popups already own their material and clean page sampling source. Their nested
+    // Scaffold must neither cover that surface nor start a second recording of the popup body.
+    val supported = isRuntimeShaderSupported() && !LocalGlassDialog.current
     val navigationBarPadding = LocalMiuixNavigationBarPadding.current
     val safeContentInsets = contentWindowInsets.union(WindowInsets(bottom = navigationBarPadding))
 
