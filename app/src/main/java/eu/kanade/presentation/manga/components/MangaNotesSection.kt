@@ -14,8 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.EditNote
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_edit_notes
 import tachiyomi.presentation.core.components.material.Button
@@ -24,6 +22,8 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.QuickNotes
 
 @Composable
 fun MangaNotesSection(
@@ -57,7 +57,7 @@ fun MangaNotesSection(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = MaterialSymbols.Rounded.EditNote,
+                        imageVector = MiuixIcons.Glass.QuickNotes,
                         contentDescription = null,
                         modifier = Modifier
                             .size(16.dp),

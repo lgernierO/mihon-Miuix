@@ -10,25 +10,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.util.LocalMiuixScrollBehavior
+import top.yukonga.miuix.kmp.glass.GlassBottomSheet
 import top.yukonga.miuix.kmp.glass.GlassBottomSheetDefaults
+import top.yukonga.miuix.kmp.glass.GlassDialog
 import top.yukonga.miuix.kmp.glass.GlassDialogDefaults
-import top.yukonga.miuix.kmp.glass.glassBottomSheetSurface
-import top.yukonga.miuix.kmp.glass.glassDialogSurface
 import top.yukonga.miuix.kmp.layout.BottomSheetDefaults
 import top.yukonga.miuix.kmp.layout.DialogDefaults
-import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
 
 /** Shared action adapters use the glass treatment only inside a glass popup. */
 val LocalGlassDialog = compositionLocalOf { false }
 
 /**
- * Application compatibility entry point for the former window dialog. The activity's root Scaffold
+ * Application dialog integration. The activity's root Scaffold
  * hosts the glass surface outside its recorded scene, retaining nullable dismissal and caller-owned
  * visibility, margins and completion callbacks.
  */
 @Composable
-fun WindowDialog(
+fun AppGlassDialog(
     show: Boolean,
     modifier: Modifier = Modifier,
     title: String? = null,
@@ -48,16 +46,16 @@ fun WindowDialog(
     content: @Composable () -> Unit,
 ) {
     val backdrop = LocalMiuixPopupBackdrop.current
-    OverlayDialog(
+    GlassDialog(
         show = show,
         modifier = modifier,
         title = title,
         titleColor = titleColor,
         summary = summary,
         summaryColor = summaryColor,
-        backgroundColor = backgroundColor,
+        containerColor = backgroundColor,
         enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = { onDismissRequest?.invoke() },
         onDismissFinished = onDismissFinished,
         outsideMargin = outsideMargin,
         insideMargin = insideMargin,
@@ -67,7 +65,7 @@ fun WindowDialog(
         largeScreen = largeScreen,
         cornerRadius = cornerRadius,
         dimColor = GlassDialogDefaults.ScrimColor,
-        surface = glassDialogSurface(backdrop = backdrop, containerColor = backgroundColor),
+        backdrop = backdrop,
     ) {
         // A locked progress dialog must consume Back instead of exposing the page below it.
         BackHandler(enabled = show && onDismissRequest == null) {}
@@ -75,15 +73,18 @@ fun WindowDialog(
             LocalMiuixBackdrop provides null,
             LocalMiuixScrollBehavior provides null,
             LocalMiuixNavigationBarPadding provides 0.dp,
+            LocalTopBarStartInset provides { 0.dp },
+            LocalTopAppBarTitleAlpha provides { 1f },
+            LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
             LocalGlassDialog provides true,
             content = content,
         )
     }
 }
 
-/** The root-hosted glass sheet keeps the existing WindowBottomSheet call contract. */
+/** The root-hosted glass sheet keeps the existing AppGlassBottomSheet call contract. */
 @Composable
-fun WindowBottomSheet(
+fun AppGlassBottomSheet(
     show: Boolean,
     modifier: Modifier = Modifier,
     title: String? = null,
@@ -108,19 +109,22 @@ fun WindowBottomSheet(
         LocalMiuixBackdrop provides null,
         LocalMiuixScrollBehavior provides null,
         LocalMiuixNavigationBarPadding provides 0.dp,
+        LocalTopBarStartInset provides { 0.dp },
+        LocalTopAppBarTitleAlpha provides { 1f },
+        LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
         LocalGlassDialog provides true,
     ) {
-        OverlayBottomSheet(
+        GlassBottomSheet(
             show = show,
             modifier = modifier,
             title = title,
             startAction = startAction,
             endAction = endAction,
-            backgroundColor = backgroundColor,
+            containerColor = backgroundColor,
             enableWindowDim = enableWindowDim,
             cornerRadius = cornerRadius,
             sheetMaxWidth = sheetMaxWidth,
-            onDismissRequest = onDismissRequest,
+            onDismissRequest = { onDismissRequest?.invoke() },
             onDismissFinished = onDismissFinished,
             outsideMargin = outsideMargin,
             insideMargin = insideMargin,
@@ -130,13 +134,16 @@ fun WindowBottomSheet(
             enableNestedScroll = enableNestedScroll,
             renderInRootScaffold = true,
             dimColor = GlassBottomSheetDefaults.ScrimColor,
-            surface = glassBottomSheetSurface(backdrop = backdrop, containerColor = backgroundColor),
+            backdrop = backdrop,
             content = {
                 BackHandler(enabled = show && (!allowDismiss || onDismissRequest == null)) {}
                 CompositionLocalProvider(
                     LocalMiuixBackdrop provides null,
                     LocalMiuixScrollBehavior provides null,
                     LocalMiuixNavigationBarPadding provides 0.dp,
+                    LocalTopBarStartInset provides { 0.dp },
+                    LocalTopAppBarTitleAlpha provides { 1f },
+                    LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
                     LocalGlassDialog provides true,
                     content = content,
                 )

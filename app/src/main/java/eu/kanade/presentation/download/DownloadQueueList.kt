@@ -45,8 +45,6 @@ import eu.kanade.tachiyomi.ui.download.DownloadQueueSection
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.DragHandle
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -72,7 +70,8 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.glass.Menu
+import top.yukonga.miuix.kmp.icon.glass.More
 
 @Composable
 fun DownloadQueueList(
@@ -398,7 +397,7 @@ private fun ReorderableCollectionItemScope.DragHandle(onDragStarted: () -> Unit,
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.DragHandle,
+            imageVector = MiuixIcons.Glass.Menu,
             contentDescription = stringResource(MR.strings.action_sort),
             modifier = Modifier.size(20.dp),
         )
@@ -419,7 +418,7 @@ private fun DownloadQueueItemMenu(
     Box {
         CompactIconButton(onClick = { expanded = true }) {
             CompactActionIcon(
-                imageVector = MiuixIcons.More,
+                imageVector = MiuixIcons.Glass.More,
                 contentDescription = stringResource(MR.strings.action_menu),
             )
         }

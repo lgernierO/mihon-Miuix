@@ -1,7 +1,6 @@
 package eu.kanade.presentation.reader
 
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -41,6 +40,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -48,16 +52,14 @@ import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlin.math.abs
-import kotlin.math.min
-import kotlin.math.roundToInt
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 /** A reader-only source: native page pixels are recorded without bars, popup content or scrims. */
 class ReaderBackdrop internal constructor(
     val source: Backdrop?,
     val modifier: Modifier,
+    val pageSource: Backdrop?,
+    val chromeModifier: Modifier,
 )
 
 @Composable
@@ -72,7 +74,7 @@ fun rememberReaderBackdrop(
     val rootView = LocalView.current.rootView
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val recorder = remember(viewer) { ReaderPageRecorder(viewer) }
-    val supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val supported = isRuntimeShaderSupported()
     var captureEnabled by remember { mutableStateOf(enabled) }
     LaunchedEffect(enabled) {
         if (enabled) {
@@ -83,16 +85,21 @@ fun rememberReaderBackdrop(
             captureEnabled = false
         }
     }
-    val backdrop = rememberLayerBackdrop {
-        // AndroidView's Compose drawContent is not a reliable copy of its native display list.
-        // Draw only the viewer subtree directly into the recording's hardware canvas instead.
-        if (captureEnabled && lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) &&
+    val drawReader: ContentDrawScope.() -> Unit = {
+        drawRect(backgroundColor.copy(alpha = 1f))
+        if (captureEnabled && lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             recorder.drawFrame(this, backgroundColor)
-        ) {
             if (brightness < 0) drawRect(Color.Black.copy(alpha = abs(brightness) / 100f))
             overlayColor?.let { drawRect(Color(it), blendMode = overlayBlendMode ?: BlendMode.SrcOver) }
         }
     }
+    // Native pixels are the body source; the second layer adds only Compose chrome.
+    val backdrop = rememberLayerBackdrop(onDraw = drawReader)
+    val pageBackdrop = rememberLayerBackdrop {
+        drawReader()
+        drawContent()
+    }
+    val popupBackdrop = remember(pageBackdrop, recorder) { ReaderDrawBackdrop(pageBackdrop, recorder) }
     val chromeBackdrop = remember(backdrop, recorder) { ReaderDrawBackdrop(backdrop, recorder) }
     LaunchedEffect(recorder, captureEnabled, supported, lifecycle, rootView) {
         if (!captureEnabled || !supported) return@LaunchedEffect
@@ -119,7 +126,21 @@ fun rememberReaderBackdrop(
         Modifier
     }
     // Only startup or an unavailable surface uses the opaque fallback. Motion keeps live sampling.
-    return ReaderBackdrop(chromeBackdrop.takeIf { supported && captureEnabled && recorder.ready }, modifier)
+    val available = supported && captureEnabled && recorder.ready
+    val chromeModifier = if (supported && captureEnabled) {
+        Modifier.drawWithContent {
+            recorder.drawRevision
+            drawContent()
+        }.layerBackdrop(pageBackdrop)
+    } else {
+        Modifier
+    }
+    return ReaderBackdrop(
+        source = chromeBackdrop.takeIf { available },
+        modifier = modifier,
+        pageSource = popupBackdrop.takeIf { available },
+        chromeModifier = chromeModifier,
+    )
 }
 
 /** Invalidate the consumer's cached blur pass as well as the source recording for each new frame. */

@@ -11,10 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SourceFilter
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.FilterList
-import mihon.icons.materialsymbols.rounded.Keep
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_global_search
 import tachiyomi.i18n.all
@@ -28,6 +24,10 @@ import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.MarkAllAsRead
+import top.yukonga.miuix.kmp.icon.glass.Pin
 
 @Composable
 fun GlobalSearchToolbar(
@@ -73,7 +73,7 @@ fun GlobalSearchToolbar(
                     onClick = { onChangeSearchFilter(SourceFilter.PinnedOnly) },
                     leadingIcon = {
                         Icon(
-                            imageVector = MaterialSymbols.Rounded.Keep,
+                            imageVector = MiuixIcons.Glass.Pin,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(CompactButtonDefaults.IconSize),
@@ -92,7 +92,7 @@ fun GlobalSearchToolbar(
                     onClick = { onChangeSearchFilter(SourceFilter.All) },
                     leadingIcon = {
                         Icon(
-                            imageVector = MaterialSymbols.Rounded.DoneAll,
+                            imageVector = MiuixIcons.Glass.MarkAllAsRead,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(CompactButtonDefaults.IconSize),
@@ -113,7 +113,7 @@ fun GlobalSearchToolbar(
                 onClick = { onToggleResults() },
                 leadingIcon = {
                     Icon(
-                        imageVector = MaterialSymbols.Rounded.FilterList,
+                        imageVector = MiuixIcons.Glass.Filter,
                         contentDescription = null,
                         modifier = Modifier
                             .size(CompactButtonDefaults.IconSize),

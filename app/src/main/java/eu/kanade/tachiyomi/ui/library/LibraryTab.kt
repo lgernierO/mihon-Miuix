@@ -47,8 +47,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import mihon.feature.migration.config.MigrationConfigScreen
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Help
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryManga
@@ -69,9 +67,11 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
+import tachiyomi.presentation.core.util.rememberPagerTabSelection
 import tachiyomi.source.local.isLocal
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.utils.springAnimateToPage
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Help
 
 data object LibraryTab : Tab {
 
@@ -108,6 +108,7 @@ data object LibraryTab : Tab {
         val pagerState = key(state.isLoading) {
             rememberPagerState(state.coercedActiveCategoryIndex) { categories.size }
         }
+        val tabSelection = rememberPagerTabSelection(pagerState, categories.map { it.id })
         val hasLibraryContent = !state.isLoading &&
             !(state.searchQuery.isNullOrEmpty() && !state.hasActiveFilters && state.isLibraryEmpty)
         val showCategoryTabs = hasLibraryContent &&
@@ -168,9 +169,9 @@ data object LibraryTab : Tab {
                         if (showCategoryTabs) {
                             LibraryTabs(
                                 categories = categories,
-                                pagerState = pagerState,
+                                selectedIndex = tabSelection.selectedIndex,
                                 getItemCountForCategory = { state.getItemCountForCategory(it) },
-                                onTabItemClick = { index -> scope.launch { pagerState.springAnimateToPage(index) } },
+                                onTabItemClick = tabSelection::select,
                             )
                         }
                     },
@@ -206,7 +207,7 @@ data object LibraryTab : Tab {
                         actions = listOf(
                             EmptyScreenAction(
                                 stringRes = MR.strings.getting_started_guide,
-                                icon = MaterialSymbols.AutoMirroredRounded.Help,
+                                icon = MiuixIcons.Glass.Help,
                                 onClick = { handler.openUri(GETTING_STARTED_URL) },
                             ),
                         ),

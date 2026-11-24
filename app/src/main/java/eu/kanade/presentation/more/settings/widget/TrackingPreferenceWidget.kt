@@ -11,9 +11,6 @@ import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.Tracker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Check
-import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.login_success
 import tachiyomi.i18n.refresh_tracker_profile
@@ -22,6 +19,9 @@ import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Ok
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -51,7 +51,7 @@ fun TrackingPreferenceWidget(
                     ) {
                         if (!isRefreshing) {
                             CompactActionIcon(
-                                imageVector = MaterialSymbols.Rounded.Refresh,
+                                imageVector = MiuixIcons.Glass.Refresh,
                                 contentDescription = stringResource(MR.strings.refresh_tracker_profile),
                             )
                         } else {
@@ -64,7 +64,7 @@ fun TrackingPreferenceWidget(
                     }
                 }
                 PreferenceIcon(
-                    imageVector = MaterialSymbols.Rounded.Check,
+                    imageVector = MiuixIcons.Glass.Ok,
                     tint = MiuixTheme.colorScheme.primary,
                     contentDescription = stringResource(MR.strings.login_success),
                 )

@@ -20,11 +20,10 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.coil.InstalledExtensionIcon
 import eu.kanade.tachiyomi.data.coil.InstalledSourceIcon
 import eu.kanade.tachiyomi.extension.model.Extension
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Dangerous
-import mihon.icons.materialsymbols.roundedfilled.Warning
 import tachiyomi.domain.source.model.Source
 import tachiyomi.source.local.isLocal
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Error
 import top.yukonga.miuix.kmp.squircle.squircleClip
 
 private val defaultModifier = Modifier
@@ -42,7 +41,7 @@ fun SourceIcon(
     when {
         source.isStub -> {
             Image(
-                imageVector = MaterialSymbols.RoundedFilled.Warning,
+                imageVector = MiuixIcons.Glass.Error,
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
                 modifier = modifier.then(defaultModifier),
@@ -102,7 +101,7 @@ fun ExtensionIcon(
             )
         }
         is Extension.NotLoaded -> Image(
-            imageVector = MaterialSymbols.RoundedFilled.Dangerous,
+            imageVector = MiuixIcons.Glass.Error,
             contentDescription = null,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
             modifier = modifier.then(defaultModifier),

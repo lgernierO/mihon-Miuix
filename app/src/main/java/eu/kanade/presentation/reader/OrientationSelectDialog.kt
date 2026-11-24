@@ -67,6 +67,7 @@ private fun DialogContent(
             optionTitle = { stringResource(it.stringRes) },
             optionIcon = { it.icon },
             onSelect = { selected = it },
+            optionIconRotation = { it.iconRotation },
         )
     }
 }

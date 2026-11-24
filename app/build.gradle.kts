@@ -237,7 +237,6 @@ dependencies {
     implementation(libs.androidx.navigationEvent)
 
     implementation(libs.miuix.ui)
-    implementation(libs.miuix.icons)
     implementation(libs.miuix.glass.icons)
     implementation(libs.miuix.preference)
 

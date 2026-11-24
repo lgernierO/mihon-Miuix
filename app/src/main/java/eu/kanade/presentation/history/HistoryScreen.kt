@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.components.AppBarTitle
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.presentation.components.relativeDateText
 import eu.kanade.presentation.history.components.HistoryItem
@@ -39,7 +38,7 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.glass.Delete
 
 @Composable
 fun HistoryScreen(
@@ -62,7 +61,7 @@ fun HistoryScreen(
                         listOf(
                             AppBar.Action(
                                 title = stringResource(MR.strings.pref_clear_history),
-                                icon = MiuixIcons.Delete,
+                                icon = MiuixIcons.Glass.Delete,
                                 onClick = {
                                     onDialogChange(HistoryViewModel.Dialog.DeleteAll)
                                 },

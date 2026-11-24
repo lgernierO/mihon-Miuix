@@ -34,17 +34,12 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.richTextEditorColors
 import eu.kanade.tachiyomi.ui.manga.notes.MangaNotesScreen
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.FormatListBulleted
-import mihon.icons.materialsymbols.rounded.FormatBold
-import mihon.icons.materialsymbols.rounded.FormatItalic
-import mihon.icons.materialsymbols.rounded.FormatListNumbered
-import mihon.icons.materialsymbols.rounded.FormatUnderlined
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.notes_format_bold
 import tachiyomi.i18n.notes_format_bulleted_list
@@ -58,8 +53,11 @@ import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.ListView
+import top.yukonga.miuix.kmp.icon.glass.Playlist
+import top.yukonga.miuix.kmp.icon.glass.Underline
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun MangaNotesTextArea(
@@ -137,7 +135,7 @@ fun MangaNotesTextArea(
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold)) },
                         isSelected = richTextState.currentSpanStyle.fontWeight == FontWeight.Bold,
-                        icon = MaterialSymbols.Rounded.FormatBold,
+                        text = "B",
                         description = stringResource(MR.strings.notes_format_bold),
                     )
                 }
@@ -145,7 +143,7 @@ fun MangaNotesTextArea(
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic)) },
                         isSelected = richTextState.currentSpanStyle.fontStyle == FontStyle.Italic,
-                        icon = MaterialSymbols.Rounded.FormatItalic,
+                        text = "I",
                         description = stringResource(MR.strings.notes_format_italic),
                     )
                 }
@@ -157,7 +155,7 @@ fun MangaNotesTextArea(
                         isSelected = richTextState.currentSpanStyle.textDecoration
                             ?.contains(TextDecoration.Underline)
                             ?: false,
-                        icon = MaterialSymbols.Rounded.FormatUnderlined,
+                        icon = MiuixIcons.Glass.Underline,
                         description = stringResource(MR.strings.notes_format_underline),
                     )
                 }
@@ -165,7 +163,7 @@ fun MangaNotesTextArea(
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleUnorderedList() },
                         isSelected = richTextState.isUnorderedList,
-                        icon = MaterialSymbols.AutoMirroredRounded.FormatListBulleted,
+                        icon = MiuixIcons.Glass.ListView,
                         description = stringResource(MR.strings.notes_format_bulleted_list),
                     )
                 }
@@ -173,7 +171,7 @@ fun MangaNotesTextArea(
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleOrderedList() },
                         isSelected = richTextState.isOrderedList,
-                        icon = MaterialSymbols.Rounded.FormatListNumbered,
+                        icon = MiuixIcons.Glass.Playlist,
                         description = stringResource(MR.strings.notes_format_numbered_list),
                     )
                 }
@@ -194,7 +192,8 @@ fun MangaNotesTextArea(
 @Composable
 fun MangaNotesTextAreaButton(
     onClick: () -> Unit,
-    icon: ImageVector,
+    icon: ImageVector? = null,
+    text: String? = null,
     isSelected: Boolean,
     description: String,
     modifier: Modifier = Modifier,
@@ -208,10 +207,15 @@ fun MangaNotesTextAreaButton(
             },
             backgroundColor = if (isSelected) MiuixTheme.colorScheme.secondaryVariant else Color.Transparent,
         ) {
-            CompactActionIcon(
+            if (icon != null) CompactActionIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (isSelected) MiuixTheme.colorScheme.onSecondaryVariant else MiuixTheme.colorScheme.onSurface,
+            ) else Text(
+                text = text.orEmpty(),
+                fontWeight = if (text == "B") FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (text == "I") FontStyle.Italic else FontStyle.Normal,
+                style = MiuixTheme.textStyles.title3,
             )
         }
     }

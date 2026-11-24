@@ -24,10 +24,6 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Info
-import mihon.icons.materialsymbols.roundedfilled.CheckCircle
-import mihon.icons.materialsymbols.roundedfilled.Warning
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.service.calculateChapterGap
 import tachiyomi.i18n.MR
@@ -45,6 +41,10 @@ import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Error
+import top.yukonga.miuix.kmp.icon.glass.Info
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -155,7 +155,7 @@ private fun NoChapterNotification(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = MaterialSymbols.Rounded.Info,
+                imageVector = MiuixIcons.Glass.Info,
                 tint = MiuixTheme.colorScheme.primary,
                 contentDescription = null,
             )
@@ -182,7 +182,7 @@ private fun ChapterGapWarning(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = MaterialSymbols.RoundedFilled.Warning,
+                imageVector = MiuixIcons.Glass.Error,
                 tint = MiuixTheme.colorScheme.error,
                 contentDescription = null,
             )
@@ -243,7 +243,7 @@ private fun ChapterText(
                     ),
                 ) {
                     Icon(
-                        imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
+                        imageVector = MiuixIcons.Glass.Ok,
                         contentDescription = stringResource(MR.strings.label_downloaded),
                     )
                 },

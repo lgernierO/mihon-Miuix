@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_ok
+import tachiyomi.presentation.core.components.miuix.AppGlassDialog
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
 import tachiyomi.presentation.core.components.miuix.TextButton
-import tachiyomi.presentation.core.components.miuix.WindowDialog
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
@@ -69,7 +69,7 @@ fun <T> MultiSelectListPreferenceDialog(
     val dismiss = { show = false }
     // Record only edits, so newly loaded options retain their persisted selection.
     val selectionChanges = remember { mutableStateMapOf<T, Boolean>() }
-    WindowDialog(
+    AppGlassDialog(
         modifier = Modifier.selectionSheetHeight(),
         show = show,
         onDismissRequest = dismiss,

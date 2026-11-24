@@ -2,15 +2,14 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webgpu
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import ca.mpreg.webgpuviewer.viewer.ImagePage
 import ca.mpreg.webgpuviewer.viewer.ImageViewerContinuous
 import ca.mpreg.webgpuviewer.viewer.ImageViewerContinuousState
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.mouseWheelPaging
-import kotlinx.coroutines.launch
 import kotlin.math.max
+import kotlinx.coroutines.launch
 
 class WebGpuViewerContinuous(activity: ReaderActivity, val useGap: Boolean = false) :
     WebGpuViewer(activity, isReversed = false, isVertical = true, viewerState = ImageViewerContinuousState()) {
@@ -29,7 +28,7 @@ class WebGpuViewerContinuous(activity: ReaderActivity, val useGap: Boolean = fal
     @Composable
     override fun Content(modifier: Modifier) {
         ImageViewerContinuous(
-            modifier = modifier.onGloballyPositioned(::updateReaderViewport).mouseWheelPaging(this),
+            modifier = modifier.mouseWheelPaging(this),
             state = state,
         )
     }

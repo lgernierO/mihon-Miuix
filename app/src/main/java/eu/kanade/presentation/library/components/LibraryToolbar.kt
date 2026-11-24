@@ -1,19 +1,12 @@
 package eu.kanade.presentation.library.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.SearchToolbar
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.FlipToBack
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_filter
 import tachiyomi.i18n.action_open_random_manga
@@ -21,15 +14,14 @@ import tachiyomi.i18n.action_select_all
 import tachiyomi.i18n.action_select_inverse
 import tachiyomi.i18n.action_update_category
 import tachiyomi.i18n.action_update_library
-import tachiyomi.presentation.core.components.Pill
-import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Filter
-import top.yukonga.miuix.kmp.icon.extended.SelectAll
-import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.MultiSelect
+import top.yukonga.miuix.kmp.icon.glass.SelectAll
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 @Composable
 fun LibraryToolbar(
@@ -93,7 +85,7 @@ private fun LibraryRegularToolbar(
                 listOf(
                     AppBar.Action(
                         title = stringResource(MR.strings.action_filter),
-                        icon = MiuixIcons.Filter,
+                        icon = MiuixIcons.Glass.Filter,
                         iconTint = filterTint,
                         onClick = onClickFilter,
                     ),
@@ -132,12 +124,12 @@ private fun LibrarySelectionToolbar(
                 listOf(
                     AppBar.Action(
                         title = stringResource(MR.strings.action_select_all),
-                        icon = MiuixIcons.SelectAll,
+                        icon = MiuixIcons.Glass.SelectAll,
                         onClick = onClickSelectAll,
                     ),
                     AppBar.Action(
                         title = stringResource(MR.strings.action_select_inverse),
-                        icon = MaterialSymbols.Rounded.FlipToBack,
+                        icon = MiuixIcons.Glass.MultiSelect,
                         onClick = onClickInvertSelection,
                     ),
                 ),

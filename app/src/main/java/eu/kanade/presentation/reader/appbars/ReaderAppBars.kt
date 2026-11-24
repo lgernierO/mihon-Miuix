@@ -1,8 +1,6 @@
 package eu.kanade.presentation.reader.appbars
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,9 +23,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
-import androidx.compose.runtime.getValue
-import eu.kanade.presentation.reader.ReaderGpuChrome
-import eu.kanade.presentation.reader.readerGpuTopBarModifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -75,24 +70,16 @@ fun ReaderAppBars(
     onClickCropBorder: () -> Unit,
     onClickSettings: () -> Unit,
     chapterId: Long? = null,
-    gpuChrome: ReaderGpuChrome? = null,
 ) {
     Column(modifier = Modifier.fillMaxHeight()) {
-        AnimatedVisibility(
+        CapturedAnimatedVisibility(
             visible = visible,
             enter = slideInVertically(readerBarsSlideAnimationSpec) { -it } + fadeIn(readerBarsFadeAnimationSpec),
             exit = slideOutVertically(readerBarsSlideAnimationSpec) { -it } + fadeOut(readerBarsFadeAnimationSpec),
         ) {
-            // Use AnimatedVisibility's own transition, rather than a second independent animator.
-            val materialAlpha by transition.animateFloat(
-                transitionSpec = { readerBarsFadeAnimationSpec },
-                label = "readerChromeMaterial",
-            ) { if (it == EnterExitState.Visible) 1f else 0f }
             ReaderTopBar(
                 modifier = Modifier
-                    .clickable(onClick = onClickTopAppBar)
-                    .then(readerGpuTopBarModifier(gpuChrome, materialAlpha)),
-                backgroundAlpha = if (gpuChrome?.usesGpuBlur == true) 0.3f else 1f,
+                    .clickable(onClick = onClickTopAppBar),
                 mangaTitle = mangaTitle,
                 chapterTitle = chapterTitle,
                 navigateUp = navigateUp,
@@ -114,7 +101,7 @@ fun ReaderAppBars(
                         .weight(1f)
                         .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
                 ) {
-                    AnimatedVisibility(
+                    CapturedAnimatedVisibility(
                         visible = visible,
                         enter = slideInHorizontally(readerBarsSlideAnimationSpec) { if (sliderOnLeft) -it else it } +
                             fadeIn(readerBarsFadeAnimationSpec),
@@ -151,7 +138,7 @@ fun ReaderAppBars(
             Spacer(Modifier.weight(1f))
         }
 
-        AnimatedVisibility(
+        CapturedAnimatedVisibility(
             visible = visible,
             enter = slideInVertically(readerBarsSlideAnimationSpec) { it } + fadeIn(readerBarsFadeAnimationSpec),
             exit = slideOutVertically(readerBarsSlideAnimationSpec) { it } + fadeOut(readerBarsFadeAnimationSpec),

@@ -16,10 +16,9 @@ import eu.kanade.presentation.more.stats.components.StatsItem
 import eu.kanade.presentation.more.stats.components.StatsOverviewItem
 import eu.kanade.presentation.more.stats.data.StatsData
 import eu.kanade.presentation.util.toDurationString
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.CollectionsBookmark
-import mihon.icons.materialsymbols.rounded.LocalLibrary
-import mihon.icons.materialsymbols.rounded.Schedule
+import java.util.Locale
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.chapters
 import tachiyomi.i18n.in_library
@@ -43,9 +42,10 @@ import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
-import java.util.Locale
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.FolderOutline
+import top.yukonga.miuix.kmp.icon.glass.Ok
+import top.yukonga.miuix.kmp.icon.glass.Schedule
 
 @Composable
 fun StatsScreenContent(
@@ -91,17 +91,17 @@ private fun LazyItemScope.OverviewSection(
             StatsOverviewItem(
                 title = data.libraryMangaCount.toString(),
                 subtitle = stringResource(MR.strings.in_library),
-                icon = MaterialSymbols.Rounded.CollectionsBookmark,
+                icon = MiuixIcons.Glass.FolderOutline,
             )
             StatsOverviewItem(
                 title = readDurationString,
                 subtitle = stringResource(MR.strings.label_read_duration),
-                icon = MaterialSymbols.Rounded.Schedule,
+                icon = MiuixIcons.Glass.Schedule,
             )
             StatsOverviewItem(
                 title = data.completedMangaCount.toString(),
                 subtitle = stringResource(MR.strings.label_completed_titles),
-                icon = MaterialSymbols.Rounded.LocalLibrary,
+                icon = MiuixIcons.Glass.Ok,
             )
         }
     }

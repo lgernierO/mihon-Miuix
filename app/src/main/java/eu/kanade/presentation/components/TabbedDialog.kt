@@ -16,23 +16,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.label_more
 import tachiyomi.presentation.core.components.miuix.CompactActionIcon
 import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.rememberPagerTabSelection
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.glass.More
 import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
 import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
-import top.yukonga.miuix.kmp.utils.springAnimateToPage
 
 object TabbedDialogPaddings {
     val Horizontal = 24.dp
@@ -56,7 +54,7 @@ fun TabbedDialog(
         onDismissRequest = onDismissRequest,
         enableWindowDim = enableWindowDim,
     ) {
-        val scope = rememberCoroutineScope()
+        val selection = rememberPagerTabSelection(pagerState, tabTitles)
 
         Column(Modifier.fillMaxWidth()) {
             if (secondaryContent != null) {
@@ -68,8 +66,8 @@ fun TabbedDialog(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TabRow(
                     tabs = tabTitles,
-                    selectedTabIndex = pagerState.currentPage.coerceIn(tabTitles.indices),
-                    onTabSelected = { index -> scope.launch { pagerState.springAnimateToPage(index) } },
+                    selectedTabIndex = selection.selectedIndex.coerceIn(tabTitles.indices),
+                    onTabSelected = selection::select,
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -119,7 +117,7 @@ private fun MoreMenu(
             onClick = { expanded = true },
         ) {
             CompactActionIcon(
-                imageVector = MiuixIcons.More,
+                imageVector = MiuixIcons.Glass.More,
                 contentDescription = stringResource(MR.strings.label_more),
             )
         }

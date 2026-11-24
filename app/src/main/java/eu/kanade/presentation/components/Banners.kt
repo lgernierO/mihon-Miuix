@@ -1,6 +1,6 @@
 package eu.kanade.presentation.components
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -73,7 +73,7 @@ fun AppStateBanners(
     val mainInsetsTop = mainInsets.getTop(density)
     SubcomposeLayout(modifier = modifier) { constraints ->
         val indexingPlaceable = subcompose(0) {
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = indexing,
                 enter = expandVertically(),
                 exit = shrinkVertically(),
@@ -86,7 +86,7 @@ fun AppStateBanners(
         val indexingHeight = indexingPlaceable.fastMaxBy { it.height }?.height ?: 0
 
         val downloadedOnlyPlaceable = subcompose(1) {
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = downloadedOnlyMode,
                 enter = expandVertically(),
                 exit = shrinkVertically(),
@@ -100,7 +100,7 @@ fun AppStateBanners(
         val downloadedOnlyHeight = downloadedOnlyPlaceable.fastMaxBy { it.height }?.height ?: 0
 
         val incognitoPlaceable = subcompose(2) {
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = incognitoMode,
                 enter = expandVertically(),
                 exit = shrinkVertically(),

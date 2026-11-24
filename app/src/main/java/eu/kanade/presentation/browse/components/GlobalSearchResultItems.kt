@@ -16,9 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
-import mihon.icons.materialsymbols.roundedfilled.Error
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.unknown_error
 import tachiyomi.presentation.core.components.material.padding
@@ -28,6 +25,9 @@ import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Error
+import top.yukonga.miuix.kmp.icon.glass.Forward
 
 @Composable
 fun GlobalSearchResultItem(
@@ -57,7 +57,7 @@ fun GlobalSearchResultItem(
                 Text(text = subtitle)
             }
             CompactIconButton(onClick = onClick) {
-                CompactActionIcon(imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward, contentDescription = null)
+                CompactActionIcon(imageVector = MiuixIcons.Glass.Forward, contentDescription = null)
             }
         }
         content()
@@ -93,7 +93,7 @@ fun GlobalSearchErrorResultItem(message: String?) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(imageVector = MaterialSymbols.RoundedFilled.Error, contentDescription = null)
+        Icon(imageVector = MiuixIcons.Glass.Error, contentDescription = null)
         Spacer(Modifier.height(4.dp))
         Text(
             text = message ?: stringResource(MR.strings.unknown_error),

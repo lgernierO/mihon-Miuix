@@ -32,9 +32,8 @@ import eu.kanade.tachiyomi.data.track.Tracker
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.lang.toJavaLocalDate
 import eu.kanade.tachiyomi.util.system.copyToClipboard
+import java.time.format.DateTimeFormatter
 import kotlinx.datetime.toJavaLocalDate
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_copy_link
 import tachiyomi.i18n.action_open_in_browser
@@ -49,12 +48,12 @@ import tachiyomi.i18n.status
 import tachiyomi.i18n.track_finished_reading_date
 import tachiyomi.i18n.track_started_reading_date
 import tachiyomi.i18n.tracked_privately
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.components.miuix.CompactActionIcon
 import tachiyomi.presentation.core.components.miuix.CompactIconButtonSize
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
-import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.basic.Badge
@@ -64,9 +63,9 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.glass.Hide
+import top.yukonga.miuix.kmp.icon.glass.More
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun TrackInfoDialogHome(
@@ -178,7 +177,7 @@ private fun TrackInfoItem(
                             modifier = Modifier.absoluteOffset(x = (-5).dp),
                         ) {
                             Icon(
-                                imageVector = MaterialSymbols.RoundedFilled.VisibilityOff,
+                                imageVector = MiuixIcons.Glass.Hide,
                                 contentDescription = stringResource(MR.strings.tracked_privately),
                                 modifier = Modifier.size(14.dp),
                             )
@@ -302,7 +301,7 @@ private fun TrackInfoItemMenu(
     private: Boolean,
     onTogglePrivate: (() -> Unit)?,
 ) {
-    WindowIconDropdownMenu(
+    AppGlassIconDropdownMenu(
         entry = DropdownEntry(
             items = buildList {
                 add(
@@ -342,10 +341,9 @@ private fun TrackInfoItemMenu(
         minWidth = 48.dp,
         minHeight = 48.dp,
         size = CompactIconButtonSize,
-        glass = false,
     ) {
         CompactActionIcon(
-            imageVector = MiuixIcons.More,
+            imageVector = MiuixIcons.Glass.More,
             contentDescription = stringResource(MR.strings.label_more),
         )
     }

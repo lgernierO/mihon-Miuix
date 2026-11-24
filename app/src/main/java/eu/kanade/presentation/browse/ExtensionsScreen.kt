@@ -2,7 +2,6 @@ package eu.kanade.presentation.browse
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,14 +42,6 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
 import mihon.domain.extension.model.ExtensionStore
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.Download
-import mihon.icons.materialsymbols.rounded.Info
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.materialsymbols.rounded.Refresh
-import mihon.icons.materialsymbols.rounded.Settings
-import mihon.icons.materialsymbols.rounded.VerifiedUser
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
@@ -103,6 +94,14 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Download
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.Info
+import top.yukonga.miuix.kmp.icon.glass.Refresh
+import top.yukonga.miuix.kmp.icon.glass.SecurityStatus
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 
 @Composable
 fun ExtensionScreen(
@@ -141,7 +140,7 @@ fun ExtensionScreen(
                     actions = listOf(
                         EmptyScreenAction(
                             stringRes = MR.strings.extensionStores,
-                            icon = MaterialSymbols.Rounded.Settings,
+                            icon = MiuixIcons.Glass.SettingsOutline,
                             onClick = { navigator.push(ExtensionStoresScreen()) },
                         ),
                     ),
@@ -497,7 +496,7 @@ private fun ExtensionItemActions(
         if (!installStep.isCompleted()) {
             CompactIconButton(onClick = { onClickItemCancel(extension) }) {
                 CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.Close,
+                    imageVector = MiuixIcons.Glass.Close,
                     contentDescription = stringResource(MR.strings.action_cancel),
                 )
             }
@@ -506,14 +505,14 @@ private fun ExtensionItemActions(
 
         val secondaryAction = when (extension) {
             is Extension.Available -> {
-                (MaterialSymbols.Rounded.Public to MR.strings.action_open_in_web_view)
+                (MiuixIcons.Glass.GlobalVpn to MR.strings.action_open_in_web_view)
                     .takeIf { extension.sources.isNotEmpty() }
             }
-            is Extension.Loaded -> MaterialSymbols.Rounded.Settings to MR.strings.action_settings
+            is Extension.Loaded -> MiuixIcons.Glass.SettingsOutline to MR.strings.action_settings
             is Extension.NotLoaded -> if (extension.reason is Extension.NotLoaded.Reason.Untrusted) {
-                MaterialSymbols.Rounded.VerifiedUser to MR.strings.ext_trust
+                MiuixIcons.Glass.SecurityStatus to MR.strings.ext_trust
             } else {
-                MaterialSymbols.Rounded.Info to MR.strings.ext_not_loaded_details
+                MiuixIcons.Glass.Info to MR.strings.ext_not_loaded_details
             }
         }
         secondaryAction?.let { (icon, label) ->
@@ -523,10 +522,10 @@ private fun ExtensionItemActions(
         }
 
         val action = when {
-            installStep == InstallStep.Error -> MaterialSymbols.Rounded.Refresh to MR.strings.action_retry
-            extension is Extension.Available -> MaterialSymbols.Rounded.Download to MR.strings.ext_install
+            installStep == InstallStep.Error -> MiuixIcons.Glass.Refresh to MR.strings.action_retry
+            extension is Extension.Available -> MiuixIcons.Glass.Download to MR.strings.ext_install
             extension is Extension.Installed && extension.hasUpdate -> {
-                MaterialSymbols.Rounded.Download to MR.strings.ext_update
+                MiuixIcons.Glass.Download to MR.strings.ext_update
             }
             else -> null
         }

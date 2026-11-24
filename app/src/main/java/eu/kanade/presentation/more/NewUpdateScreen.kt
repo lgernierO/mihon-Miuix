@@ -16,10 +16,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import eu.kanade.presentation.manga.components.MarkdownRender
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.ui.more.NewUpdateScreenModel
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.OpenInNew
-import mihon.icons.materialsymbols.rounded.UpdateDisabled
-import mihon.icons.materialsymbols.rounded.Verified
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
@@ -42,6 +38,10 @@ import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.InfoScreen
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.OpenWithOtherApp
+import top.yukonga.miuix.kmp.icon.glass.Prohibit
+import top.yukonga.miuix.kmp.icon.glass.SecurityAuthenticity
 
 @Composable
 fun NewUpdateScreen(
@@ -80,7 +80,7 @@ fun NewUpdateScreen(
     }
 
     InfoScreen(
-        icon = MaterialSymbols.Rounded.Verified,
+        icon = MiuixIcons.Glass.SecurityAuthenticity,
         headingText = stringResource(MR.strings.update_check_notification_update_available),
         subtitleText = versionName,
         acceptText = when (stage) {
@@ -99,7 +99,7 @@ fun NewUpdateScreen(
         rejectAction = {
             OutlinedButton(onClick = { showSkipDialog = true }) {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.UpdateDisabled,
+                    imageVector = MiuixIcons.Glass.Prohibit,
                     contentDescription = stringResource(MR.strings.update_check_skip),
                 )
             }
@@ -121,7 +121,7 @@ fun NewUpdateScreen(
             ) {
                 Text(text = stringResource(MR.strings.update_check_open))
                 Spacer(modifier = Modifier.width(MaterialTheme.padding.extraSmall))
-                Icon(imageVector = MaterialSymbols.AutoMirroredRounded.OpenInNew, contentDescription = null)
+                Icon(imageVector = MiuixIcons.Glass.OpenWithOtherApp, contentDescription = null)
             }
         }
     }

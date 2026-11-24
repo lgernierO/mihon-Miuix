@@ -16,10 +16,6 @@ import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.util.formattedMessage
 import eu.kanade.tachiyomi.source.Source
 import kotlinx.coroutines.flow.StateFlow
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Help
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.manga.model.Manga
@@ -40,6 +36,10 @@ import tachiyomi.source.local.LocalSource
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.Help
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 
 @Composable
 fun BrowseSourceContent(
@@ -94,7 +94,7 @@ fun BrowseSourceContent(
                 listOf(
                     EmptyScreenAction(
                         stringRes = MR.strings.local_source_help_guide,
-                        icon = MaterialSymbols.AutoMirroredRounded.Help,
+                        icon = MiuixIcons.Glass.Help,
                         onClick = onLocalSourceHelpClick,
                     ),
                 )
@@ -102,17 +102,17 @@ fun BrowseSourceContent(
                 listOf(
                     EmptyScreenAction(
                         stringRes = MR.strings.action_retry,
-                        icon = MaterialSymbols.Rounded.Refresh,
+                        icon = MiuixIcons.Glass.Refresh,
                         onClick = mangaList::refresh,
                     ),
                     EmptyScreenAction(
                         stringRes = MR.strings.action_open_in_web_view,
-                        icon = MaterialSymbols.Rounded.Public,
+                        icon = MiuixIcons.Glass.GlobalVpn,
                         onClick = onWebViewClick,
                     ),
                     EmptyScreenAction(
                         stringRes = MR.strings.label_help,
-                        icon = MaterialSymbols.AutoMirroredRounded.Help,
+                        icon = MiuixIcons.Glass.Help,
                         onClick = onHelpClick,
                     ),
                 )

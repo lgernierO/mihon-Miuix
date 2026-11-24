@@ -49,8 +49,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Save
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_close
@@ -60,12 +58,12 @@ import tachiyomi.i18n.action_edit_cover
 import tachiyomi.i18n.action_save
 import tachiyomi.i18n.action_share
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
 import tachiyomi.presentation.core.components.miuix.LocalMiuixPopupInRoot
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
 import tachiyomi.presentation.core.components.miuix.SnackbarHost
-import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.source.local.isLocal
@@ -73,9 +71,10 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Share
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Edit
+import top.yukonga.miuix.kmp.icon.glass.Save
+import top.yukonga.miuix.kmp.icon.glass.Share
 
 @Composable
 fun MangaCoverDialog(
@@ -113,7 +112,7 @@ fun MangaCoverDialog(
                             ActionsPill {
                                 IconButton(onClick = onDismissRequest) {
                                     AppBarIcon(
-                                        imageVector = MiuixIcons.Close,
+                                        imageVector = MiuixIcons.Glass.Close,
                                         contentDescription = stringResource(MR.strings.action_close),
                                     )
                                 }
@@ -124,19 +123,19 @@ fun MangaCoverDialog(
                                     actions = listOf(
                                         AppBar.Action(
                                             title = stringResource(MR.strings.action_share),
-                                            icon = MiuixIcons.Share,
+                                            icon = MiuixIcons.Glass.Share,
                                             onClick = onShareClick,
                                         ),
                                         AppBar.Action(
                                             title = stringResource(MR.strings.action_save),
-                                            icon = MaterialSymbols.Rounded.Save,
+                                            icon = MiuixIcons.Glass.Save,
                                             onClick = onSaveClick,
                                         ),
                                     ),
                                 )
                                 if (onEditClick != null) {
                                     if (isCustomCover && (manga.favorite || manga.isLocal())) {
-                                        WindowIconDropdownMenu(
+                                        AppGlassIconDropdownMenu(
                                             entry = DropdownEntry(
                                                 items = listOf(
                                                     DropdownItem(
@@ -153,7 +152,7 @@ fun MangaCoverDialog(
                                             minHeight = 48.dp,
                                         ) {
                                             AppBarIcon(
-                                                imageVector = MiuixIcons.Edit,
+                                                imageVector = MiuixIcons.Glass.Edit,
                                                 contentDescription = stringResource(MR.strings.action_edit_cover),
                                             )
                                         }
@@ -169,7 +168,7 @@ fun MangaCoverDialog(
                                             },
                                         ) {
                                             AppBarIcon(
-                                                imageVector = MiuixIcons.Edit,
+                                                imageVector = MiuixIcons.Glass.Edit,
                                                 contentDescription = stringResource(MR.strings.action_edit_cover),
                                             )
                                         }

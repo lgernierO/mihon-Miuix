@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
@@ -34,8 +33,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
-import top.yukonga.miuix.kmp.basic.DropdownColors
-import top.yukonga.miuix.kmp.basic.DropdownDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.IconButtonDefaults
@@ -49,7 +46,6 @@ import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.glass.glassPopupAnchor
 import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
 import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
-import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.PopupLayout
 
 /** Independent platform dialogs host their menus in their own Scaffold. */
@@ -137,57 +133,47 @@ internal fun GlassMenuHost(
 }
 
 @Composable
-fun WindowIconDropdownMenu(
+fun AppGlassIconDropdownMenu(
     entry: DropdownEntry,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     maxHeight: Dp? = null,
-    dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
-    cornerRadius: Dp = IconButtonDefaults.CornerRadius,
     minHeight: Dp = IconButtonDefaults.MinHeight,
     minWidth: Dp = IconButtonDefaults.MinWidth,
     size: Dp = IconButtonVisualSize,
-    glass: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    WindowIconDropdownMenu(
+    AppGlassIconDropdownMenu(
         entries = remember(entry) { listOf(entry) },
         modifier = modifier,
         enabled = enabled,
         maxHeight = maxHeight,
-        dropdownColors = dropdownColors,
         collapseOnSelection = collapseOnSelection,
         onExpandedChange = onExpandedChange,
         backgroundColor = backgroundColor,
-        cornerRadius = cornerRadius,
         minHeight = minHeight,
         minWidth = minWidth,
         size = size,
-        glass = glass,
         content = content,
     )
 }
 
 /** The public glass menu retains grouped entries, selected rows and cascading children. */
 @Composable
-@Suppress("UNUSED_PARAMETER")
-fun WindowIconDropdownMenu(
+fun AppGlassIconDropdownMenu(
     entries: List<DropdownEntry>,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     maxHeight: Dp? = null,
-    dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     collapseOnSelection: Boolean = entries.size <= 1,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     backgroundColor: Color = Color.Unspecified,
-    cornerRadius: Dp = IconButtonDefaults.CornerRadius,
     minHeight: Dp = IconButtonDefaults.MinHeight,
     minWidth: Dp = IconButtonDefaults.MinWidth,
     size: Dp = IconButtonVisualSize,
-    glass: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -202,8 +188,8 @@ fun WindowIconDropdownMenu(
     } else {
         buttonBackdrop
     }
-    val radius = cornerRadius.coerceIn(0.dp, size / 2)
-    val fill = if (backgroundColor.isSpecified) backgroundColor else toolbarButtonFill()
+    val radius = size / 2
+    val fill = if (backgroundColor.isSpecified) backgroundColor else GlassTopAppBarDefaults.buttonFill()
     val sizing = GlassPopupSizing(maxHeight = maxHeight ?: GlassPopupDefaults.MaxHeight)
     val setExpanded: (Boolean) -> Unit = remember {
         { next ->
@@ -225,42 +211,18 @@ fun WindowIconDropdownMenu(
         ),
         contentAlignment = Alignment.Center,
     ) {
-        if (actualEnabled && glass) {
-            val surfaceProgress = LocalMiuixToolbarGlassProgress.current?.value ?: 1f
+        if (actualEnabled) {
             GlassIconButton(
                 onClick = {
                     setExpanded(!expanded)
                     if (expanded) hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
                 },
-                backdrop = buttonBackdrop.takeIf { surfaceProgress > 0f },
-                surfaceAlpha = surfaceProgress,
-                material = animatedToolbarButtonMaterial(),
+                backdrop = buttonBackdrop,
                 size = size,
-                shape = GlassShape(radius),
                 fill = fill,
                 modifier = Modifier
                     .glassPopupAnchor(anchor, cornerRadius = radius, floating = true)
                     .semantics { role = Role.Button },
-            ) {
-                Box(modifier = Modifier.glassPopupAnchorContent(anchor)) {
-                    currentContent()
-                }
-            }
-        } else if (actualEnabled) {
-            // The native button owns feedback; anchor bounds stay on the compact visual surface.
-            IconButton(
-                onClick = {
-                    setExpanded(!expanded)
-                    if (expanded) hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
-                },
-                backgroundColor = backgroundColor.takeIf { it.isSpecified } ?: compactIconButtonBackgroundColor(true),
-                cornerRadius = radius,
-                minHeight = size,
-                minWidth = size,
-                modifier = Modifier
-                    .sizeIn(minWidth = IconButtonTouchTargetSize, minHeight = IconButtonTouchTargetSize)
-                    .wrapContentSize(Alignment.Center)
-                    .glassPopupAnchor(anchor, cornerRadius = radius, floating = false),
             ) {
                 Box(modifier = Modifier.glassPopupAnchorContent(anchor)) {
                     currentContent()
@@ -271,12 +233,8 @@ fun WindowIconDropdownMenu(
             IconButton(
                 onClick = {},
                 enabled = false,
-                backgroundColor = if (glass || backgroundColor.isSpecified) {
-                    backgroundColor
-                } else {
-                    compactIconButtonBackgroundColor(false)
-                },
-                cornerRadius = cornerRadius,
+                backgroundColor = backgroundColor.takeIf { it.isSpecified } ?: Color.Transparent,
+                cornerRadius = radius,
                 minHeight = size,
                 minWidth = size,
                 modifier = Modifier.semantics {
@@ -307,8 +265,7 @@ fun WindowIconDropdownMenu(
 
 /** Items-based preference adapter; selection and host lifetime remain framework owned. */
 @Composable
-@Suppress("UNUSED_PARAMETER")
-fun WindowDropdownPreference(
+fun AppGlassDropdownPreference(
     items: List<String>,
     selectedIndex: Int,
     title: String,
@@ -316,7 +273,6 @@ fun WindowDropdownPreference(
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
     summary: String? = null,
     summaryColor: BasicComponentColors = BasicComponentDefaults.summaryColor(),
-    dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     startAction: (@Composable () -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,

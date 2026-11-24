@@ -11,14 +11,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuViewerContinuous
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import mihon.app.di.appGraph
-import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
-import mihon.icons.custommaterialsymbols.rounded.ReaderLeftToRight
-import mihon.icons.custommaterialsymbols.rounded.ReaderLongStrip
-import mihon.icons.custommaterialsymbols.rounded.ReaderLongStripGaps
-import mihon.icons.custommaterialsymbols.rounded.ReaderRightToLeft
-import mihon.icons.custommaterialsymbols.rounded.ReaderVertical
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.MobileGear
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.label_default
 import tachiyomi.i18n.left_to_right_viewer
@@ -26,6 +18,13 @@ import tachiyomi.i18n.right_to_left_viewer
 import tachiyomi.i18n.vertical_plus_viewer
 import tachiyomi.i18n.vertical_viewer
 import tachiyomi.i18n.webtoon_viewer
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.BookOutline
+import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
+import top.yukonga.miuix.kmp.icon.glass.ChevronForward
+import top.yukonga.miuix.kmp.icon.glass.ListView
+import top.yukonga.miuix.kmp.icon.glass.PageDown
+import top.yukonga.miuix.kmp.icon.glass.Playlist
 
 enum class ReadingMode(
     val stringRes: StringResource,
@@ -34,38 +33,38 @@ enum class ReadingMode(
     val direction: Direction? = null,
     val type: ViewerType? = null,
 ) {
-    DEFAULT(MR.strings.label_default, MaterialSymbols.Rounded.MobileGear, 0x00000000),
+    DEFAULT(MR.strings.label_default, MiuixIcons.Glass.BookOutline, 0x00000000),
     LEFT_TO_RIGHT(
         MR.strings.left_to_right_viewer,
-        CustomMaterialSymbols.Rounded.ReaderLeftToRight,
+        MiuixIcons.Glass.ChevronForward,
         0x00000001,
         Direction.Horizontal,
         ViewerType.Pager,
     ),
     RIGHT_TO_LEFT(
         MR.strings.right_to_left_viewer,
-        CustomMaterialSymbols.Rounded.ReaderRightToLeft,
+        MiuixIcons.Glass.ChevronBackward,
         0x00000002,
         Direction.Horizontal,
         ViewerType.Pager,
     ),
     VERTICAL(
         MR.strings.vertical_viewer,
-        CustomMaterialSymbols.Rounded.ReaderVertical,
+        MiuixIcons.Glass.PageDown,
         0x00000003,
         Direction.Vertical,
         ViewerType.Pager,
     ),
     WEBTOON(
         MR.strings.webtoon_viewer,
-        CustomMaterialSymbols.Rounded.ReaderLongStrip,
+        MiuixIcons.Glass.ListView,
         0x00000004,
         Direction.Vertical,
         ViewerType.Webtoon,
     ),
     CONTINUOUS_VERTICAL(
         MR.strings.vertical_plus_viewer,
-        CustomMaterialSymbols.Rounded.ReaderLongStripGaps,
+        MiuixIcons.Glass.Playlist,
         0x00000005,
         Direction.Vertical,
         ViewerType.Webtoon,

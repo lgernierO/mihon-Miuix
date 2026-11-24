@@ -46,9 +46,6 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsViewModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Eyeglasses2
-import mihon.icons.materialsymbols.rounded.Settings
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_disable_all
 import tachiyomi.i18n.action_enable_all
@@ -77,6 +74,9 @@ import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Glasses
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
@@ -371,7 +371,7 @@ private fun DetailsHeader(
             onCheckedChange = onExtIncognitoChange,
             startAction = {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.Eyeglasses2,
+                    imageVector = MiuixIcons.Glass.Glasses,
                     contentDescription = null,
                 )
             },
@@ -438,7 +438,7 @@ private fun SourceSwitchPreference(
             if (source.source is ConfigurableSource) {
                 CompactIconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
                     CompactActionIcon(
-                        imageVector = MaterialSymbols.Rounded.Settings,
+                        imageVector = MiuixIcons.Glass.SettingsOutline,
                         contentDescription = stringResource(MR.strings.label_settings),
                         tint = MaterialTheme.colorScheme.onSurface,
                     )

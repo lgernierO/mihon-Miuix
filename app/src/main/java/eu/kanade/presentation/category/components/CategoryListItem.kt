@@ -13,10 +13,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.DragHandle
-import mihon.icons.materialsymbols.rounded.Edit
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
@@ -30,6 +26,10 @@ import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.Edit
+import top.yukonga.miuix.kmp.icon.glass.Menu
 
 @Composable
 fun ReorderableCollectionItemScope.CategoryListItem(
@@ -76,7 +76,7 @@ fun ReorderableCollectionItemScope.CategoryListItem(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = MaterialSymbols.Rounded.DragHandle,
+                        imageVector = MiuixIcons.Glass.Menu,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                     )
@@ -86,14 +86,14 @@ fun ReorderableCollectionItemScope.CategoryListItem(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CompactIconButton(onClick = onRename) {
                         Icon(
-                            imageVector = MaterialSymbols.Rounded.Edit,
+                            imageVector = MiuixIcons.Glass.Edit,
                             contentDescription = stringResource(MR.strings.action_rename_category),
                             modifier = Modifier.size(20.dp),
                         )
                     }
                     CompactIconButton(onClick = onDelete) {
                         Icon(
-                            imageVector = MaterialSymbols.Rounded.Delete,
+                            imageVector = MiuixIcons.Glass.Delete,
                             contentDescription = stringResource(MR.strings.action_delete),
                             modifier = Modifier.size(20.dp),
                         )

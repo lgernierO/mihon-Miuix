@@ -17,6 +17,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -24,20 +25,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Check
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_apply
 import tachiyomi.i18n.action_revert_to_default
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.glass.GlassDialogButton
+import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.preference.RadioButtonLocation
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -61,7 +62,7 @@ fun ModeSelectionDialog(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             onUseDefault?.let {
-                Button(
+                GlassDialogButton(
                     onClick = it,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     minHeight = 48.dp,
@@ -75,16 +76,16 @@ fun ModeSelectionDialog(
                 }
             }
 
-            Button(
+            GlassDialogButton(
                 onClick = onApply,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
                 minHeight = 48.dp,
-                colors = ButtonDefaults.buttonColorsPrimary(),
+                role = GlassDialogButtonRole.Primary,
                 insideMargin = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
             ) {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.Check,
-                    modifier = Modifier.size(18.dp),
+                    imageVector = MiuixIcons.Glass.Ok,
+                    modifier = Modifier.size(28.dp),
                     contentDescription = null,
                 )
                 Text(
@@ -106,6 +107,7 @@ internal fun <T : Enum<T>> ModeSelectionList(
     optionTitle: @Composable (T) -> String,
     optionIcon: (T) -> ImageVector,
     onSelect: (T) -> Unit,
+    optionIconRotation: (T) -> Float = { 0f },
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SmallTitle(text = title)
@@ -129,7 +131,7 @@ internal fun <T : Enum<T>> ModeSelectionList(
                             Icon(
                                 imageVector = optionIcon(option),
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(28.dp).rotate(optionIconRotation(option)),
                                 tint = if (option == selectedOption) {
                                     MiuixTheme.colorScheme.primary
                                 } else {

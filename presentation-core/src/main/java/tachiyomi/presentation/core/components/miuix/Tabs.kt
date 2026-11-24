@@ -19,15 +19,14 @@ import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import tachiyomi.presentation.core.theme.contentColorWithContrast
 import top.yukonga.miuix.kmp.basic.TabRowDefaults
-import top.yukonga.miuix.kmp.glass.GlassTabRow
-import top.yukonga.miuix.kmp.glass.GlassTabRowDefaults
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassSegmentedTabRow
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.utils.overScrollHorizontal
 
 /**
- * Glass tabs keep the existing sizing and selection contract. The framework owns each pill's
+ * Segmented tabs keep the existing sizing and selection contract. The framework owns the track's
  * selection and press feedback; the application adds scrolling for long category lists.
  */
 @Composable
@@ -46,25 +45,14 @@ fun TabRow(
     val minimumTabWidth = minWidth.coerceAtLeast(0.dp)
     val maximumTabWidth = maxWidth.coerceAtLeast(minimumTabWidth)
     val backdrop = LocalMiuixBackdrop.current
-    val scheme = MiuixTheme.colorScheme
-    val defaultColors = GlassTabRowDefaults.primaryColors()
-    // Pair each foreground with its container rather than fixing black/white by selection state.
-    val tabColors = defaultColors.copy(
-        selectedContentColor = defaultColors.selectedContainerColor.contentColorWithContrast(
-            preferred = scheme.onPrimary,
-            fallback = scheme.onSurface,
-        ),
-        contentColor = defaultColors.restingContainerColor.contentColorWithContrast(
-            preferred = scheme.onSurface,
-            fallback = scheme.onBackground,
-        ),
-    )
+    val fallbackBackdrop = rememberLayerBackdrop()
+    val surfaceAlpha = if (isRuntimeShaderSupported() && backdrop != null && LocalTopBarContentScrolled.current) 1f else 0f
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
     var positioned by remember { mutableStateOf(false) }
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val spacing = GlassTabRowDefaults.TabGap * (tabs.size - 1)
+        val spacing = 0.dp
         val viewportWidth = if (constraints.hasBoundedWidth) {
             this.maxWidth
         } else {
@@ -78,7 +66,7 @@ fun TabRow(
 
         LaunchedEffect(selectedIndex, tabs.size, rowWidth, viewportWidth, density) {
             val target = with(density) {
-                val selectedStart = (tabWidth + GlassTabRowDefaults.TabGap) * selectedIndex
+                val selectedStart = tabWidth * selectedIndex
                 (selectedStart + tabWidth / 2 - viewportWidth / 2).roundToPx()
                     .coerceIn(0, (rowWidth - viewportWidth).roundToPx().coerceAtLeast(0))
             }
@@ -96,16 +84,16 @@ fun TabRow(
                 .overScrollHorizontal(isEnabled = { scrollState.canScrollBackward || scrollState.canScrollForward })
                 .horizontalScroll(scrollState, overscrollEffect = null),
         ) {
-            GlassTabRow(
+            GlassSegmentedTabRow(
                 tabs = tabs,
                 selectedIndex = selectedIndex,
                 onSelect = onTabSelected,
-                backdrop = backdrop,
+                backdrop = backdrop ?: fallbackBackdrop,
+                surfaceAlpha = surfaceAlpha,
                 modifier = Modifier
                     .width(rowWidth)
                     .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = tabs.size) },
                 height = height,
-                colors = tabColors,
             )
         }
     }

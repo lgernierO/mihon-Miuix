@@ -1,6 +1,6 @@
 package tachiyomi.presentation.core.components.miuix
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
+import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -24,18 +26,16 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.Button as MiuixButton
+import top.yukonga.miuix.kmp.basic.ButtonColors as MiuixButtonColors
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 import top.yukonga.miuix.kmp.basic.TextButtonColors
 import top.yukonga.miuix.kmp.glass.GlassDialogButton
 import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
-import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
-import top.yukonga.miuix.kmp.basic.Button as MiuixButton
-import top.yukonga.miuix.kmp.basic.ButtonColors as MiuixButtonColors
-import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * Small contextual actions retain Miuix's 40dp visual button and reserve the 48dp platform touch
@@ -91,6 +91,16 @@ fun Button(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
+    if (LocalGlassDialog.current) {
+        GlassDialogButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            role = GlassDialogButtonRole.Primary,
+        ) { ButtonContent(content = content) }
+        return
+    }
+
     val miuixColors = if (colors == null) {
         ButtonDefaults.buttonColorsPrimary()
     } else {
@@ -175,15 +185,13 @@ fun TextButton(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
-            cornerRadius = cornerRadius,
             minWidth = minWidth,
             minHeight = minHeight,
-            colors = ButtonDefaults.buttonColors(
-                color = colors.color,
-                disabledColor = colors.disabledColor,
-                contentColor = colors.textColor,
-                disabledContentColor = colors.disabledTextColor,
-            ),
+            role = if (LocalDialogButtonPrimary.current || colors.color == MiuixTheme.colorScheme.primary) {
+                GlassDialogButtonRole.Primary
+            } else {
+                GlassDialogButtonRole.Normal
+            },
             insideMargin = insideMargin,
             interactionSource = interactionSource,
         ) {
@@ -214,6 +222,16 @@ fun OutlinedButton(
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 ) {
+    if (LocalGlassDialog.current) {
+        GlassDialogButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            role = GlassDialogButtonRole.Normal,
+        ) { ButtonContent(content = content) }
+        return
+    }
+
     MiuixButton(
         onClick = onClick,
         modifier = modifier,
@@ -232,6 +250,16 @@ fun FilledTonalButton(
     colors: ButtonColors? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
+    if (LocalGlassDialog.current) {
+        GlassDialogButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            role = GlassDialogButtonRole.Normal,
+        ) { ButtonContent(content = content) }
+        return
+    }
+
     MiuixButton(
         onClick = onClick,
         modifier = modifier,
@@ -289,7 +317,7 @@ fun SmallExtendedFloatingActionButton(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 icon()
-                AnimatedVisibility(
+                CapturedAnimatedVisibility(
                     visible = expanded,
                     enter = expandHorizontally(),
                     exit = shrinkHorizontally(),

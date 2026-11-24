@@ -51,9 +51,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Visibility
-import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_close
@@ -88,11 +85,13 @@ import tachiyomi.presentation.core.components.miuix.OutlinedTextField
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Help
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Help
+import top.yukonga.miuix.kmp.icon.glass.Hide
+import top.yukonga.miuix.kmp.icon.glass.Show
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 object SettingsTrackingScreen : SearchableSettings {
 
@@ -105,7 +104,7 @@ object SettingsTrackingScreen : SearchableSettings {
         val uriHandler = LocalUriHandler.current
         IconButton(onClick = { uriHandler.openUri("https://mihon.app/docs/guides/tracking") }) {
             AppBarIcon(
-                imageVector = MiuixIcons.Help,
+                imageVector = MiuixIcons.Glass.Help,
                 contentDescription = stringResource(MR.strings.tracking_guide),
             )
         }
@@ -255,7 +254,7 @@ object SettingsTrackingScreen : SearchableSettings {
                     )
                     CompactIconButton(onClick = onDismissRequest) {
                         CompactActionIcon(
-                            imageVector = MiuixIcons.Close,
+                            imageVector = MiuixIcons.Glass.Close,
                             contentDescription = stringResource(MR.strings.action_close),
                         )
                     }
@@ -293,9 +292,9 @@ object SettingsTrackingScreen : SearchableSettings {
                             ) {
                                 CompactActionIcon(
                                     imageVector = if (hidePassword) {
-                                        MaterialSymbols.RoundedFilled.Visibility
+                                        MiuixIcons.Glass.Show
                                     } else {
-                                        MaterialSymbols.RoundedFilled.VisibilityOff
+                                        MiuixIcons.Glass.Hide
                                     },
                                     contentDescription = stringResource(MR.strings.password),
                                     tint = if (processing) {

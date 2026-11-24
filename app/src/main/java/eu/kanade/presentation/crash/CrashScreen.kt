@@ -15,8 +15,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import kotlinx.coroutines.launch
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.BugReport
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.app_name
 import tachiyomi.i18n.crash_screen_description
@@ -27,6 +25,8 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.InfoScreen
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.FeedbackOutline
 
 @Composable
 fun CrashScreen(
@@ -38,7 +38,7 @@ fun CrashScreen(
     val crashLogUtil = remember { context.appGraph.crashLogUtil }
 
     InfoScreen(
-        icon = MaterialSymbols.Rounded.BugReport,
+        icon = MiuixIcons.Glass.FeedbackOutline,
         headingText = stringResource(MR.strings.crash_screen_title),
         subtitleText = stringResource(MR.strings.crash_screen_description, stringResource(MR.strings.app_name)),
         acceptText = stringResource(MR.strings.pref_dump_crash_logs),

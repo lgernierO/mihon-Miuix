@@ -103,7 +103,7 @@ import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.icon.glass.Help
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 object SettingsDataScreen : SearchableSettings {
@@ -120,7 +120,7 @@ object SettingsDataScreen : SearchableSettings {
         val uriHandler = LocalUriHandler.current
         IconButton(onClick = { uriHandler.openUri(HELP_URL) }) {
             AppBarIcon(
-                imageVector = MiuixIcons.Help,
+                imageVector = MiuixIcons.Glass.Help,
                 contentDescription = stringResource(MR.strings.label_help),
             )
         }

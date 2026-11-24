@@ -23,9 +23,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.R
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.ContentCopy
-import mihon.icons.materialsymbols.rounded.Public
 import mihon.icons.simpleicons.Discord
 import mihon.icons.simpleicons.Facebook
 import mihon.icons.simpleicons.Github
@@ -53,6 +50,9 @@ import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Copy
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -107,7 +107,7 @@ internal fun AboutScreenContent(
                     summary = versionName,
                     endActions = {
                         CompactActionIcon(
-                            imageVector = MaterialSymbols.Rounded.ContentCopy,
+                            imageVector = MiuixIcons.Glass.Copy,
                             contentDescription = null,
                             tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
                         )
@@ -163,7 +163,7 @@ internal fun AboutScreenContent(
             ) {
                 AboutLinkIcon(
                     label = stringResource(MR.strings.website),
-                    icon = MaterialSymbols.Rounded.Public,
+                    icon = MiuixIcons.Glass.GlobalVpn,
                     onClick = { onOpenLink("https://mihon.app") },
                 )
                 AboutLinkIcon(

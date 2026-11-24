@@ -14,11 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.widget.PreferenceIcon
 import mihon.domain.extension.model.ExtensionStore
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Label
-import mihon.icons.materialsymbols.rounded.ContentCopy
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.Public
 import mihon.icons.simpleicons.Discord
 import mihon.icons.simpleicons.SimpleIcons
 import tachiyomi.i18n.MR
@@ -32,6 +27,11 @@ import tachiyomi.presentation.core.components.miuix.ElevatedCard
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Copy
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.Tags
 
 @Composable
 fun ExtensionStoresContent(
@@ -88,7 +88,7 @@ private fun ExtensionStoresListItem(
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PreferenceIcon(imageVector = MaterialSymbols.AutoMirroredRounded.Label)
+            PreferenceIcon(imageVector = MiuixIcons.Glass.Tags)
             Text(
                 text = store.name,
                 modifier = Modifier.weight(1f).padding(start = MaterialTheme.padding.medium),
@@ -102,7 +102,7 @@ private fun ExtensionStoresListItem(
         ) {
             CompactIconButton(onClick = onOpenWebsite) {
                 CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.Public,
+                    imageVector = MiuixIcons.Glass.GlobalVpn,
                     contentDescription = stringResource(MR.strings.action_open_in_browser),
                 )
             }
@@ -118,14 +118,14 @@ private fun ExtensionStoresListItem(
 
             CompactIconButton(onClick = onCopy) {
                 CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.ContentCopy,
+                    imageVector = MiuixIcons.Glass.Copy,
                     contentDescription = stringResource(MR.strings.action_copy_to_clipboard),
                 )
             }
 
             CompactIconButton(onClick = onDelete) {
                 CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.Delete,
+                    imageVector = MiuixIcons.Glass.Delete,
                     contentDescription = stringResource(MR.strings.action_delete),
                 )
             }

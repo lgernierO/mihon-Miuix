@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,11 +38,11 @@ import tachiyomi.i18n.migrationConfigScreen_removeDownloadsTitle
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.miuixVerticalScroll
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.glass.GlassDialogButton
+import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
+import top.yukonga.miuix.kmp.glass.GlassTextField
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -53,7 +53,8 @@ fun MigrationConfigScreenSheet(
     onDismissRequest: () -> Unit,
     onStartMigration: (extraSearchQuery: String?) -> Unit,
 ) {
-    var extraSearchQuery by rememberSaveable { mutableStateOf("") }
+    val queryState = rememberTextFieldState()
+    val extraSearchQuery = queryState.text.toString()
     val migrationFlags by preferences.migrationFlags.collectAsState()
     AdaptiveSheet(onDismissRequest = onDismissRequest) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -108,11 +109,10 @@ fun MigrationConfigScreenSheet(
                     )
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TextField(
-                        value = extraSearchQuery,
-                        onValueChange = { extraSearchQuery = it },
+                    GlassTextField(
+                        state = queryState,
                         label = stringResource(MR.strings.migrationConfigScreen_additionalSearchQueryLabel),
-                        singleLine = true,
+                        lineLimits = TextFieldLineLimits.SingleLine,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
@@ -151,12 +151,12 @@ fun MigrationConfigScreenSheet(
                     )
                 }
             }
-            Button(
+            GlassDialogButton(
                 onClick = {
                     val cleanedExtraSearchQuery = extraSearchQuery.trim().ifBlank { null }
                     onStartMigration(cleanedExtraSearchQuery)
                 },
-                colors = ButtonDefaults.buttonColorsPrimary(),
+                role = GlassDialogButtonRole.Primary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(

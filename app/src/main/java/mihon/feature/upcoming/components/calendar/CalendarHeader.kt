@@ -18,14 +18,14 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.YearMonth
 import kotlinx.datetime.toJavaYearMonth
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.yearMonth
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.KeyboardArrowLeft
-import mihon.icons.materialsymbols.rounded.KeyboardArrowRight
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.upcoming_calendar_next
 import tachiyomi.i18n.upcoming_calendar_prev
@@ -33,9 +33,9 @@ import tachiyomi.presentation.core.components.miuix.CompactActionIcon
 import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-import kotlin.time.Clock
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
+import top.yukonga.miuix.kmp.icon.glass.ChevronForward
 
 @Composable
 fun CalenderHeader(
@@ -64,14 +64,14 @@ fun CalenderHeader(
             CompactIconButton(onClick = onPreviousClick) {
                 @Suppress("DEPRECATION")
                 CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.KeyboardArrowLeft,
+                    imageVector = MiuixIcons.Glass.ChevronBackward,
                     contentDescription = stringResource(MR.strings.upcoming_calendar_prev),
                 )
             }
             CompactIconButton(onClick = onNextClick) {
                 @Suppress("DEPRECATION")
                 CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.KeyboardArrowRight,
+                    imageVector = MiuixIcons.Glass.ChevronForward,
                     contentDescription = stringResource(MR.strings.upcoming_calendar_next),
                 )
             }

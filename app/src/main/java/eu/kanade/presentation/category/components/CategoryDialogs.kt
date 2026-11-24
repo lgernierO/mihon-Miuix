@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,9 +48,9 @@ import tachiyomi.i18n.information_empty_category_dialog
 import tachiyomi.i18n.information_required_plain
 import tachiyomi.i18n.name
 import tachiyomi.i18n.not_selected
+import tachiyomi.presentation.core.components.miuix.AppGlassDialog
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
 import tachiyomi.presentation.core.components.miuix.TextButton
-import tachiyomi.presentation.core.components.miuix.WindowDialog
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
@@ -56,8 +58,8 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Checkbox
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.glass.GlassTextField
+import top.yukonga.miuix.kmp.glass.GlassTextFieldDefaults
 import top.yukonga.miuix.kmp.preference.CheckboxLocation
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -105,7 +107,8 @@ private fun CategoryNameDialog(
     onConfirm: (String) -> Unit,
 ) {
     var show by remember { mutableStateOf(true) }
-    var name by remember { mutableStateOf(initialName) }
+    val nameState = rememberTextFieldState(initialName)
+    val name = nameState.text.toString()
     var pendingName by remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
     val valueHasChanged = name != initialName
@@ -114,7 +117,7 @@ private fun CategoryNameDialog(
     val duplicateMessage = stringResource(MR.strings.error_category_exists)
     val dismiss = { show = false }
 
-    WindowDialog(
+    AppGlassDialog(
         modifier = Modifier.selectionSheetHeight(),
         title = title,
         show = show,
@@ -134,16 +137,15 @@ private fun CategoryNameDialog(
                     .padding(bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                TextField(
+                GlassTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
                         .semantics { if (nameAlreadyExists) error(duplicateMessage) },
-                    value = name,
-                    onValueChange = { name = it },
+                    state = nameState,
                     label = stringResource(MR.strings.name),
                     enabled = show,
-                    colors = TextFieldDefaults.textFieldColors(
+                    colors = GlassTextFieldDefaults.textFieldColors(
                         borderColor = if (nameAlreadyExists) {
                             MiuixTheme.colorScheme.error
                         } else {
@@ -151,7 +153,7 @@ private fun CategoryNameDialog(
                         },
                     ),
                     cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
-                    singleLine = true,
+                    lineLimits = TextFieldLineLimits.SingleLine,
                 )
                 Text(
                     text = if (nameAlreadyExists) {
@@ -206,7 +208,7 @@ fun CategoryDeleteDialog(
     var show by remember { mutableStateOf(true) }
     var deleteConfirmed by remember { mutableStateOf(false) }
     val dismiss = { show = false }
-    WindowDialog(
+    AppGlassDialog(
         modifier = Modifier.selectionSheetHeight(),
         title = stringResource(MR.strings.delete_category),
         summary = stringResource(MR.strings.delete_category_confirmation, category),
@@ -256,7 +258,7 @@ fun ChangeCategoryDialog(
     var pendingSelection by remember { mutableStateOf<List<CheckboxState<Category>>?>(null) }
     var selection by remember { mutableStateOf(initialSelection) }
     val dismiss = { show = false }
-    WindowDialog(
+    AppGlassDialog(
         modifier = Modifier.selectionSheetHeight(),
         show = show,
         title = stringResource(MR.strings.action_move_category),

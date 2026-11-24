@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,30 +37,31 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.ArrowDownward
-import mihon.icons.materialsymbols.rounded.ArrowUpward
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.core.common.preference.toggle
 import tachiyomi.presentation.core.components.material.padding
-import tachiyomi.presentation.core.components.miuix.WindowDropdownPreference
+import tachiyomi.presentation.core.components.miuix.AppGlassDropdownPreference
+import tachiyomi.presentation.core.components.miuix.rememberSyncedTextFieldState
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.miuixScroll
 import tachiyomi.presentation.core.util.sliderValue
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Checkbox as MiuixCheckbox
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.PageDown
+import top.yukonga.miuix.kmp.icon.glass.PageUp
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
-import top.yukonga.miuix.kmp.basic.Checkbox as MiuixCheckbox
 
 object SettingsItemsPaddings {
     val Horizontal = 24.dp
@@ -79,8 +81,8 @@ fun HeadingItem(text: String) {
 @Composable
 fun SortItem(label: String, sortDescending: Boolean?, onClick: () -> Unit) {
     val arrowIcon = when (sortDescending) {
-        true -> MaterialSymbols.Rounded.ArrowDownward
-        false -> MaterialSymbols.Rounded.ArrowUpward
+        true -> MiuixIcons.Glass.PageDown
+        false -> MiuixIcons.Glass.PageUp
         null -> null
     }
 
@@ -242,7 +244,7 @@ fun SelectItem(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
 ) {
-    WindowDropdownPreference(
+    AppGlassDropdownPreference(
         title = label,
         items = options.map { it.toString() },
         selectedIndex = selectedIndex,
@@ -309,9 +311,8 @@ fun TextItem(label: String, value: String, onChange: (String) -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = SettingsItemsPaddings.Horizontal, vertical = 4.dp),
         label = label,
-        value = value,
-        onValueChange = onChange,
-        singleLine = true,
+        state = rememberSyncedTextFieldState(value, onChange),
+        lineLimits = TextFieldLineLimits.SingleLine,
     )
 }
 

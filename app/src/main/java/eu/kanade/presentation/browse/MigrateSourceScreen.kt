@@ -17,11 +17,6 @@ import eu.kanade.presentation.browse.components.SourceIcon
 import eu.kanade.tachiyomi.ui.browse.migration.sources.MigrateSourceViewModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.ArrowDownward
-import mihon.icons.materialsymbols.rounded.ArrowUpward
-import mihon.icons.materialsymbols.rounded.Numbers
-import mihon.icons.materialsymbols.rounded.SortByAlpha
 import tachiyomi.domain.source.model.Source
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_asc
@@ -43,6 +38,11 @@ import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.NumeralSystemConversion
+import top.yukonga.miuix.kmp.icon.glass.PageDown
+import top.yukonga.miuix.kmp.icon.glass.PageUp
+import top.yukonga.miuix.kmp.icon.glass.Sort
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -120,11 +120,11 @@ fun MigrateSourceSortingHeader(
         CompactIconButton(onClick = onToggleSortingMode) {
             when (sortingMode) {
                 SetMigrateSorting.Mode.ALPHABETICAL -> CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.SortByAlpha,
+                    imageVector = MiuixIcons.Glass.Sort,
                     contentDescription = stringResource(MR.strings.action_sort_alpha),
                 )
                 SetMigrateSorting.Mode.TOTAL -> CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.Numbers,
+                    imageVector = MiuixIcons.Glass.NumeralSystemConversion,
                     contentDescription = stringResource(MR.strings.action_sort_count),
                 )
             }
@@ -132,11 +132,11 @@ fun MigrateSourceSortingHeader(
         CompactIconButton(onClick = onToggleSortingDirection) {
             when (sortingDirection) {
                 SetMigrateSorting.Direction.ASCENDING -> CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.ArrowUpward,
+                    imageVector = MiuixIcons.Glass.PageUp,
                     contentDescription = stringResource(MR.strings.action_asc),
                 )
                 SetMigrateSorting.Direction.DESCENDING -> CompactActionIcon(
-                    imageVector = MaterialSymbols.Rounded.ArrowDownward,
+                    imageVector = MiuixIcons.Glass.PageDown,
                     contentDescription = stringResource(MR.strings.action_desc),
                 )
             }

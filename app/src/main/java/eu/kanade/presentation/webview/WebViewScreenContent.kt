@@ -49,10 +49,6 @@ import eu.kanade.tachiyomi.util.system.setUserAgent
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
 import logcat.LogPriority
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.ArrowBack
-import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
-import mihon.icons.materialsymbols.rounded.TabClose
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_open_in_browser
@@ -69,7 +65,9 @@ import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.glass.Back
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Forward
 
 class WebViewWindow(webContent: WebContent, val navigator: WebViewNavigator) {
     var state by mutableStateOf(WebViewState(webContent))
@@ -262,13 +260,13 @@ fun WebViewScreenContent(
                         title = currentWindow.state.pageTitle ?: initialTitle,
                         subtitle = currentUrl,
                         navigateUp = onNavigateUp,
-                        navigationIcon = MiuixIcons.Close,
+                        navigationIcon = MiuixIcons.Glass.Close,
                         actions = {
                             AppBarActions(
                                 listOf(
                                     AppBar.Action(
                                         title = stringResource(MR.strings.action_webview_back),
-                                        icon = MaterialSymbols.AutoMirroredRounded.ArrowBack,
+                                        icon = MiuixIcons.Glass.Back,
                                         onClick = {
                                             if (navigator.canGoBack) {
                                                 navigator.navigateBack()
@@ -278,7 +276,7 @@ fun WebViewScreenContent(
                                     ),
                                     AppBar.Action(
                                         title = stringResource(MR.strings.action_webview_forward),
-                                        icon = MaterialSymbols.AutoMirroredRounded.ArrowForward,
+                                        icon = MiuixIcons.Glass.Forward,
                                         onClick = {
                                             if (navigator.canGoForward) {
                                                 navigator.navigateForward()
@@ -308,7 +306,7 @@ fun WebViewScreenContent(
                                             0,
                                             AppBar.Action(
                                                 title = stringResource(MR.strings.action_webview_close_tab),
-                                                icon = MaterialSymbols.Rounded.TabClose,
+                                                icon = MiuixIcons.Glass.Close,
                                                 onClick = popState,
                                             ),
                                         )

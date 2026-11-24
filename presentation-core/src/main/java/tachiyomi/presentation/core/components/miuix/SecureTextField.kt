@@ -35,6 +35,7 @@ import tachiyomi.i18n.unknown_error
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.glass.GlassTextFieldDefaults
 import top.yukonga.miuix.kmp.squircle.squircleBackground
 import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.theme.LocalContentColor
@@ -60,7 +61,7 @@ fun OutlinedSecureTextField(
     val focused by interactionSource.collectIsFocusedAsState()
     val floatingLabel = labelText.isNotEmpty() && state.text.isNotEmpty()
     val insideMargin = TextFieldDefaults.InsideMargin
-    val defaultColors = TextFieldDefaults.textFieldColors()
+    val defaultColors = if (LocalGlassDialog.current) GlassTextFieldDefaults.textFieldColors() else TextFieldDefaults.textFieldColors()
     val colors = if (isError) {
         defaultColors.copy(borderColor = MiuixTheme.colorScheme.error, labelColor = MiuixTheme.colorScheme.error)
     } else {

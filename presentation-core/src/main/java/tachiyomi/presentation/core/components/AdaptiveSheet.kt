@@ -17,9 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.components.miuix.AppGlassBottomSheet
+import tachiyomi.presentation.core.components.miuix.AppGlassDialog
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
-import tachiyomi.presentation.core.components.miuix.WindowBottomSheet
-import tachiyomi.presentation.core.components.miuix.WindowDialog
 
 /**
  * Miuix owns popup gestures and insets. The screen's existing tablet policy chooses a centered
@@ -42,7 +42,7 @@ fun AdaptiveSheet(
     }
 
     if (isTabletUi) {
-        WindowDialog(
+        AppGlassDialog(
             show = show,
             modifier = Modifier.selectionSheetHeight().then(modifier),
             maxWidth = 460.dp,
@@ -56,7 +56,7 @@ fun AdaptiveSheet(
             content()
         }
     } else {
-        WindowBottomSheet(
+        AppGlassBottomSheet(
             show = show,
             modifier = Modifier.selectionSheetHeight().then(modifier),
             sheetMaxWidth = 460.dp,

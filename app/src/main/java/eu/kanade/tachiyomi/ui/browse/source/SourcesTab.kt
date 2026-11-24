@@ -23,8 +23,8 @@ import tachiyomi.i18n.internal_error
 import tachiyomi.i18n.label_sources
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Filter
-import top.yukonga.miuix.kmp.icon.extended.Search
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.Search
 
 @Composable
 fun Screen.sourcesTab(): TabContent {
@@ -37,12 +37,12 @@ fun Screen.sourcesTab(): TabContent {
         actions = listOf(
             AppBar.Action(
                 title = stringResource(MR.strings.action_global_search),
-                icon = MiuixIcons.Search,
+                icon = MiuixIcons.Glass.Search,
                 onClick = { navigator.push(GlobalSearchScreen()) },
             ),
             AppBar.Action(
                 title = stringResource(MR.strings.action_filter),
-                icon = MiuixIcons.Filter,
+                icon = MiuixIcons.Glass.Filter,
                 onClick = { navigator.push(SourcesFilterScreen()) },
             ),
         ),

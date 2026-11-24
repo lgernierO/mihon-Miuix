@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,14 +27,14 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMaxBy
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.basic.ScrollBarAdapter
 import top.yukonga.miuix.kmp.basic.ScrollBarDefaults
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 /** Draws the native Miuix scrollbar over a lazy list without changing its measured size. */
 @OptIn(ExperimentalScrollBarApi::class)
@@ -171,10 +171,10 @@ private class GridScrollBarAdapter(
     private val state: LazyGridState,
     private val columnCount: Int,
 ) : ScrollBarAdapter {
-    private val metrics by derivedStateOf {
+    private val metrics by computedStateOf {
         val layout = state.layoutInfo
         val items = layout.visibleItemsInfo.filter { it.row != LazyGridItemInfo.UnknownRow }
-        if (items.isEmpty()) return@derivedStateOf GridScrollMetrics()
+        if (items.isEmpty()) return@computedStateOf GridScrollMetrics()
 
         val first = items.first()
         val last = items.last()

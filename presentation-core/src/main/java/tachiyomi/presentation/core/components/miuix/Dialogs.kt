@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
+import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -23,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
-import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 
 /** Lets the shared button adapter give a dialog's confirmation the primary Miuix role. */
 val LocalDialogButtonPrimary = compositionLocalOf { false }
@@ -49,7 +49,7 @@ fun AlertDialog(
     // disable both; ordinary dialogs enable both.
     val implicitDismiss = properties.dismissOnBackPress && properties.dismissOnClickOutside
 
-    WindowDialog(
+    AppGlassDialog(
         show = show,
         modifier = modifier,
         onDismissRequest = if (implicitDismiss) {

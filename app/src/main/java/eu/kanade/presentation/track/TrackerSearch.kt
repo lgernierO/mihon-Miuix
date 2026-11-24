@@ -1,7 +1,7 @@
 package eu.kanade.presentation.track
 
 import android.content.ClipData
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -65,9 +65,6 @@ import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.launch
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.CheckCircle
-import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_bar_up_description
 import tachiyomi.i18n.action_copy_to_clipboard
@@ -85,6 +82,7 @@ import tachiyomi.i18n.unknown_error
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
 import tachiyomi.presentation.core.components.miuix.Button
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
 import tachiyomi.presentation.core.components.miuix.IconButton
@@ -98,11 +96,12 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import tachiyomi.presentation.core.components.miuix.AppSmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.glass.Back
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Hide
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -126,14 +125,13 @@ fun TrackerSearch(
     Scaffold(
         topBar = {
             Column {
-                AppSmallTopAppBar(
+                AppGlassTopAppBar(
                     title = "",
-                    titlePadding = 0.dp,
-                    navigationIconPadding = 0.dp,
+                    expandable = false,
                     actions = {
                         IconButton(onClick = onDismissRequest) {
                             AppBarIcon(
-                                imageVector = MiuixIcons.Back,
+                                imageVector = MiuixIcons.Glass.Back,
                                 contentDescription = stringResource(MR.strings.action_bar_up_description),
                                 autoMirror = true,
                             )
@@ -167,7 +165,7 @@ fun TrackerSearch(
                                 },
                             ) {
                                 AppBarIcon(
-                                    imageVector = MiuixIcons.Close,
+                                    imageVector = MiuixIcons.Glass.Close,
                                     contentDescription = stringResource(MR.strings.action_reset),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -178,7 +176,7 @@ fun TrackerSearch(
             }
         },
         bottomBar = {
-            AnimatedVisibility(
+            CapturedAnimatedVisibility(
                 visible = selected != null,
                 enter = fadeIn() + slideInVertically { it / 2 },
                 exit = slideOutVertically { it / 2 } + fadeOut(),
@@ -203,7 +201,7 @@ fun TrackerSearch(
                             elevation = ButtonDefaults.elevatedButtonElevation(),
                         ) {
                             Icon(
-                                imageVector = MaterialSymbols.RoundedFilled.VisibilityOff,
+                                imageVector = MiuixIcons.Glass.Hide,
                                 contentDescription = stringResource(MR.strings.action_toggle_private_on),
                             )
                         }
@@ -294,7 +292,7 @@ private fun SearchResultItem(
         ) {
             if (selected) {
                 Icon(
-                    imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
+                    imageVector = MiuixIcons.Glass.Ok,
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.TopEnd),
                     tint = MiuixTheme.colorScheme.onSecondaryVariant,

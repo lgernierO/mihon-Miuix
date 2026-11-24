@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
@@ -28,24 +29,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
-import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
-import mihon.icons.custommaterialsymbols.rounded.CropOff
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Crop
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_settings
 import tachiyomi.i18n.pref_crop_borders
 import tachiyomi.i18n.rotation_type
 import tachiyomi.i18n.viewer
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.NavigationBarDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
+import top.yukonga.miuix.kmp.icon.glass.Trim
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -60,12 +59,11 @@ fun ReaderBottomBar(
     modifier: Modifier = Modifier,
     chapterNavigator: (@Composable () -> Unit)? = null,
 ) {
-    // Keep the existing two rows anchored at the bottom; this is an action toolbar.
-    FloatingToolbar(
+    // Preserve both reader rows; the upstream toolbar owns shape, tint, blur and shadow.
+    GlassFloatingToolbar(
         modifier = modifier,
-        cornerRadius = 24.dp,
+        backdrop = LocalMiuixBackdrop.current,
         outSidePadding = PaddingValues(0.dp),
-        shadowElevation = 0.dp,
     ) {
         Column(
             modifier = Modifier
@@ -73,7 +71,11 @@ fun ReaderBottomBar(
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            chapterNavigator?.invoke()
+            if (chapterNavigator != null) {
+                Box(Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+                    chapterNavigator()
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -94,17 +96,18 @@ fun ReaderBottomBar(
                     icon = orientation.icon,
                     title = stringResource(MR.strings.rotation_type),
                     onClick = onClickOrientation,
+                    iconRotation = orientation.iconRotation,
                 )
                 ReaderBarAction(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    icon = if (cropEnabled) MaterialSymbols.Rounded.Crop else CustomMaterialSymbols.Rounded.CropOff,
+                    icon = MiuixIcons.Glass.Trim,
                     title = stringResource(MR.strings.pref_crop_borders),
                     onClick = onClickCropBorder,
                     selected = cropEnabled,
                 )
                 ReaderBarAction(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    icon = MiuixIcons.Settings,
+                    icon = MiuixIcons.Glass.SettingsOutline,
                     title = stringResource(MR.strings.action_settings),
                     onClick = onClickSettings,
                 )
@@ -120,6 +123,7 @@ private fun ReaderBarAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    iconRotation: Float = 0f,
 ) {
     Box(modifier) {
         TooltipBox(text = title) {
@@ -143,7 +147,7 @@ private fun ReaderBarAction(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        modifier = Modifier.size(NavigationBarDefaults.IconSize),
+                        modifier = Modifier.size(28.dp).rotate(iconRotation),
                         tint = contentColor,
                     )
                     Text(

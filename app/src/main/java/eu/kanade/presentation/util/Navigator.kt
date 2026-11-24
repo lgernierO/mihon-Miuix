@@ -4,6 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -39,13 +42,14 @@ interface AssistContentScreen {
 @Composable
 fun DefaultNavigatorScreenTransition(
     navigator: Navigator,
+    instant: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val slideDistance = rememberSlideDistance()
     ScreenTransition(
         navigator = navigator,
         transition = {
-            materialSharedAxisX(
+            if (instant) EnterTransition.None togetherWith ExitTransition.None else materialSharedAxisX(
                 forward = navigator.lastEvent != StackEvent.Pop,
                 slideDistance = slideDistance,
             )

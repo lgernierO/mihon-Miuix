@@ -26,7 +26,6 @@ kotlin {
 dependencies {
     api(projects.core.common)
     api(projects.i18n)
-    implementation(projects.icons.materialSymbols)
 
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -42,6 +41,8 @@ dependencies {
     // Miuix is the shared UI framework for the application and its settings.
     api(libs.miuix.ui)
     api(libs.miuix.glass)
+    api(libs.miuix.glass.icons)
+    api(libs.miuix.blur)
     api(libs.miuix.preference)
 
     implementation(libs.androidx.paging.runtime)

@@ -70,11 +70,9 @@ import eu.kanade.presentation.reader.ReaderNavigationOverlayState
 import eu.kanade.presentation.reader.ReaderPageActionsDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
 import eu.kanade.presentation.reader.ReadingModeSelectDialog
-import eu.kanade.presentation.reader.rememberReaderBackdrop
-import eu.kanade.presentation.reader.ReaderGpuChrome
-import eu.kanade.presentation.reader.rememberReaderGpuChrome
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
+import eu.kanade.presentation.reader.rememberReaderBackdrop
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -131,7 +129,6 @@ import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.LocalMiuixPopupBackdrop
 import tachiyomi.presentation.core.components.miuix.Text
-import tachiyomi.presentation.core.components.miuix.ToolbarGlassVisibility
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
 
@@ -215,16 +212,12 @@ class ReaderActivity : BaseActivity() {
 
             val backgroundColor = remember(general.theme) { Color(baseContext.readerBackgroundColor(general.theme)) }
             val activeViewer by viewerFlow.collectAsState()
-            // Each menu opening starts clear; hidden-page gestures must not arm the next opening.
-            var readerContentDragged by remember(activeViewer, state.menuVisible) { mutableStateOf(false) }
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
-            val gpuChrome = rememberReaderGpuChrome(activeViewer)
             val readerBackdrop = rememberReaderBackdrop(
                 viewer = activeViewer,
-                // GPU chrome samples its own frame. Surface readback is only needed for popups.
-                enabled = (gpuChrome == null && state.menuVisible) ||
+                enabled = state.menuVisible ||
                     state.dialog != null || state.isLoadingAdjacentChapter,
                 backgroundColor = backgroundColor,
                 brightness = brightness,
@@ -244,7 +237,7 @@ class ReaderActivity : BaseActivity() {
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-            CompositionLocalProvider(LocalMiuixPopupBackdrop provides readerBackdrop.source) {
+            CompositionLocalProvider(LocalMiuixPopupBackdrop provides readerBackdrop.pageSource) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -263,23 +256,6 @@ class ReaderActivity : BaseActivity() {
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .pointerInput(activeViewer, state.menuVisible) {
-                                if (!state.menuVisible) return@pointerInput
-                                val touchSlop = viewConfiguration.touchSlop
-                                awaitEachGesture {
-                                    val down = awaitFirstDown(
-                                        requireUnconsumed = false,
-                                        pass = PointerEventPass.Initial,
-                                    )
-                                    do {
-                                        val event = awaitPointerEvent(PointerEventPass.Initial)
-                                        val pointer = event.changes.firstOrNull { it.id == down.id }
-                                        if (pointer != null && (pointer.position - down.position).getDistance() > touchSlop) {
-                                            readerContentDragged = true
-                                        }
-                                    } while (event.changes.any { it.pressed })
-                                }
-                            }
                             .then(readerBackdrop.modifier)
                             .background(backgroundColor),
                     ) {
@@ -293,36 +269,32 @@ class ReaderActivity : BaseActivity() {
                         }
                     }
 
-                    if (isLoadingViewer) {
-                        LoadingScreen()
-                        return@Box
-                    }
+                    Box(Modifier.fillMaxSize().then(readerBackdrop.chromeModifier)) {
+                        if (isLoadingViewer) {
+                            LoadingScreen()
+                            return@Box
+                        }
 
-                    if (!state.menuVisible && showPageNumber) {
-                        ReaderPageIndicator(
-                            currentPage = state.currentPage,
-                            totalPages = state.totalPages,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .navigationBarsPadding(),
-                        )
-                    }
+                        if (!state.menuVisible && showPageNumber) {
+                            ReaderPageIndicator(
+                                currentPage = state.currentPage,
+                                totalPages = state.totalPages,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .navigationBarsPadding(),
+                            )
+                        }
 
-                    if (flashOnPageChange) {
-                        DisplayRefreshHost(hostState = displayRefreshHost)
-                    }
+                        if (flashOnPageChange) {
+                            DisplayRefreshHost(hostState = displayRefreshHost)
+                        }
 
-                    ReaderNavigationOverlay(state = navigationOverlayState)
+                        ReaderNavigationOverlay(state = navigationOverlayState)
 
-                    CompositionLocalProvider(
-                        LocalMiuixBackdrop provides readerBackdrop.source.takeIf { gpuChrome == null },
-                    ) {
-                        ToolbarGlassVisibility(
-                            visible = readerContentDragged,
-                            preblurredBackdrop = gpuChrome?.usesGpuBlur == true,
-                            resetKey = activeViewer to state.menuVisible,
-                        ) {
-                            AppBars(state = state, gpuChrome = gpuChrome)
+                        CompositionLocalProvider(LocalMiuixBackdrop provides readerBackdrop.source) {
+                            key(activeViewer) {
+                                AppBars(state = state)
+                            }
                         }
                     }
                 }
@@ -607,7 +579,7 @@ class ReaderActivity : BaseActivity() {
     }
 
     @Composable
-    fun AppBars(state: ReaderViewModel.State, gpuChrome: ReaderGpuChrome? = null) {
+    fun AppBars(state: ReaderViewModel.State) {
         val isHttpSource = state.source is HttpSource
         val readingMode = ReadingMode.fromPreference(viewModel.getMangaReadingMode())
 
@@ -623,7 +595,6 @@ class ReaderActivity : BaseActivity() {
 
         ReaderAppBars(
             visible = state.menuVisible,
-            gpuChrome = gpuChrome,
 
             mangaTitle = state.manga?.title,
             chapterTitle = state.currentChapter?.chapter?.name,

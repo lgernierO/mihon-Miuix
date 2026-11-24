@@ -37,10 +37,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import mihon.feature.migration.dialog.MigrateMangaDialog
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.FilterList
-import mihon.icons.materialsymbols.rounded.Verified
-import mihon.icons.materialsymbols.roundedfilled.Favorite
 import mihon.presentation.core.util.collectAsLazyPagingItems
 import tachiyomi.core.common.Constants
 import tachiyomi.domain.source.model.StubSource
@@ -59,6 +55,10 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.LocalSource
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.FavoriteOutline
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.SecurityAuthenticity
 
 data class BrowseSourceScreen(
     val sourceId: Long,
@@ -149,7 +149,7 @@ data class BrowseSourceScreen(
                             },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = MaterialSymbols.RoundedFilled.Favorite,
+                                    imageVector = MiuixIcons.Glass.FavoriteOutline,
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(CompactButtonDefaults.IconSize),
@@ -172,7 +172,7 @@ data class BrowseSourceScreen(
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = MaterialSymbols.Rounded.Verified,
+                                        imageVector = MiuixIcons.Glass.SecurityAuthenticity,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(CompactButtonDefaults.IconSize),
@@ -193,7 +193,7 @@ data class BrowseSourceScreen(
                                 onClick = viewModel::openFilterSheet,
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = MaterialSymbols.Rounded.FilterList,
+                                        imageVector = MiuixIcons.Glass.Filter,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(CompactButtonDefaults.IconSize),

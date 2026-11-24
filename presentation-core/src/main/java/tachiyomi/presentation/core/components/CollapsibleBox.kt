@@ -1,6 +1,6 @@
 package tachiyomi.presentation.core.components
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,12 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
-import mihon.icons.materialsymbols.rounded.KeyboardArrowUp
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.theme.header
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.ExpandLess
+import top.yukonga.miuix.kmp.icon.glass.ExpandMore
 
 @Composable
 fun CollapsibleBox(
@@ -45,15 +45,15 @@ fun CollapsibleBox(
 
             Icon(
                 imageVector = if (expanded) {
-                    MaterialSymbols.Rounded.KeyboardArrowUp
+                    MiuixIcons.Glass.ExpandLess
                 } else {
-                    MaterialSymbols.Rounded.KeyboardArrowDown
+                    MiuixIcons.Glass.ExpandMore
                 },
                 contentDescription = null,
             )
         }
 
-        AnimatedVisibility(visible = expanded) {
+        CapturedAnimatedVisibility(visible = expanded) {
             content()
         }
     }

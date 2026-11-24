@@ -24,11 +24,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AdaptiveSheet
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.ContentCopy
-import mihon.icons.materialsymbols.rounded.Photo
-import mihon.icons.materialsymbols.rounded.Save
-import mihon.icons.materialsymbols.rounded.Share
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_copy_to_clipboard
@@ -40,12 +35,17 @@ import tachiyomi.i18n.set_as_cover
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
 import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.glass.GlassDialogButton
+import top.yukonga.miuix.kmp.glass.GlassDialogButtonRole
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Copy
+import top.yukonga.miuix.kmp.icon.glass.ImageOutline
+import top.yukonga.miuix.kmp.icon.glass.Save
+import top.yukonga.miuix.kmp.icon.glass.Share
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -89,14 +89,14 @@ fun ReaderPageActionsDialog(
                         item {
                             PageAction(
                                 title = stringResource(MR.strings.set_as_cover),
-                                icon = MaterialSymbols.Rounded.Photo,
+                                icon = MiuixIcons.Glass.ImageOutline,
                                 onClick = { showSetCoverDialog = true },
                             )
                         }
                         item {
                             PageAction(
                                 title = stringResource(MR.strings.action_copy_to_clipboard),
-                                icon = MaterialSymbols.Rounded.ContentCopy,
+                                icon = MiuixIcons.Glass.Copy,
                                 onClick = {
                                     onShare(true)
                                     dismiss()
@@ -106,7 +106,7 @@ fun ReaderPageActionsDialog(
                         item {
                             PageAction(
                                 title = stringResource(MR.strings.action_share),
-                                icon = MaterialSymbols.Rounded.Share,
+                                icon = MiuixIcons.Glass.Share,
                                 onClick = {
                                     onShare(false)
                                     dismiss()
@@ -116,7 +116,7 @@ fun ReaderPageActionsDialog(
                         item {
                             PageAction(
                                 title = stringResource(MR.strings.action_save),
-                                icon = MaterialSymbols.Rounded.Save,
+                                icon = MiuixIcons.Glass.Save,
                                 onClick = {
                                     onSave()
                                     dismiss()
@@ -174,7 +174,7 @@ private fun CoverConfirmationActions(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Button(
+        GlassDialogButton(
             onClick = onCancel,
             modifier = Modifier.weight(1f).fillMaxHeight(),
             minHeight = 48.dp,
@@ -186,11 +186,11 @@ private fun CoverConfirmationActions(
                 textAlign = TextAlign.Center,
             )
         }
-        Button(
+        GlassDialogButton(
             onClick = onConfirm,
             modifier = Modifier.weight(1f).fillMaxHeight(),
             minHeight = 48.dp,
-            colors = ButtonDefaults.buttonColorsPrimary(),
+            role = GlassDialogButtonRole.Primary,
             insideMargin = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
         ) {
             Text(

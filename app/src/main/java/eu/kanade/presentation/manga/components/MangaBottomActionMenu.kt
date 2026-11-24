@@ -1,6 +1,6 @@
 package eu.kanade.presentation.manga.components
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
@@ -23,14 +23,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.downloadDropdownEntry
 import eu.kanade.presentation.manga.DownloadAction
-import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
-import mihon.icons.custommaterialsymbols.rounded.DonePrevious
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.BookmarkAdd
-import mihon.icons.materialsymbols.rounded.BookmarkRemove
-import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.RemoveDone
-import mihon.icons.materialsymbols.rounded.SwapCalls
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_bookmark
 import tachiyomi.i18n.action_delete
@@ -42,8 +34,8 @@ import tachiyomi.i18n.action_move_category
 import tachiyomi.i18n.action_remove_bookmark
 import tachiyomi.i18n.label_more
 import tachiyomi.i18n.migrate
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.components.miuix.IconButton
-import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
@@ -52,10 +44,16 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.TooltipAnchorPosition
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Delete
-import top.yukonga.miuix.kmp.icon.extended.Download
-import top.yukonga.miuix.kmp.icon.extended.Folder
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.glass.AddBookmark
+import top.yukonga.miuix.kmp.icon.glass.BookmarkOutline
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.Download
+import top.yukonga.miuix.kmp.icon.glass.FolderOutline
+import top.yukonga.miuix.kmp.icon.glass.MarkAllAsRead
+import top.yukonga.miuix.kmp.icon.glass.MarkAsRead
+import top.yukonga.miuix.kmp.icon.glass.MarkAsUnread
+import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.glass.Replace
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -75,7 +73,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_bookmark),
-                    icon = MaterialSymbols.Rounded.BookmarkAdd,
+                    icon = MiuixIcons.Glass.AddBookmark,
                     onClick = onBookmarkClicked,
                 ),
             )
@@ -84,7 +82,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_remove_bookmark),
-                    icon = MaterialSymbols.Rounded.BookmarkRemove,
+                    icon = MiuixIcons.Glass.BookmarkOutline,
                     onClick = onRemoveBookmarkClicked,
                 ),
             )
@@ -93,7 +91,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_mark_as_read),
-                    icon = MaterialSymbols.Rounded.DoneAll,
+                    icon = MiuixIcons.Glass.MarkAllAsRead,
                     onClick = onMarkAsReadClicked,
                 ),
             )
@@ -102,7 +100,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_mark_as_unread),
-                    icon = MaterialSymbols.Rounded.RemoveDone,
+                    icon = MiuixIcons.Glass.MarkAsUnread,
                     onClick = onMarkAsUnreadClicked,
                 ),
             )
@@ -111,7 +109,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_mark_previous_as_read),
-                    icon = CustomMaterialSymbols.Rounded.DonePrevious,
+                    icon = MiuixIcons.Glass.MarkAsRead,
                     onClick = onMarkPreviousAsReadClicked,
                 ),
             )
@@ -120,7 +118,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_download),
-                    icon = MiuixIcons.Download,
+                    icon = MiuixIcons.Glass.Download,
                     onClick = onDownloadClicked,
                 ),
             )
@@ -129,7 +127,7 @@ fun MangaBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_delete),
-                    icon = MiuixIcons.Delete,
+                    icon = MiuixIcons.Glass.Delete,
                     onClick = onDeleteClicked,
                 ),
             )
@@ -153,21 +151,21 @@ fun LibraryBottomActionMenu(
         add(
             BottomAction(
                 title = stringResource(MR.strings.action_move_category),
-                icon = MiuixIcons.Folder,
+                icon = MiuixIcons.Glass.FolderOutline,
                 onClick = onChangeCategoryClicked,
             ),
         )
         add(
             BottomAction(
                 title = stringResource(MR.strings.action_mark_as_read),
-                icon = MaterialSymbols.Rounded.DoneAll,
+                icon = MiuixIcons.Glass.MarkAllAsRead,
                 onClick = onMarkAsReadClicked,
             ),
         )
         add(
             BottomAction(
                 title = stringResource(MR.strings.action_mark_as_unread),
-                icon = MaterialSymbols.Rounded.RemoveDone,
+                icon = MiuixIcons.Glass.MarkAsUnread,
                 onClick = onMarkAsUnreadClicked,
             ),
         )
@@ -175,7 +173,7 @@ fun LibraryBottomActionMenu(
             add(
                 BottomAction(
                     title = stringResource(MR.strings.action_download),
-                    icon = MiuixIcons.Download,
+                    icon = MiuixIcons.Glass.Download,
                     children = downloadDropdownEntry(onDownloadClicked).items,
                 ),
             )
@@ -183,14 +181,14 @@ fun LibraryBottomActionMenu(
         add(
             BottomAction(
                 title = stringResource(MR.strings.migrate),
-                icon = MaterialSymbols.Rounded.SwapCalls,
+                icon = MiuixIcons.Glass.Replace,
                 onClick = onMigrateClicked,
             ),
         )
         add(
             BottomAction(
                 title = stringResource(MR.strings.action_delete),
-                icon = MiuixIcons.Delete,
+                icon = MiuixIcons.Glass.Delete,
                 onClick = onDeleteClicked,
             ),
         )
@@ -211,7 +209,7 @@ private fun SelectionActionToolbar(
     actions: List<BottomAction>,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = visible && actions.isNotEmpty(),
         modifier = modifier,
         enter = expandVertically(expandFrom = Alignment.Bottom),
@@ -245,7 +243,7 @@ private fun SelectionActionToolbar(
                             SelectionActionButton(
                                 BottomAction(
                                     title = stringResource(MR.strings.label_more),
-                                    icon = MiuixIcons.More,
+                                    icon = MiuixIcons.Glass.More,
                                     children = overflowActions.map { action ->
                                         DropdownItem(
                                             text = action.title,
@@ -284,7 +282,7 @@ private fun SelectionActionButton(action: BottomAction, enabled: Boolean) {
             )
         }
         if (action.children != null) {
-            WindowIconDropdownMenu(
+            AppGlassIconDropdownMenu(
                 entry = DropdownEntry(items = action.children),
                 enabled = enabled,
                 minHeight = 48.dp,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,16 +46,11 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
+import java.text.NumberFormat
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import logcat.LogPriority
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Add
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.DragHandle
-import mihon.icons.materialsymbols.rounded.KeyboardArrowDown
-import mihon.icons.materialsymbols.rounded.KeyboardArrowUp
-import mihon.icons.materialsymbols.rounded.Refresh
 import sh.calvin.reorderable.ReorderableColumn
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.util.system.logcat
@@ -108,6 +104,7 @@ import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.FilterChip
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
+import tachiyomi.presentation.core.components.miuix.rememberSyncedTextFieldState
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.miuixVerticalScroll
@@ -115,11 +112,16 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Add
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.ExpandLess
+import top.yukonga.miuix.kmp.icon.glass.ExpandMore
+import top.yukonga.miuix.kmp.icon.glass.Menu
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SliderPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import java.text.NumberFormat
-import kotlin.math.roundToInt
 
 @Composable
 internal fun WebGpuViewerSettings(viewModel: ReaderSettingsViewModel) {
@@ -419,7 +421,7 @@ private fun SamplerItem(labelRes: StringResource, defaultName: String, pref: Pre
             shader?.let {
                 CompactIconButton(onClick = { WebGpuShaders.remove(context, pref, it) }) {
                     CompactActionIcon(
-                        imageVector = MaterialSymbols.Rounded.Delete,
+                        imageVector = MiuixIcons.Glass.Delete,
                         contentDescription = stringResource(MR.strings.action_remove),
                     )
                 }
@@ -502,7 +504,7 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
-                                    imageVector = MaterialSymbols.Rounded.DragHandle,
+                                    imageVector = MiuixIcons.Glass.Menu,
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                 )
@@ -518,9 +520,9 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
                                 ) {
                                     CompactActionIcon(
                                         imageVector = if (expanded) {
-                                            MaterialSymbols.Rounded.KeyboardArrowUp
+                                            MiuixIcons.Glass.ExpandLess
                                         } else {
-                                            MaterialSymbols.Rounded.KeyboardArrowDown
+                                            MiuixIcons.Glass.ExpandMore
                                         },
                                         contentDescription = parametersLabel,
                                     )
@@ -530,7 +532,7 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
                                 onClick = { WebGpuShaders.remove(context, pref, shader) },
                             ) {
                                 CompactActionIcon(
-                                    imageVector = MaterialSymbols.Rounded.Delete,
+                                    imageVector = MiuixIcons.Glass.Delete,
                                     contentDescription = stringResource(MR.strings.action_delete),
                                 )
                             }
@@ -546,7 +548,7 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.Add,
+            imageVector = MiuixIcons.Glass.Add,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
         )
@@ -595,7 +597,7 @@ private fun ShaderParams(
                     enabled = param.name in shader.values,
                 ) {
                     CompactActionIcon(
-                        imageVector = MaterialSymbols.Rounded.Refresh,
+                        imageVector = MiuixIcons.Glass.Refresh,
                         contentDescription = stringResource(MR.strings.action_reset),
                     )
                 }
@@ -623,22 +625,20 @@ private fun ShaderParams(
                     endActions = { resetAction() },
                 )
             } else {
-                var text by remember(value) { mutableStateOf(format.format(value)) }
+                val field = rememberSyncedTextFieldState(format.format(value)) { text ->
+                    val parsed = runCatching { format.parse(text)?.toFloat() }.getOrNull()
+                    if (parsed != null && parsed.isFinite()) {
+                        set(if (integer) parsed.roundToInt().toFloat() else parsed)
+                    }
+                }
                 BasicComponent(
                     title = title,
                     summary = subtitle,
                     endActions = { resetAction() },
                     bottomAction = {
                         TextField(
-                            value = text,
-                            onValueChange = { new ->
-                                text = new
-                                val parsed = runCatching { format.parse(new)?.toFloat() }.getOrNull()
-                                if (parsed != null && parsed.isFinite()) {
-                                    set(if (integer) parsed.roundToInt().toFloat() else parsed)
-                                }
-                            },
-                            singleLine = true,
+                            state = field,
+                            lineLimits = TextFieldLineLimits.SingleLine,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.fillMaxWidth().semantics { contentDescription = title },
                         )

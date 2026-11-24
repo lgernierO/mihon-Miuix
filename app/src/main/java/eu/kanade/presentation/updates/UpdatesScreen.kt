@@ -22,11 +22,10 @@ import eu.kanade.presentation.manga.components.MangaBottomActionMenu
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesViewModel
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.FlipToBack
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_filter
 import tachiyomi.i18n.action_select_all
@@ -44,15 +43,15 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.active
+import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Filter
-import top.yukonga.miuix.kmp.icon.extended.Months
-import top.yukonga.miuix.kmp.icon.extended.Refresh
-import top.yukonga.miuix.kmp.icon.extended.SelectAll
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.Months
+import top.yukonga.miuix.kmp.icon.glass.MultiSelect
+import top.yukonga.miuix.kmp.icon.glass.Refresh
+import top.yukonga.miuix.kmp.icon.glass.SelectAll
 import top.yukonga.miuix.kmp.theme.LocalContentColor
-import kotlin.time.Duration.Companion.seconds
-import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
 
 @Composable
 fun UpdateScreen(
@@ -183,18 +182,18 @@ private fun UpdatesAppBar(
                 listOf(
                     AppBar.Action(
                         title = stringResource(MR.strings.action_filter),
-                        icon = MiuixIcons.Filter,
+                        icon = MiuixIcons.Glass.Filter,
                         iconTint = if (hasFilters) MaterialTheme.colorScheme.active else LocalContentColor.current,
                         onClick = onFilterClicked,
                     ),
                     AppBar.Action(
                         title = stringResource(MR.strings.action_view_upcoming),
-                        icon = MiuixIcons.Months,
+                        icon = MiuixIcons.Glass.Months,
                         onClick = onCalendarClicked,
                     ),
                     AppBar.Action(
                         title = stringResource(MR.strings.action_update_library),
-                        icon = MiuixIcons.Refresh,
+                        icon = MiuixIcons.Glass.Refresh,
                         onClick = onUpdateLibrary,
                     ),
                 ),
@@ -207,12 +206,12 @@ private fun UpdatesAppBar(
                 listOf(
                     AppBar.Action(
                         title = stringResource(MR.strings.action_select_all),
-                        icon = MiuixIcons.SelectAll,
+                        icon = MiuixIcons.Glass.SelectAll,
                         onClick = onSelectAll,
                     ),
                     AppBar.Action(
                         title = stringResource(MR.strings.action_select_inverse),
-                        icon = MaterialSymbols.Rounded.FlipToBack,
+                        icon = MiuixIcons.Glass.MultiSelect,
                         onClick = onInvertSelection,
                     ),
                 ),

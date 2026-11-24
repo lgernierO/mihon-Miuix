@@ -1,12 +1,12 @@
 package tachiyomi.presentation.core.components.material
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding as foundationPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.material3.contentColorFor
@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
+import tachiyomi.presentation.core.components.miuix.navigationRailContentPadding
 import tachiyomi.presentation.core.util.LocalMiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -33,9 +33,9 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.foundation.layout.padding as foundationPadding
 
 @Composable
 fun Scaffold(
@@ -55,11 +55,11 @@ fun Scaffold(
 ) {
     var fabHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
-    val scrollState = topBarScrollBehavior.state
-    // Keep the separately recorded body backdrop in sync with scrolling, including movement
-    // after a small top bar has pinned and stopped changing its own layout.
-    val backdrop = rememberLayerBackdrop()
-    val supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val backdrop = rememberLayerBackdrop {
+        drawRect(containerColor.copy(alpha = 1f))
+        drawContent()
+    }
+    val supported = isRuntimeShaderSupported()
     val navigationBarPadding = LocalMiuixNavigationBarPadding.current
     val safeContentInsets = contentWindowInsets.union(WindowInsets(bottom = navigationBarPadding))
 
@@ -70,13 +70,13 @@ fun Scaffold(
             topBar = { topBar(topBarScrollBehavior) },
             // Reserve the top-level floating navigation slot for this page's content and actions.
             bottomBar = {
-                Box(Modifier.foundationPadding(bottom = navigationBarPadding)) {
+                Box(Modifier.navigationRailContentPadding().foundationPadding(bottom = navigationBarPadding)) {
                     bottomBar()
                 }
             },
             snackbarHost = snackbarHost,
             floatingActionButton = {
-                Box(Modifier.onSizeChanged { fabHeight = it.height }) {
+                Box(Modifier.navigationRailContentPadding().onSizeChanged { fabHeight = it.height }) {
                     floatingActionButton()
                 }
             },
@@ -99,14 +99,9 @@ fun Scaffold(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .drawWithContent {
-                            // Reading state here invalidates this drawing node before the nested
-                            // layerBackdrop records its next frame.
-                            scrollState.visualContentOffset
-                            drawContent()
-                        }
                         .then(if (supported) Modifier.layerBackdrop(backdrop) else Modifier)
-                        .background(containerColor),
+                        .background(containerColor)
+                        .navigationRailContentPadding(),
                 ) {
                     content(paddingValues)
                 }

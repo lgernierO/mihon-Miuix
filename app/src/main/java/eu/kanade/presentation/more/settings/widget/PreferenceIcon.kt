@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.VolunteerActivism
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -22,13 +20,11 @@ internal fun PreferenceIcon(
     enabled: Boolean = true,
     contentDescription: String? = null,
 ) {
-    // The filled support symbol covers more of its viewport than the neighbouring outline icons.
-    val glyphSize = if (imageVector === MaterialSymbols.RoundedFilled.VolunteerActivism) 22.dp else 24.dp
-    Box(modifier = modifier.size(24.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.size(28.dp), contentAlignment = Alignment.Center) {
         Icon(
             imageVector = imageVector,
             contentDescription = contentDescription,
-            modifier = Modifier.size(glyphSize),
+            modifier = Modifier.size(28.dp),
             tint = if (enabled) tint else MiuixTheme.colorScheme.disabledOnSecondaryVariant,
         )
     }

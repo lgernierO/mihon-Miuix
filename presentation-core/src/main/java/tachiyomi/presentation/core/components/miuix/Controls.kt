@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -20,19 +21,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Checkbox as MiuixCheckbox
 import top.yukonga.miuix.kmp.basic.CheckboxDefaults
+import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
+import top.yukonga.miuix.kmp.basic.IconButtonDefaults as MiuixIconButtonDefaults
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
-import top.yukonga.miuix.kmp.basic.Checkbox as MiuixCheckbox
-import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
-import top.yukonga.miuix.kmp.basic.IconButtonDefaults as MiuixIconButtonDefaults
 
 @Composable
 fun Checkbox(
@@ -66,7 +65,7 @@ fun TriStateCheckbox(
 }
 
 /** Compact circular surface; keep the Android hit area independent of the visible diameter. */
-internal val IconButtonVisualSize = 42.dp
+internal val IconButtonVisualSize = GlassTopAppBarDefaults.ButtonSize
 internal val IconButtonTouchTargetSize = 48.dp
 val CompactIconButtonSize = 36.dp
 
@@ -79,7 +78,6 @@ fun IconButton(
     contentModifier: Modifier = Modifier,
     backgroundColor: Color = Color.Unspecified,
     size: Dp = IconButtonVisualSize,
-    glass: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val contentColor = if (enabled) LocalContentColor.current else MiuixTheme.colorScheme.disabledOnSurface
@@ -92,16 +90,13 @@ fun IconButton(
         val buttonModifier = modifier
             .sizeIn(minWidth = IconButtonTouchTargetSize, minHeight = IconButtonTouchTargetSize)
             .wrapContentSize(Alignment.Center)
-        if (onLongClick == null && enabled && glass) {
-            val surfaceProgress = LocalMiuixToolbarGlassProgress.current?.value ?: 1f
+        if (onLongClick == null && enabled) {
             GlassIconButton(
                 onClick = onClick,
                 modifier = buttonModifier.buttonStateSemantics(true),
                 size = size,
-                backdrop = LocalMiuixBackdrop.current.takeUnless { backgroundColor.isSpecified || surfaceProgress == 0f },
-                surfaceAlpha = surfaceProgress,
-                material = animatedToolbarButtonMaterial(),
-                fill = if (backgroundColor.isSpecified) backgroundColor else toolbarButtonFill(),
+                backdrop = LocalMiuixBackdrop.current.takeUnless { backgroundColor.isSpecified },
+                fill = if (backgroundColor.isSpecified) backgroundColor else GlassTopAppBarDefaults.buttonFill(),
                 stroke = if (backgroundColor.isSpecified) null else GlassTopAppBarDefaults.buttonStroke(),
                 shadow = if (backgroundColor.isSpecified) null else GlassShadows.Regular,
             ) {
@@ -153,14 +148,7 @@ fun IconButton(
     }
 }
 
-/** Theme-matched solid fill shared by compact buttons and non-glass menu triggers. */
-@Composable
-internal fun compactIconButtonBackgroundColor(enabled: Boolean): Color {
-    val colors = ButtonDefaults.buttonColors()
-    return if (enabled) colors.color else colors.disabledColor
-}
-
-/** In-content actions retain a solid circle and native press feedback, without glass effects. */
+/** Compact in-content actions use the same native Glass surface as toolbar actions. */
 @Composable
 fun CompactIconButton(
     onClick: () -> Unit,
@@ -177,9 +165,8 @@ fun CompactIconButton(
         enabled = enabled,
         onLongClick = onLongClick,
         contentModifier = contentModifier,
-        backgroundColor = backgroundColor.takeIf { it.isSpecified } ?: compactIconButtonBackgroundColor(enabled),
+        backgroundColor = backgroundColor,
         size = CompactIconButtonSize,
-        glass = false,
         content = content,
     )
 }

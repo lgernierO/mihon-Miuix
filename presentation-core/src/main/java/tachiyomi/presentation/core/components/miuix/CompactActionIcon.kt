@@ -20,7 +20,7 @@ fun CompactActionIcon(
     Icon(
         imageVector = imageVector,
         contentDescription = contentDescription,
-        modifier = modifier.size(20.dp),
+        modifier = modifier.size(28.dp),
         tint = tint,
     )
 }

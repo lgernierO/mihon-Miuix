@@ -2,18 +2,13 @@ package eu.kanade.tachiyomi.ui.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -21,19 +16,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
@@ -48,6 +41,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.more.MoreTab
 import eu.kanade.tachiyomi.ui.updates.UpdatesTab
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -61,19 +55,27 @@ import tachiyomi.i18n.update_check_notification_ext_updates
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
+import tachiyomi.presentation.core.components.miuix.LocalTopAppBarCenterObstructionStart
+import tachiyomi.presentation.core.components.miuix.LocalTopAppBarTitleAlpha
+import tachiyomi.presentation.core.components.miuix.LocalTopBarStartInset
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import top.yukonga.miuix.kmp.basic.Badge
-import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
+import top.yukonga.miuix.kmp.glass.GlassNavigationRail
+import top.yukonga.miuix.kmp.glass.GlassNavigationRailDefaults
+import top.yukonga.miuix.kmp.glass.rememberGlassNavigationRailState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.glass.BookFill
-import top.yukonga.miuix.kmp.icon.glass.ClockFill
+import top.yukonga.miuix.kmp.icon.glass.ClockOutline
+import top.yukonga.miuix.kmp.icon.glass.FolderOutline
 import top.yukonga.miuix.kmp.icon.glass.More
-import top.yukonga.miuix.kmp.icon.glass.NotificationFill
+import top.yukonga.miuix.kmp.icon.glass.NotificationOutline
 import top.yukonga.miuix.kmp.icon.glass.Search
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 object HomeScreen : Screen() {
 
@@ -95,81 +97,72 @@ object HomeScreen : Screen() {
         MoreTab,
     )
 
+    /** Persistent tab owner and rail live outside the route transition. */
     @Composable
-    override fun Content() {
+    fun Shell(content: @Composable (instantTransition: Boolean) -> Unit) {
         val navigator = LocalNavigator.currentOrThrow
-        TabNavigator(
-            tab = LibraryTab,
-            key = TabNavigatorKey,
-        ) { tabNavigator ->
-            // Provide usable navigator to content screen
+        TabNavigator(tab = LibraryTab, key = TabNavigatorKey) { tabNavigator ->
             CompositionLocalProvider(LocalNavigator provides navigator) {
-                val tabletUi = isTabletUi()
-                var showCompactNavigation by rememberSaveable { mutableStateOf(true) }
-                LaunchedEffect(Unit) {
-                    showBottomNavEvent.receiveAsFlow().collectLatest { show ->
-                        showCompactNavigation = show
+                val wide = isTabletUi()
+                val railState = rememberGlassNavigationRailState()
+                val surface = MiuixTheme.colorScheme.surface.copy(alpha = 1f)
+                val sidebarBackdrop = rememberLayerBackdrop {
+                    drawRect(surface)
+                    drawContent()
+                }
+                val supported = isRuntimeShaderSupported()
+                val startInset = remember(railState, wide) {
+                    { if (wide) (GlassNavigationRailDefaults.Margin + GlassNavigationRailDefaults.ExpandedWidth) * railState.progress else 0.dp }
+                }
+                val titleAlpha = remember(railState, wide) { { if (wide) railState.progress else 1f } }
+                val obstruction = if (wide && !railState.expanded && railState.collapsedWidth > 0.dp) {
+                    railState.collapsedStart
+                } else {
+                    Dp.Unspecified
+                }
+                var instantTransition by remember { mutableStateOf(false) }
+                LaunchedEffect(instantTransition) {
+                    if (instantTransition) {
+                        delay(100)
+                        instantTransition = false
                     }
                 }
-
-                Row(Modifier.fillMaxSize()) {
-                    if (tabletUi) {
-                        NavigationRail {
-                            TABS.fastForEach { tab ->
-                                HomeNavigationRailItem(tab)
-                            }
+                val actions = TABS.map { rememberTabSelection(it) }
+                Box(Modifier.fillMaxSize()) {
+                    CompositionLocalProvider(
+                        LocalTopBarStartInset provides startInset,
+                        LocalTopAppBarTitleAlpha provides titleAlpha,
+                        LocalTopAppBarCenterObstructionStart provides obstruction,
+                    ) {
+                        Box(Modifier.fillMaxSize().then(if (supported && wide) Modifier.layerBackdrop(sidebarBackdrop) else Modifier)) {
+                            content(instantTransition)
                         }
                     }
-                    Scaffold(
-                        modifier = Modifier.weight(1f),
-                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                        bottomBar = {
-                            AnimatedVisibility(
-                                visible = !tabletUi && showCompactNavigation,
-                                enter = expandVertically(),
-                                exit = shrinkVertically(),
-                            ) {
-                                HomeGlassNavigationBar()
-                            }
-                        },
-                    ) { contentPadding ->
-                        CompositionLocalProvider(
-                            LocalMiuixNavigationBarPadding provides contentPadding.calculateBottomPadding(),
-                        ) {
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(
-                                        top = contentPadding.calculateTopPadding(),
-                                        start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
-                                        end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
-                                    )
-                                    .consumeWindowInsets(contentPadding),
-                            ) {
-                                AnimatedContent(
-                                    targetState = tabNavigator.current,
-                                    contentKey = { tab -> tab.key },
-                                    transitionSpec = {
-                                        materialFadeThroughIn(
-                                            initialScale = 1f,
-                                            durationMillis = TabFadeDuration,
-                                        ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
-                                    },
-                                    label = "tabContent",
-                                ) { tab ->
-                                    tabNavigator.saveableState(key = "currentTab", tab) {
-                                        tab.Content()
-                                    }
+                    if (wide) {
+                        GlassNavigationRail(
+                            items = navigationItems(),
+                            selectedIndex = if (navigator.lastItem == HomeScreen) {
+                                TABS.indexOfFirst { it::class == tabNavigator.current::class }
+                            } else {
+                                -1
+                            },
+                            onSelect = { index ->
+                                if (navigator.lastItem != HomeScreen) {
+                                    instantTransition = true
+                                    navigator.popUntilRoot()
                                 }
-                            }
-                        }
+                                actions.getOrNull(index)?.invoke()
+                            },
+                            backdrop = sidebarBackdrop.takeIf { supported },
+                            state = railState,
+                        )
                     }
                 }
             }
 
             val goToLibraryTab = { tabNavigator.current = LibraryTab }
 
-            BackHandler(enabled = tabNavigator.current != LibraryTab, onBack = goToLibraryTab)
+            BackHandler(enabled = navigator.lastItem == HomeScreen && tabNavigator.current != LibraryTab, onBack = goToLibraryTab)
 
             LaunchedEffect(Unit) {
                 launch {
@@ -206,17 +199,59 @@ object HomeScreen : Screen() {
     }
 
     @Composable
-    private fun HomeNavigationRailItem(
-        tab: eu.kanade.presentation.util.Tab,
-    ) {
+    override fun Content() {
         val tabNavigator = LocalTabNavigator.current
-        val selected = tabNavigator.current::class == tab::class
-        val onSelect = rememberTabSelection(tab)
-        NavigationRailItem(
-            selected = selected,
-            onClick = onSelect,
+        val wide = isTabletUi()
+        var showCompactNavigation by rememberSaveable { mutableStateOf(true) }
+        LaunchedEffect(Unit) {
+            showBottomNavEvent.receiveAsFlow().collectLatest { showCompactNavigation = it }
+        }
+        // This outer shell reserves only the mobile bar; each page applies the rail inset once.
+        val railInset = LocalTopBarStartInset.current
+        CompositionLocalProvider(
+            LocalTopBarStartInset provides NoHomeInset,
+            LocalTopAppBarCenterObstructionStart provides Dp.Unspecified,
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                bottomBar = {
+                    CapturedAnimatedVisibility(
+                        visible = !wide && showCompactNavigation,
+                        enter = expandVertically(),
+                        exit = shrinkVertically(),
+                    ) { HomeGlassNavigationBar() }
+                },
+            ) { padding ->
+                CompositionLocalProvider(
+                    LocalMiuixNavigationBarPadding provides padding.calculateBottomPadding(),
+                    LocalTopBarStartInset provides railInset,
+                ) {
+                    AnimatedContent(
+                        targetState = tabNavigator.current,
+                        contentKey = { it.key },
+                        modifier = Modifier.fillMaxSize(),
+                        transitionSpec = {
+                            materialFadeThroughIn(initialScale = 1f, durationMillis = TabFadeDuration) togetherWith
+                                materialFadeThroughOut(durationMillis = TabFadeDuration)
+                        },
+                        label = "tabContent",
+                    ) { tab ->
+                        tabNavigator.saveableState(key = "currentTab", tab) { tab.Content() }
+                    }
+                }
+            }
+        }
+    }
+
+    private val NoHomeInset: () -> Dp = { 0.dp }
+
+    @Composable
+    private fun navigationItems(): List<GlassNavigationItem> = TABS.map { tab ->
+        GlassNavigationItem(
             icon = tab.navigationIcon,
             label = tab.options.title,
+            contentDescription = tab.options.title,
             badge = tabBadge(tab),
         )
     }
@@ -225,29 +260,13 @@ object HomeScreen : Screen() {
     private fun HomeGlassNavigationBar() {
         val tabNavigator = LocalTabNavigator.current
         val actions = TABS.map { rememberTabSelection(it) }
-        val badges = TABS.map { tabBadge(it) }
         Box(Modifier.padding(horizontal = 12.dp)) {
             GlassNavigationBar(
-                items = TABS.map { tab ->
-                    GlassNavigationItem(
-                        icon = tab.navigationIcon,
-                        label = tab.options.title,
-                        contentDescription = tab.options.title,
-                    )
-                },
+                items = navigationItems(),
                 selectedIndex = TABS.indexOfFirst { it::class == tabNavigator.current::class }.coerceAtLeast(0),
                 onSelect = { index -> actions.getOrNull(index)?.invoke() },
                 backdrop = LocalMiuixBackdrop.current,
             )
-            // The glass API has no badge slot. Keep the existing observable counters above
-            // their destinations without introducing a second click target over the bar.
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp)) {
-                badges.forEach { badge ->
-                    Box(Modifier.weight(1f).padding(end = 8.dp), contentAlignment = Alignment.TopEnd) {
-                        badge?.invoke()
-                    }
-                }
-            }
         }
     }
 
@@ -267,9 +286,9 @@ object HomeScreen : Screen() {
 
     private val eu.kanade.presentation.util.Tab.navigationIcon: ImageVector
         get() = when (this) {
-            LibraryTab -> MiuixIcons.Glass.BookFill
-            UpdatesTab -> MiuixIcons.Glass.NotificationFill
-            HistoryTab -> MiuixIcons.Glass.ClockFill
+            LibraryTab -> MiuixIcons.Glass.FolderOutline
+            UpdatesTab -> MiuixIcons.Glass.NotificationOutline
+            HistoryTab -> MiuixIcons.Glass.ClockOutline
             BrowseTab -> MiuixIcons.Glass.Search
             else -> MiuixIcons.Glass.More
         }
