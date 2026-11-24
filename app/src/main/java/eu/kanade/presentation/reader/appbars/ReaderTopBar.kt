@@ -27,10 +27,11 @@ fun ReaderTopBar(
     onOpenInBrowser: (() -> Unit)?,
     onShare: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    backgroundAlpha: Float = 1f,
 ) {
     AppBar(
         modifier = modifier,
-        backgroundColor = MiuixTheme.colorScheme.surfaceContainer,
+        backgroundColor = MiuixTheme.colorScheme.surfaceContainer.copy(alpha = backgroundAlpha),
         titleColor = MiuixTheme.colorScheme.onSurfaceContainer,
         title = mangaTitle,
         subtitle = chapterTitle,

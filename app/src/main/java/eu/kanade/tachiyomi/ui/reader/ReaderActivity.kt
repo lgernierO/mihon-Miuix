@@ -71,6 +71,8 @@ import eu.kanade.presentation.reader.ReaderPageActionsDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
 import eu.kanade.presentation.reader.ReadingModeSelectDialog
 import eu.kanade.presentation.reader.rememberReaderBackdrop
+import eu.kanade.presentation.reader.ReaderGpuChrome
+import eu.kanade.presentation.reader.rememberReaderGpuChrome
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
@@ -215,9 +217,12 @@ class ReaderActivity : BaseActivity() {
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
+            val gpuChrome = rememberReaderGpuChrome(activeViewer)
             val readerBackdrop = rememberReaderBackdrop(
                 viewer = activeViewer,
-                enabled = state.menuVisible || state.dialog != null || state.isLoadingAdjacentChapter,
+                // GPU chrome samples its own frame. Surface readback is only needed for popups.
+                enabled = (gpuChrome == null && state.menuVisible) ||
+                    state.dialog != null || state.isLoadingAdjacentChapter,
                 backgroundColor = backgroundColor,
                 brightness = brightness,
                 overlayColor = colorOverlay.takeIf { colorOverlayEnabled },
@@ -289,8 +294,10 @@ class ReaderActivity : BaseActivity() {
 
                     ReaderNavigationOverlay(state = navigationOverlayState)
 
-                    CompositionLocalProvider(LocalMiuixBackdrop provides readerBackdrop.source) {
-                        AppBars(state = state)
+                    CompositionLocalProvider(
+                        LocalMiuixBackdrop provides readerBackdrop.source.takeIf { gpuChrome == null },
+                    ) {
+                        AppBars(state = state, gpuChrome = gpuChrome)
                     }
                 }
 
@@ -574,7 +581,7 @@ class ReaderActivity : BaseActivity() {
     }
 
     @Composable
-    fun AppBars(state: ReaderViewModel.State) {
+    fun AppBars(state: ReaderViewModel.State, gpuChrome: ReaderGpuChrome? = null) {
         val isHttpSource = state.source is HttpSource
         val readingMode = ReadingMode.fromPreference(viewModel.getMangaReadingMode())
 
@@ -590,6 +597,7 @@ class ReaderActivity : BaseActivity() {
 
         ReaderAppBars(
             visible = state.menuVisible,
+            gpuChrome = gpuChrome,
 
             mangaTitle = state.manga?.title,
             chapterTitle = state.currentChapter?.chapter?.name,

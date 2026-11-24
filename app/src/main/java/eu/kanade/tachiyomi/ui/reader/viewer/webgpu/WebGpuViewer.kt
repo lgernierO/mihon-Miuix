@@ -5,6 +5,13 @@ import android.graphics.Rect
 import android.os.SystemClock
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import androidx.compose.ui.geometry.Rect as ChromeRect
 import ca.mpreg.imagedecoder.ImageDecoder
 import ca.mpreg.webgpuviewer.closeTo
 import ca.mpreg.webgpuviewer.renderer.GainmapInput
@@ -91,6 +98,48 @@ open class WebGpuViewer(
 ) : Viewer {
 
     open val isContinuous: Boolean = false
+
+    private val readerChromeBlur = ReaderChromeBlurFilter()
+    private val chromeSurface = MutableStateFlow(false)
+    private val chromePrepared = MutableStateFlow(false)
+    val readerChromeUsesSurface = chromeSurface.asStateFlow()
+    val readerChromeBlurPrepared = chromePrepared.asStateFlow()
+    val readerChromeBlurFailed get() = readerChromeBlur.failed
+    private var chromeViewportOrigin = Offset.Zero
+    private var chromeBoundsInWindow: ChromeRect? = null
+    private var chromeOpacity = 0f
+    private var chromeRadius = 0f
+    private var keepChromeFramesLive = false
+    private var preferredHoldUntilFinal = false
+
+    /** Window coordinates include reader insets; the filter consumes Surface-local pixels. */
+    fun updateReaderChrome(boundsInWindow: ChromeRect?, alpha: Float, radiusPx: Float) {
+        chromeBoundsInWindow = boundsInWindow
+        chromeOpacity = alpha
+        chromeRadius = radiusPx
+        updateChromeFilter()
+    }
+
+    fun keepReaderChromeFramesLive(keep: Boolean) {
+        if (keepChromeFramesLive == keep) return
+        keepChromeFramesLive = keep
+        viewerState.holdUntilFinal = preferredHoldUntilFinal && !keep
+        viewerState.invalidate()
+    }
+
+    private fun updateChromeFilter() {
+        readerChromeBlur.update(
+            bounds = chromeBoundsInWindow?.translate(-chromeViewportOrigin),
+            alpha = chromeOpacity,
+            radiusPx = chromeRadius,
+        )
+    }
+
+    protected fun updateReaderViewport(coordinates: LayoutCoordinates) {
+        if (!coordinates.isAttached) return
+        chromeViewportOrigin = coordinates.positionInWindow()
+        updateChromeFilter()
+    }
 
     /** Resolved once: render() asks per frame, and createReaderThemeContext builds a Resources. */
     @Volatile
@@ -793,13 +842,26 @@ open class WebGpuViewer(
     }
 
     init {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            scope.launch {
+                if (readerChromeBlur.prepare() && !destroyed) {
+                    viewerState.filters.filters = viewerState.filters.filters + readerChromeBlur
+                    chromePrepared.value = true
+                }
+            }
+        }
         viewerState.apply {
             fetchPage = fetch@{ index ->
-                val current = currentPage ?: return@fetch null
+                val current = currentPage ?: run {
+                    if (index == 0) chromeSurface.value = false
+                    return@fetch null
+                }
 
-                // For index 0, return the current spread
+                // Observe the renderer's existing fetch, never fetch pages from the chrome UI.
                 if (index == 0) {
-                    return@fetch buildSpreadPage(getSpreadAnchor(current))
+                    return@fetch buildSpreadPage(getSpreadAnchor(current)).also { image ->
+                        chromeSurface.value = image !is ImagePage.Compose && image !is ImagePage.Dummy
+                    }
                 }
 
                 // Navigate by spreads from current
@@ -858,7 +920,10 @@ open class WebGpuViewer(
             if (old?.fastRenderingOnly != new.fastRenderingOnly) {
                 viewerState.enableTiles = !new.fastRenderingOnly
             }
-            if (old?.holdUntilFinal != new.holdUntilFinal) viewerState.holdUntilFinal = new.holdUntilFinal
+            if (old?.holdUntilFinal != new.holdUntilFinal) {
+                preferredHoldUntilFinal = new.holdUntilFinal
+                viewerState.holdUntilFinal = new.holdUntilFinal && !keepChromeFramesLive
+            }
             if (old?.imageFilters != new.imageFilters) imageFilters.update(new.imageFilters)
             if (old?.tileFilters != new.tileFilters) tileFilters.update(new.tileFilters)
             if (old?.upscaler != new.upscaler) upscaler.update(new.upscaler)
@@ -1052,7 +1117,10 @@ open class WebGpuViewer(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        ImageViewer(modifier = modifier.mouseWheelPaging(this), state = viewerState)
+        ImageViewer(
+            modifier = modifier.onGloballyPositioned(::updateReaderViewport).mouseWheelPaging(this),
+            state = viewerState,
+        )
     }
 
     private val cropBorders: Boolean
