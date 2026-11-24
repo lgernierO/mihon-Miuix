@@ -52,6 +52,7 @@ import tachiyomi.i18n.action_next_chapter
 import tachiyomi.i18n.action_previous_chapter
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
@@ -323,9 +324,12 @@ private fun NavigatorButton(
     contentDescription: String,
     iconModifier: Modifier = Modifier,
 ) {
+    val colors = ButtonDefaults.buttonColors()
     IconButton(
         onClick = onClick,
         enabled = enabled,
+        glass = false,
+        backgroundColor = if (enabled) colors.color else colors.disabledColor,
         modifier = Modifier.semantics {
             role = Role.Button
             if (!enabled) disabled()

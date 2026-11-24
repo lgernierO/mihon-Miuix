@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
@@ -20,6 +21,9 @@ interface Viewer {
      */
     @Composable
     fun Content(modifier: Modifier)
+
+    /** Native page subtree only, used to record reader chrome backgrounds without the chrome. */
+    val backdropView: View? get() = null
 
     /**
      * Destroys this viewer. Called when leaving the reader or swapping viewers.

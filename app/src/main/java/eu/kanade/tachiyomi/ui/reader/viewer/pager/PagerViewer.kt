@@ -53,6 +53,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      */
     val pager = createPager()
 
+    override val backdropView get() = pager
+
     private val settingsViewModel = activity.settingsViewModel
 
     /**

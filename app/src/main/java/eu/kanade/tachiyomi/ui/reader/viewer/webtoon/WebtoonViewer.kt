@@ -55,6 +55,9 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      */
     private val frame = WebtoonFrame(activity)
 
+    // The frame owns whole-strip zoom/pan, not just the recycler's scroll position.
+    override val backdropView get() = frame
+
     /**
      * Distance to scroll when the user taps on one side of the recycler view.
      */

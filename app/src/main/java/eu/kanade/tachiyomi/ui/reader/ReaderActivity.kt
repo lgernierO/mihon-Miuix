@@ -70,6 +70,7 @@ import eu.kanade.presentation.reader.ReaderNavigationOverlayState
 import eu.kanade.presentation.reader.ReaderPageActionsDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
 import eu.kanade.presentation.reader.ReadingModeSelectDialog
+import eu.kanade.presentation.reader.rememberReaderBackdrop
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
@@ -93,7 +94,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.LocalPageColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.Action
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
-import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.readerBackgroundColor
@@ -127,11 +127,10 @@ import tachiyomi.i18n.share_page_info
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
+import tachiyomi.presentation.core.components.miuix.LocalMiuixPopupBackdrop
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 class ReaderActivity : BaseActivity() {
 
@@ -212,14 +211,18 @@ class ReaderActivity : BaseActivity() {
             val navigation = settingsViewModel.navigation.collectAsState().value
 
             val backgroundColor = remember(general.theme) { Color(baseContext.readerBackgroundColor(general.theme)) }
-            val readerBackdrop = rememberLayerBackdrop()
             val activeViewer by viewerFlow.collectAsState()
-            // Surface-based WebGPU rendering cannot be captured by the Compose page layer.
-            val canSampleReader = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                activeViewer !is WebGpuViewer
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
+            val readerBackdrop = rememberReaderBackdrop(
+                viewer = activeViewer,
+                enabled = state.menuVisible || state.dialog != null || state.isLoadingAdjacentChapter,
+                backgroundColor = backgroundColor,
+                brightness = brightness,
+                overlayColor = colorOverlay.takeIf { colorOverlayEnabled },
+                overlayBlendMode = colorOverlayBlendMode,
+            )
 
             LaunchedEffect(brightness) { setWindowBrightness(brightness) }
 
@@ -233,122 +236,124 @@ class ReaderActivity : BaseActivity() {
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .onPreviewKeyEvent(::onKeyEvent)
-                    .focusRequester(focusRequester)
-                    .focusable()
-                    .pointerInput(Unit) {
-                        awaitEachGesture {
-                            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                            navigationOverlayState.hide()
+            CompositionLocalProvider(LocalMiuixPopupBackdrop provides readerBackdrop.source) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(backgroundColor)
+                        .onPreviewKeyEvent(::onKeyEvent)
+                        .focusRequester(focusRequester)
+                        .focusable()
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                                navigationOverlayState.hide()
+                            }
+                        }
+                        .then(if (general.keepScreenOn) Modifier.keepScreenOn() else Modifier),
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .then(readerBackdrop.modifier)
+                            .background(backgroundColor),
+                    ) {
+                        ReaderViewer()
+                        if (!isLoadingViewer) {
+                            ReaderContentOverlay(
+                                brightness = brightness,
+                                color = colorOverlay.takeIf { colorOverlayEnabled },
+                                colorBlendMode = colorOverlayBlendMode,
+                            )
                         }
                     }
-                    .then(if (general.keepScreenOn) Modifier.keepScreenOn() else Modifier),
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .then(if (canSampleReader) Modifier.layerBackdrop(readerBackdrop) else Modifier)
-                        .background(backgroundColor),
-                ) {
-                    ReaderViewer()
-                    if (!isLoadingViewer) {
-                        ReaderContentOverlay(
-                            brightness = brightness,
-                            color = colorOverlay.takeIf { colorOverlayEnabled },
-                            colorBlendMode = colorOverlayBlendMode,
+
+                    if (isLoadingViewer) {
+                        LoadingScreen()
+                        return@Box
+                    }
+
+                    if (!state.menuVisible && showPageNumber) {
+                        ReaderPageIndicator(
+                            currentPage = state.currentPage,
+                            totalPages = state.totalPages,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .navigationBarsPadding(),
                         )
                     }
+
+                    if (flashOnPageChange) {
+                        DisplayRefreshHost(hostState = displayRefreshHost)
+                    }
+
+                    ReaderNavigationOverlay(state = navigationOverlayState)
+
+                    CompositionLocalProvider(LocalMiuixBackdrop provides readerBackdrop.source) {
+                        AppBars(state = state)
+                    }
                 }
 
-                if (isLoadingViewer) {
-                    LoadingScreen()
-                    return@Box
-                }
-
-                if (!state.menuVisible && showPageNumber) {
-                    ReaderPageIndicator(
-                        currentPage = state.currentPage,
-                        totalPages = state.totalPages,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding(),
-                    )
-                }
-
-                if (flashOnPageChange) {
-                    DisplayRefreshHost(hostState = displayRefreshHost)
-                }
-
-                ReaderNavigationOverlay(state = navigationOverlayState)
-
-                CompositionLocalProvider(LocalMiuixBackdrop provides readerBackdrop.takeIf { canSampleReader }) {
-                    AppBars(state = state)
-                }
-            }
-
-            if (state.isLoadingAdjacentChapter) {
-                AlertDialog(
-                    onDismissRequest = {},
-                    confirmButton = {},
-                    text = {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            CircularProgressIndicator()
-                            Text(stringResource(MR.strings.loading))
-                        }
-                    },
-                )
-            }
-
-            val onDismissRequest = viewModel::closeDialog
-            when (state.dialog) {
-                is ReaderViewModel.Dialog.Settings -> {
-                    ReaderSettingsDialog(
-                        onDismissRequest = onDismissRequest,
-                        onShowMenus = { setMenuVisibility(true) },
-                        // The filter preview hides reading controls without changing the
-                        // system-bar insets beneath the open settings window.
-                        onHideMenus = { viewModel.showMenus(false) },
-                        viewModel = settingsViewModel,
-                    )
-                }
-                is ReaderViewModel.Dialog.ReadingModeSelect -> {
-                    ReadingModeSelectDialog(
-                        onDismissRequest = onDismissRequest,
-                        viewModel = settingsViewModel,
-                        onChange = { stringRes ->
-                            menuToggleToast?.cancel()
-                            if (!readerPreferences.showReadingMode.get()) {
-                                menuToggleToast = toast(stringRes)
+                if (state.isLoadingAdjacentChapter) {
+                    AlertDialog(
+                        onDismissRequest = {},
+                        confirmButton = {},
+                        text = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                CircularProgressIndicator()
+                                Text(stringResource(MR.strings.loading))
                             }
                         },
                     )
                 }
-                is ReaderViewModel.Dialog.OrientationModeSelect -> {
-                    OrientationSelectDialog(
-                        onDismissRequest = onDismissRequest,
-                        viewModel = settingsViewModel,
-                        onChange = { stringRes ->
-                            menuToggleToast?.cancel()
-                            menuToggleToast = toast(stringRes)
-                        },
-                    )
+
+                val onDismissRequest = viewModel::closeDialog
+                when (state.dialog) {
+                    is ReaderViewModel.Dialog.Settings -> {
+                        ReaderSettingsDialog(
+                            onDismissRequest = onDismissRequest,
+                            onShowMenus = { setMenuVisibility(true) },
+                            // The filter preview hides reading controls without changing the
+                            // system-bar insets beneath the open settings window.
+                            onHideMenus = { viewModel.showMenus(false) },
+                            viewModel = settingsViewModel,
+                        )
+                    }
+                    is ReaderViewModel.Dialog.ReadingModeSelect -> {
+                        ReadingModeSelectDialog(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = settingsViewModel,
+                            onChange = { stringRes ->
+                                menuToggleToast?.cancel()
+                                if (!readerPreferences.showReadingMode.get()) {
+                                    menuToggleToast = toast(stringRes)
+                                }
+                            },
+                        )
+                    }
+                    is ReaderViewModel.Dialog.OrientationModeSelect -> {
+                        OrientationSelectDialog(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = settingsViewModel,
+                            onChange = { stringRes ->
+                                menuToggleToast?.cancel()
+                                menuToggleToast = toast(stringRes)
+                            },
+                        )
+                    }
+                    is ReaderViewModel.Dialog.PageActions -> {
+                        ReaderPageActionsDialog(
+                            onDismissRequest = onDismissRequest,
+                            onSetAsCover = viewModel::setAsCover,
+                            onShare = viewModel::shareImage,
+                            onSave = viewModel::saveImage,
+                        )
+                    }
+                    null -> {}
                 }
-                is ReaderViewModel.Dialog.PageActions -> {
-                    ReaderPageActionsDialog(
-                        onDismissRequest = onDismissRequest,
-                        onSetAsCover = viewModel::setAsCover,
-                        onShare = viewModel::shareImage,
-                        onSave = viewModel::saveImage,
-                    )
-                }
-                null -> {}
             }
         }
 
