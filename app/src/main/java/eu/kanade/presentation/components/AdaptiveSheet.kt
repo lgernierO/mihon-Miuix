@@ -5,10 +5,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.lifecycle.DisposableEffectIgnoringConfiguration
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.presentation.util.ScreenTransition
 import eu.kanade.presentation.util.isTabletUi
@@ -28,13 +30,15 @@ fun NavigatorAdaptiveSheet(
                 onDismissRequest = onDismissRequest,
                 enableImplicitDismiss = enableSwipeDismiss(sheetNavigator),
             ) {
-                ScreenTransition(
-                    navigator = sheetNavigator,
-                    transition = {
-                        fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
-                            fadeOut(animationSpec = tween(90))
-                    },
-                )
+                CompositionLocalProvider(LocalNavigator provides sheetNavigator) {
+                    ScreenTransition(
+                        navigator = sheetNavigator,
+                        transition = {
+                            fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
+                                fadeOut(animationSpec = tween(90))
+                        },
+                    )
+                }
             }
 
             // Make sure screens are disposed no matter what

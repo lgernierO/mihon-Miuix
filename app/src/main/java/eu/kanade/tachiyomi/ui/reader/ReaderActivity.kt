@@ -93,6 +93,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.LocalPageColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.Action
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
+import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.readerBackgroundColor
@@ -125,9 +126,12 @@ import tachiyomi.i18n.picture_saved
 import tachiyomi.i18n.share_page_info
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 class ReaderActivity : BaseActivity() {
 
@@ -208,6 +212,11 @@ class ReaderActivity : BaseActivity() {
             val navigation = settingsViewModel.navigation.collectAsState().value
 
             val backgroundColor = remember(general.theme) { Color(baseContext.readerBackgroundColor(general.theme)) }
+            val readerBackdrop = rememberLayerBackdrop()
+            val activeViewer by viewerFlow.collectAsState()
+            // Surface-based WebGPU rendering cannot be captured by the Compose page layer.
+            val canSampleReader = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                activeViewer !is WebGpuViewer
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
@@ -239,18 +248,26 @@ class ReaderActivity : BaseActivity() {
                     }
                     .then(if (general.keepScreenOn) Modifier.keepScreenOn() else Modifier),
             ) {
-                ReaderViewer()
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .then(if (canSampleReader) Modifier.layerBackdrop(readerBackdrop) else Modifier)
+                        .background(backgroundColor),
+                ) {
+                    ReaderViewer()
+                    if (!isLoadingViewer) {
+                        ReaderContentOverlay(
+                            brightness = brightness,
+                            color = colorOverlay.takeIf { colorOverlayEnabled },
+                            colorBlendMode = colorOverlayBlendMode,
+                        )
+                    }
+                }
 
                 if (isLoadingViewer) {
                     LoadingScreen()
                     return@Box
                 }
-
-                ReaderContentOverlay(
-                    brightness = brightness,
-                    color = colorOverlay.takeIf { colorOverlayEnabled },
-                    colorBlendMode = colorOverlayBlendMode,
-                )
 
                 if (!state.menuVisible && showPageNumber) {
                     ReaderPageIndicator(
@@ -268,7 +285,9 @@ class ReaderActivity : BaseActivity() {
 
                 ReaderNavigationOverlay(state = navigationOverlayState)
 
-                AppBars(state = state)
+                CompositionLocalProvider(LocalMiuixBackdrop provides readerBackdrop.takeIf { canSampleReader }) {
+                    AppBars(state = state)
+                }
             }
 
             if (state.isLoadingAdjacentChapter) {

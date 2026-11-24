@@ -19,6 +19,7 @@ import tachiyomi.i18n.action_display_mode
 import tachiyomi.i18n.action_open_in_web_view
 import tachiyomi.i18n.action_settings
 import tachiyomi.i18n.label_help
+import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.source.local.LocalSource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
@@ -27,7 +28,6 @@ import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.GridView
 import top.yukonga.miuix.kmp.icon.extended.ListView
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
 
 @Composable

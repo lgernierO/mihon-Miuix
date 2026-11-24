@@ -8,10 +8,12 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,9 +24,11 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,25 +53,27 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Autorenew
-import mihon.icons.materialsymbols.rounded.CollectionsBookmark
-import mihon.icons.materialsymbols.rounded.Explore
-import mihon.icons.materialsymbols.rounded.MoreVert
-import mihon.icons.materialsymbols.rounded.Schedule
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.notification_chapters_generic
 import tachiyomi.i18n.update_check_notification_ext_updates
+import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
+import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import top.yukonga.miuix.kmp.basic.Badge
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.glass.GlassNavigationBar
+import top.yukonga.miuix.kmp.glass.GlassNavigationItem
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.BookFill
+import top.yukonga.miuix.kmp.icon.glass.ClockFill
+import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.glass.NotificationFill
+import top.yukonga.miuix.kmp.icon.glass.Search
 
 object HomeScreen : Screen() {
 
@@ -123,33 +129,37 @@ object HomeScreen : Screen() {
                                 enter = expandVertically(),
                                 exit = shrinkVertically(),
                             ) {
-                                NavigationBar {
-                                    TABS.fastForEach { tab ->
-                                        HomeNavigationBarItem(tab)
-                                    }
-                                }
+                                HomeGlassNavigationBar()
                             }
                         },
-                    ) {
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(it)
-                                .consumeWindowInsets(it),
+                    ) { contentPadding ->
+                        CompositionLocalProvider(
+                            LocalMiuixNavigationBarPadding provides contentPadding.calculateBottomPadding(),
                         ) {
-                            AnimatedContent(
-                                targetState = tabNavigator.current,
-                                contentKey = { tab -> tab.key },
-                                transitionSpec = {
-                                    materialFadeThroughIn(
-                                        initialScale = 1f,
-                                        durationMillis = TabFadeDuration,
-                                    ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
-                                },
-                                label = "tabContent",
-                            ) { tab ->
-                                tabNavigator.saveableState(key = "currentTab", tab) {
-                                    tab.Content()
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        top = contentPadding.calculateTopPadding(),
+                                        start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
+                                        end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
+                                    )
+                                    .consumeWindowInsets(contentPadding),
+                            ) {
+                                AnimatedContent(
+                                    targetState = tabNavigator.current,
+                                    contentKey = { tab -> tab.key },
+                                    transitionSpec = {
+                                        materialFadeThroughIn(
+                                            initialScale = 1f,
+                                            durationMillis = TabFadeDuration,
+                                        ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
+                                    },
+                                    label = "tabContent",
+                                ) { tab ->
+                                    tabNavigator.saveableState(key = "currentTab", tab) {
+                                        tab.Content()
+                                    }
                                 }
                             }
                         }
@@ -212,16 +222,33 @@ object HomeScreen : Screen() {
     }
 
     @Composable
-    private fun RowScope.HomeNavigationBarItem(tab: eu.kanade.presentation.util.Tab) {
+    private fun HomeGlassNavigationBar() {
         val tabNavigator = LocalTabNavigator.current
-        NavigationBarItem(
-            selected = tabNavigator.current::class == tab::class,
-            onClick = rememberTabSelection(tab),
-            icon = tab.navigationIcon,
-            label = tab.options.title,
-            modifier = Modifier.weight(1f),
-            badge = tabBadge(tab),
-        )
+        val actions = TABS.map { rememberTabSelection(it) }
+        val badges = TABS.map { tabBadge(it) }
+        Box(Modifier.padding(horizontal = 12.dp)) {
+            GlassNavigationBar(
+                items = TABS.map { tab ->
+                    GlassNavigationItem(
+                        icon = tab.navigationIcon,
+                        label = tab.options.title,
+                        contentDescription = tab.options.title,
+                    )
+                },
+                selectedIndex = TABS.indexOfFirst { it::class == tabNavigator.current::class }.coerceAtLeast(0),
+                onSelect = { index -> actions.getOrNull(index)?.invoke() },
+                backdrop = LocalMiuixBackdrop.current,
+            )
+            // The glass API has no badge slot. Keep the existing observable counters above
+            // their destinations without introducing a second click target over the bar.
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp)) {
+                badges.forEach { badge ->
+                    Box(Modifier.weight(1f).padding(end = 8.dp), contentAlignment = Alignment.TopEnd) {
+                        badge?.invoke()
+                    }
+                }
+            }
+        }
     }
 
     @Composable
@@ -240,11 +267,11 @@ object HomeScreen : Screen() {
 
     private val eu.kanade.presentation.util.Tab.navigationIcon: ImageVector
         get() = when (this) {
-            LibraryTab -> MaterialSymbols.Rounded.CollectionsBookmark
-            UpdatesTab -> MaterialSymbols.Rounded.Autorenew
-            HistoryTab -> MaterialSymbols.Rounded.Schedule
-            BrowseTab -> MaterialSymbols.Rounded.Explore
-            else -> MaterialSymbols.Rounded.MoreVert
+            LibraryTab -> MiuixIcons.Glass.BookFill
+            UpdatesTab -> MiuixIcons.Glass.NotificationFill
+            HistoryTab -> MiuixIcons.Glass.ClockFill
+            BrowseTab -> MiuixIcons.Glass.Search
+            else -> MiuixIcons.Glass.More
         }
 
     @Composable

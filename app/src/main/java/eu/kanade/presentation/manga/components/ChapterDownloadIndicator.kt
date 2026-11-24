@@ -32,8 +32,8 @@ import tachiyomi.i18n.downloading_with_progress
 import tachiyomi.i18n.label_downloaded
 import tachiyomi.i18n.manga_download
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Icon
@@ -86,7 +86,7 @@ private fun NotDownloadedIndicator(
     modifier: Modifier = Modifier,
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
-    IconButton(
+    CompactIconButton(
         modifier = modifier.secondaryItemAlpha(),
         enabled = enabled,
         onClick = { onClick(ChapterDownloadAction.START) },
@@ -120,7 +120,7 @@ private fun DownloadingIndicator(
     val downloadProgress = downloadProgressProvider()
     val description = stringResource(MR.strings.manga_download)
     val progressDescription = stringResource(MR.strings.downloading_with_progress, downloadProgress)
-    IconButton(
+    CompactIconButton(
         modifier = modifier.semantics {
             contentDescription = description
             stateDescription = progressDescription
@@ -195,7 +195,7 @@ private fun DownloadedIndicator(
         if (!enabled) isMenuExpanded = false
     }
     val description = stringResource(MR.strings.label_downloaded)
-    IconButton(
+    CompactIconButton(
         modifier = modifier.semantics { stateDescription = description },
         enabled = enabled,
         onClick = { isMenuExpanded = true },
@@ -230,7 +230,7 @@ private fun ErrorIndicator(
     modifier: Modifier = Modifier,
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
-    IconButton(
+    CompactIconButton(
         modifier = modifier,
         enabled = enabled,
         onClick = { onClick(ChapterDownloadAction.START) },
@@ -245,7 +245,7 @@ private fun ErrorIndicator(
     }
 }
 
-private val IndicatorSize = 26.dp
+private val IndicatorSize = 24.dp
 private val IndicatorPadding = 1.dp
 
 private val IndicatorStrokeWidth = 2.dp

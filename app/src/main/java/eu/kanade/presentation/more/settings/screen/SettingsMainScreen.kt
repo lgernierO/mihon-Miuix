@@ -59,14 +59,14 @@ import tachiyomi.i18n.pref_library_summary
 import tachiyomi.i18n.pref_reader_summary
 import tachiyomi.i18n.pref_security_summary
 import tachiyomi.i18n.pref_tracking_summary
+import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
+import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.squircle.squircleBackground
@@ -102,11 +102,10 @@ object SettingsMainScreen : Screen() {
 
         Scaffold(
             topBar = {
-                TopAppBar(
+                AppGlassTopAppBar(
                     title = stringResource(MR.strings.label_settings),
-                    color = containerColor,
                     navigationIcon = {
-                        IconButton(onClick = backPress::invoke, minWidth = 48.dp, minHeight = 48.dp) {
+                        IconButton(onClick = backPress::invoke) {
                             UpIcon()
                         }
                     },

@@ -2,6 +2,7 @@ package eu.kanade.presentation.components
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,26 +32,29 @@ import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_menu_overflow_description
 import tachiyomi.i18n.action_search
 import tachiyomi.i18n.action_search_hint
+import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
+import tachiyomi.presentation.core.components.miuix.AppSmallTopAppBar
 import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TooltipBox
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Search
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 val AppBarActionIconSize = 24.dp
+
+// 48dp touch slots plus this gap keep compact circular surfaces visually separate.
+val AppBarActionSpacing = 2.dp
 
 @Composable
 fun AppBar(
@@ -66,33 +70,40 @@ fun AppBar(
     actionModeActions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     titleColor: Color = MiuixTheme.colorScheme.onSurface,
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val actionMode = actionModeCounter > 0
     val navigation: @Composable () -> Unit = {
         AppBarNavigation(actionMode, onCancelActionMode, navigateUp, navigationIcon)
     }
     val barActions: @Composable RowScope.() -> Unit = {
-        if (actionMode) actionModeActions() else actions()
+        // Space the complete sequence, including SearchToolbar's leading search button and menus.
+        // AppBarActions intentionally emits its children directly into this row.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(AppBarActionSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (actionMode) actionModeActions() else actions()
+        }
     }
     val color = backgroundColor ?: MiuixTheme.colorScheme.surface
     if (!actionMode && (scrollBehavior != null || navigateUp == null)) {
-        TopAppBar(
+        AppGlassTopAppBar(
             title = title.orEmpty(),
             modifier = modifier,
             subtitle = subtitle.orEmpty(),
             color = color,
-            titleColor = titleColor,
-            largeTitleColor = titleColor,
             navigationIcon = navigation,
             actions = barActions,
             scrollBehavior = scrollBehavior,
+            bottomContent = bottomContent,
         )
     } else {
         val centerTitle = !actionMode && !subtitle.isNullOrBlank()
         var navigationWidth by remember { mutableIntStateOf(0) }
         var actionsWidth by remember { mutableIntStateOf(0) }
         val sideWidth = with(LocalDensity.current) { maxOf(navigationWidth, actionsWidth).toDp() }
-        SmallTopAppBar(
+        AppSmallTopAppBar(
             title = if (actionMode) actionModeCounter.toString() else title.orEmpty(),
             modifier = modifier,
             subtitle = "",
@@ -131,20 +142,23 @@ fun AppBar(
             },
             scrollBehavior = scrollBehavior,
             bottomContent = {
-                if (!actionMode && !subtitle.isNullOrBlank()) {
-                    Text(
-                        text = subtitle,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = TopAppBarDefaults.TitlePadding,
-                                end = TopAppBarDefaults.TitlePadding,
-                                bottom = TopAppBarDefaults.SubtitleBottomPadding,
-                            ),
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        style = MiuixTheme.textStyles.body2,
-                        textAlign = TextAlign.Center,
-                    )
+                Column {
+                    if (!actionMode && !subtitle.isNullOrBlank()) {
+                        Text(
+                            text = subtitle,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = TopAppBarDefaults.TitlePadding,
+                                    end = TopAppBarDefaults.TitlePadding,
+                                    bottom = TopAppBarDefaults.SubtitleBottomPadding,
+                                ),
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            style = MiuixTheme.textStyles.body2,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    bottomContent()
                 }
             },
         )
@@ -256,6 +270,7 @@ fun SearchToolbar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -281,9 +296,10 @@ fun SearchToolbar(
             navigateUp = navigateUp,
             actions = searchAction,
             scrollBehavior = scrollBehavior,
+            bottomContent = bottomContent,
         )
     } else {
-        SmallTopAppBar(
+        AppSmallTopAppBar(
             title = "",
             modifier = modifier,
             titlePadding = 0.dp,
@@ -291,7 +307,7 @@ fun SearchToolbar(
             actions = {
                 // The framework measures navigation and actions independently.
                 // Keep the close button and expanding input in the same Row.
-                Box(Modifier.padding(start = TopAppBarDefaults.NavigationIconPadding)) {
+                Box(Modifier.padding(start = TopAppBarDefaults.NavigationIconPadding, end = 8.dp)) {
                     AppBarNavigation(false, {}, onClickCloseSearch, null)
                 }
                 ToolbarSearchField(
@@ -308,9 +324,14 @@ fun SearchToolbar(
                     modifier = Modifier.weight(1f).padding(end = 8.dp),
                     interactionSource = interactionSource,
                 )
-                actions()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(AppBarActionSpacing),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = actions,
+                )
             },
             scrollBehavior = scrollBehavior,
+            bottomContent = bottomContent,
         )
     }
 }

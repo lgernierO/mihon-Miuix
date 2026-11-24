@@ -6,9 +6,11 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -26,6 +28,7 @@ import eu.kanade.presentation.category.components.ChangeCategoryDialog
 import eu.kanade.presentation.library.DeleteLibraryMangaDialog
 import eu.kanade.presentation.library.LibrarySettingsDialog
 import eu.kanade.presentation.library.components.LibraryContent
+import eu.kanade.presentation.library.components.LibraryTabs
 import eu.kanade.presentation.library.components.LibraryToolbar
 import eu.kanade.presentation.manga.components.LibraryBottomActionMenu
 import eu.kanade.presentation.more.onboarding.GETTING_STARTED_URL
@@ -68,6 +71,7 @@ import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.isLocal
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.utils.springAnimateToPage
 
 data object LibraryTab : Tab {
 
@@ -98,6 +102,22 @@ data object LibraryTab : Tab {
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         val snackbarHostState = remember { SnackbarHostState() }
+
+        val categories = state.displayedCategories
+        // Create the loaded pager with the saved category, just as LibraryContent previously did.
+        val pagerState = key(state.isLoading) {
+            rememberPagerState(state.coercedActiveCategoryIndex) { categories.size }
+        }
+        val hasLibraryContent = !state.isLoading &&
+            !(state.searchQuery.isNullOrEmpty() && !state.hasActiveFilters && state.isLibraryEmpty)
+        val showCategoryTabs = hasLibraryContent &&
+            (state.showCategoryTabs || !state.searchQuery.isNullOrEmpty()) &&
+            categories.isNotEmpty() && (categories.size > 1 || !categories.first().isSystemCategory)
+        LaunchedEffect(categories, pagerState) {
+            if (categories.isNotEmpty() && pagerState.currentPage >= categories.size) {
+                pagerState.scrollToPage(categories.lastIndex)
+            }
+        }
 
         val onClickRefresh: suspend (Category?) -> Boolean = { category ->
             val started = LibraryUpdateWorker.startNow(context.workManager, category)
@@ -143,8 +163,17 @@ data object LibraryTab : Tab {
                     },
                     searchQuery = state.searchQuery,
                     onSearchQueryChange = viewModel::search,
-                    // For scroll overlay when no tab
-                    scrollBehavior = scrollBehavior.takeIf { !state.showCategoryTabs },
+                    scrollBehavior = scrollBehavior,
+                    bottomContent = {
+                        if (showCategoryTabs) {
+                            LibraryTabs(
+                                categories = categories,
+                                pagerState = pagerState,
+                                getItemCountForCategory = { state.getItemCountForCategory(it) },
+                                onTabItemClick = { index -> scope.launch { pagerState.springAnimateToPage(index) } },
+                            )
+                        }
+                    },
                 )
             },
             bottomBar = {
@@ -189,9 +218,8 @@ data object LibraryTab : Tab {
                         searchQuery = state.searchQuery,
                         selection = state.selection,
                         contentPadding = contentPadding,
-                        currentPage = state.coercedActiveCategoryIndex,
+                        pagerState = pagerState,
                         hasActiveFilters = state.hasActiveFilters,
-                        showPageTabs = state.showCategoryTabs || !state.searchQuery.isNullOrEmpty(),
                         onChangeCurrentPage = viewModel::updateActiveCategoryIndex,
                         onClickManga = { navigator.push(MangaScreen(it)) },
                         onContinueReadingClicked = { it: LibraryManga ->
@@ -213,7 +241,6 @@ data object LibraryTab : Tab {
                         onGlobalSearchClicked = {
                             navigator.push(GlobalSearchScreen(viewModel.state.value.searchQuery ?: ""))
                         },
-                        getItemCountForCategory = { state.getItemCountForCategory(it) },
                         getDisplayMode = { viewModel.getDisplayMode() },
                         getColumnsForOrientation = { viewModel.getColumnsForOrientation(it) },
                         getItemsForCategory = { state.getItemsForCategory(it) },

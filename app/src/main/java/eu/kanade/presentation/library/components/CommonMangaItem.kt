@@ -44,10 +44,7 @@ import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButtonDefaults
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
@@ -397,25 +394,15 @@ private fun ContinueReadingButton(
     IconButton(
         onClick = onClick,
         modifier = modifier.semantics { contentDescription = description },
+        backgroundColor = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+        size = size,
+        glass = false,
     ) {
-        Card(
-            modifier = Modifier.size(size),
-            cornerRadius = IconButtonDefaults.CornerRadius,
-            colors = CardDefaults.defaultColors(
-                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                contentColor = MiuixTheme.colorScheme.onPrimaryContainer,
-            ),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = MaterialSymbols.RoundedFilled.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(iconSize),
-                )
-            }
-        }
+        Icon(
+            imageVector = MaterialSymbols.RoundedFilled.PlayArrow,
+            contentDescription = null,
+            modifier = Modifier.size(iconSize),
+            tint = MiuixTheme.colorScheme.onPrimaryContainer,
+        )
     }
 }

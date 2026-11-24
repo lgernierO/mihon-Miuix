@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.richTextEditorColors
-import eu.kanade.presentation.components.AppBarActionIconSize
 import eu.kanade.tachiyomi.ui.manga.notes.MangaNotesScreen
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -55,10 +53,10 @@ import tachiyomi.i18n.notes_format_numbered_list
 import tachiyomi.i18n.notes_format_underline
 import tachiyomi.i18n.notes_placeholder
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.time.Duration.Companion.seconds
@@ -202,21 +200,18 @@ fun MangaNotesTextAreaButton(
     modifier: Modifier = Modifier,
 ) {
     TooltipBox(text = description) {
-        IconButton(
+        CompactIconButton(
             onClick = onClick,
             modifier = modifier.semantics {
                 selected = isSelected
                 contentDescription = description
             },
             backgroundColor = if (isSelected) MiuixTheme.colorScheme.secondaryVariant else Color.Transparent,
-            minWidth = 48.dp,
-            minHeight = 48.dp,
         ) {
-            Icon(
+            CompactActionIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (isSelected) MiuixTheme.colorScheme.onSecondaryVariant else MiuixTheme.colorScheme.onSurface,
-                modifier = Modifier.size(AppBarActionIconSize),
             )
         }
     }

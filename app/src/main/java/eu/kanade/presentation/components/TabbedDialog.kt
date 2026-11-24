@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.label_more
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -114,10 +115,10 @@ private fun MoreMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-        IconButton(
+        CompactIconButton(
             onClick = { expanded = true },
         ) {
-            AppBarIcon(
+            CompactActionIcon(
                 imageVector = MiuixIcons.More,
                 contentDescription = stringResource(MR.strings.label_more),
             )

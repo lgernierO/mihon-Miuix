@@ -23,7 +23,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.unknown_error
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
@@ -55,8 +56,8 @@ fun GlobalSearchResultItem(
                 )
                 Text(text = subtitle)
             }
-            IconButton(onClick = onClick) {
-                Icon(imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward, contentDescription = null)
+            CompactIconButton(onClick = onClick) {
+                CompactActionIcon(imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward, contentDescription = null)
             }
         }
         content()

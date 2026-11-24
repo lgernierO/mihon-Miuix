@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.presentation.util.rememberResourceBitmapPainter
@@ -61,8 +60,11 @@ import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
+import tachiyomi.presentation.core.components.miuix.CompactIconButtonSize
 import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.basic.Card
@@ -74,7 +76,6 @@ import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Copy
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -337,8 +338,8 @@ private fun MigrationListItemAction(
     Box(modifier, contentAlignment = Alignment.Center) {
         when (result) {
             MigratingManga.SearchResult.Searching -> {
-                IconButton(onClick = onSkip) {
-                    AppBarIcon(
+                CompactIconButton(onClick = onSkip) {
+                    CompactActionIcon(
                         imageVector = MiuixIcons.Close,
                         contentDescription = stringResource(MR.strings.migrationListScreen_skipActionLabel),
                     )
@@ -378,8 +379,10 @@ private fun MigrationListItemAction(
                     ),
                     minWidth = 48.dp,
                     minHeight = 48.dp,
+                    size = CompactIconButtonSize,
+                    glass = false,
                 ) {
-                    AppBarIcon(
+                    CompactActionIcon(
                         imageVector = MiuixIcons.More,
                         contentDescription = stringResource(MR.strings.label_more),
                     )

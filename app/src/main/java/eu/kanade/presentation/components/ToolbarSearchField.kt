@@ -3,6 +3,7 @@ package eu.kanade.presentation.components
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,12 +21,13 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_reset
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -62,10 +64,19 @@ internal fun ToolbarSearchField(
         interactionSource = interactionSource,
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    AppBarIcon(
-                        imageVector = MiuixIcons.Close,
+                // The field already owns its surface; embedded actions use the native compact
+                // IconButton defaults rather than the floating glass toolbar treatment.
+                IconButton(
+                    onClick = {
+                        onQueryChange("")
+                        focusRequester.requestFocus()
+                    },
+                ) {
+                    Icon(
+                        imageVector = MiuixIcons.Basic.SearchCleanup,
                         contentDescription = stringResource(MR.strings.action_reset),
+                        modifier = Modifier.size(ToolbarSearchFieldDefaults.ClearIconSize),
+                        tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
                     )
                 }
             } else {
@@ -83,6 +94,9 @@ internal object ToolbarSearchFieldDefaults {
     val MinHeight = 48.dp
     val CornerRadius = 12.dp
     val InsideMargin = DpSize(12.dp, 8.dp)
+
+    // Official SuperSearchBar uses a 44dp slot with 8dp/16dp horizontal padding: a 20dp glyph.
+    val ClearIconSize = 20.dp
 
     @Composable
     fun colors() = TextFieldDefaults.textFieldColors(

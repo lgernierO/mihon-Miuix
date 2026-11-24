@@ -2,13 +2,16 @@ package eu.kanade.presentation.browse
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.browse.components.BaseSourceItem
 import eu.kanade.tachiyomi.ui.browse.source.SourcesViewModel
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceViewModel.Listing
@@ -28,8 +31,9 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.SECONDARY_ALPHA
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
 import tachiyomi.presentation.core.components.miuix.CompactButton
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
@@ -38,7 +42,6 @@ import tachiyomi.presentation.core.util.plus
 import tachiyomi.source.local.isLocal
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -135,6 +138,7 @@ private fun SourceItem(
                         softWrap = false,
                     )
                 }
+                Spacer(Modifier.width(8.dp))
             }
             SourcePinButton(
                 isPinned = Pin.Pinned in source.pin,
@@ -158,8 +162,8 @@ private fun SourcePinButton(
         )
     }
     val description = if (isPinned) MR.strings.action_unpin else MR.strings.action_pin
-    IconButton(onClick = onClick) {
-        Icon(
+    CompactIconButton(onClick = onClick) {
+        CompactActionIcon(
             imageVector = icon,
             tint = tint,
             contentDescription = stringResource(description),

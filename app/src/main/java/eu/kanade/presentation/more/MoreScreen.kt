@@ -40,12 +40,12 @@ import tachiyomi.i18n.pref_category_about
 import tachiyomi.i18n.pref_incognito_mode
 import tachiyomi.i18n.pref_incognito_mode_summary
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
+import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -69,9 +69,8 @@ fun MoreScreen(
     Scaffold(
         containerColor = MiuixTheme.colorScheme.surface,
         topBar = {
-            TopAppBar(
+            AppGlassTopAppBar(
                 title = stringResource(MR.strings.label_more),
-                color = MiuixTheme.colorScheme.surface,
                 scrollBehavior = scrollBehavior,
             )
         },

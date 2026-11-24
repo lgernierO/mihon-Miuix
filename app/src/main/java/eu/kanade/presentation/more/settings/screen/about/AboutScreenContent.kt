@@ -43,12 +43,14 @@ import tachiyomi.i18n.version
 import tachiyomi.i18n.website
 import tachiyomi.i18n.whats_new
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -70,9 +72,8 @@ internal fun AboutScreenContent(
     ScrollbarLazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(contentPadding)
             .consumeWindowInsets(contentPadding),
-        contentPadding = PaddingValues(horizontal = AboutGroupMargin, vertical = AboutGroupMargin),
+        contentPadding = contentPadding + PaddingValues(horizontal = AboutGroupMargin, vertical = AboutGroupMargin),
         verticalArrangement = Arrangement.spacedBy(AboutGroupMargin),
     ) {
         item(key = "identity") {
@@ -105,7 +106,7 @@ internal fun AboutScreenContent(
                     title = stringResource(MR.strings.version),
                     summary = versionName,
                     endActions = {
-                        Icon(
+                        CompactActionIcon(
                             imageVector = MaterialSymbols.Rounded.ContentCopy,
                             contentDescription = null,
                             tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
@@ -201,12 +202,8 @@ private fun AboutLinkIcon(
     icon: ImageVector,
     onClick: () -> Unit,
 ) {
-    IconButton(
-        onClick = onClick,
-        minWidth = 48.dp,
-        minHeight = 48.dp,
-    ) {
-        Icon(
+    CompactIconButton(onClick = onClick) {
+        CompactActionIcon(
             imageVector = icon,
             contentDescription = label,
             tint = MiuixTheme.colorScheme.primary,

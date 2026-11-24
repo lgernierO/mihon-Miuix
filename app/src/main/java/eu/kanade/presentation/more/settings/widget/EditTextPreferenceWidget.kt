@@ -21,26 +21,26 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Cancel
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_ok
 import tachiyomi.i18n.action_reset
 import tachiyomi.i18n.information_required_plain
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.TextButton
+import tachiyomi.presentation.core.components.miuix.WindowDialog
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun EditTextPreferenceWidget(
@@ -101,9 +101,14 @@ fun EditTextPreferenceWidget(
                                     minWidth = 48.dp,
                                     minHeight = 48.dp,
                                 ) {
-                                    Icon(
-                                        imageVector = MaterialSymbols.RoundedFilled.Cancel,
+                                    CompactActionIcon(
+                                        imageVector = MiuixIcons.Basic.SearchCleanup,
                                         contentDescription = stringResource(MR.strings.action_reset),
+                                        tint = if (show && !processing) {
+                                            MiuixTheme.colorScheme.onSecondaryContainer
+                                        } else {
+                                            MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                                        },
                                     )
                                 }
                             }

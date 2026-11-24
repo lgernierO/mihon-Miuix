@@ -50,11 +50,11 @@ import mihon.icons.materialsymbols.rounded.SkipPrevious
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_next_chapter
 import tachiyomi.i18n.action_previous_chapter
+import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.Text
@@ -326,8 +326,6 @@ private fun NavigatorButton(
     IconButton(
         onClick = onClick,
         enabled = enabled,
-        minWidth = 48.dp,
-        minHeight = 48.dp,
         modifier = Modifier.semantics {
             role = Role.Button
             if (!enabled) disabled()

@@ -53,7 +53,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Sort
-import top.yukonga.miuix.kmp.menu.WindowIconCascadingDropdownMenu
+import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu as WindowIconCascadingDropdownMenu
 
 object DownloadQueueScreen : Screen() {
 

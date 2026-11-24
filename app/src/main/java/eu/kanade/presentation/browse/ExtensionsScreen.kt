@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
@@ -93,9 +90,10 @@ import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.components.miuix.AlertDialog
-import tachiyomi.presentation.core.components.miuix.Button
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactButton
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
@@ -104,7 +102,7 @@ import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.plus
-import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 @Composable
 fun ExtensionScreen(
@@ -210,13 +208,11 @@ private fun ExtensionContent(
                         val action: @Composable RowScope.() -> Unit =
                             if (header.textRes == MR.strings.ext_updates_pending) {
                                 {
-                                    Button(onClick = { onClickUpdateAll() }) {
-                                        Text(
-                                            text = stringResource(MR.strings.ext_update_all),
-                                            style = LocalTextStyle.current.copy(
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                        )
+                                    CompactButton(
+                                        onClick = onClickUpdateAll,
+                                        colors = ButtonDefaults.buttonColorsPrimary(),
+                                    ) {
+                                        Text(text = stringResource(MR.strings.ext_update_all))
                                     }
                                 }
                             } else {
@@ -499,8 +495,8 @@ private fun ExtensionItemActions(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (!installStep.isCompleted()) {
-            IconButton(onClick = { onClickItemCancel(extension) }) {
-                Icon(
+            CompactIconButton(onClick = { onClickItemCancel(extension) }) {
+                CompactActionIcon(
                     imageVector = MaterialSymbols.Rounded.Close,
                     contentDescription = stringResource(MR.strings.action_cancel),
                 )
@@ -521,8 +517,8 @@ private fun ExtensionItemActions(
             }
         }
         secondaryAction?.let { (icon, label) ->
-            IconButton(onClick = { onClickItemSecondaryAction(extension) }) {
-                Icon(imageVector = icon, contentDescription = stringResource(label))
+            CompactIconButton(onClick = { onClickItemSecondaryAction(extension) }) {
+                CompactActionIcon(imageVector = icon, contentDescription = stringResource(label))
             }
         }
 
@@ -535,8 +531,8 @@ private fun ExtensionItemActions(
             else -> null
         }
         action?.let { (icon, label) ->
-            IconButton(onClick = { onClickItemAction(extension) }) {
-                Icon(imageVector = icon, contentDescription = stringResource(label))
+            CompactIconButton(onClick = { onClickItemAction(extension) }) {
+                CompactActionIcon(imageVector = icon, contentDescription = stringResource(label))
             }
         }
     }

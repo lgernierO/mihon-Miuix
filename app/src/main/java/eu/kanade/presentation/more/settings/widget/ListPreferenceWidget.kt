@@ -19,14 +19,13 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.TextButton
+import tachiyomi.presentation.core.components.miuix.WindowDialog
+import tachiyomi.presentation.core.components.miuix.WindowDropdownPreference
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
-import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun <T> ListPreferenceWidget(
@@ -45,7 +44,7 @@ fun <T> ListPreferenceWidget(
         title = title,
         summary = subtitle,
         showValue = false,
-        startAction = icon?.let { { Icon(imageVector = it, contentDescription = null) } },
+        startAction = icon?.let { { PreferenceIcon(imageVector = it) } },
         onSelectedIndexChange = { index -> options.getOrNull(index)?.let { onValueChange(it.key) } },
     )
 }

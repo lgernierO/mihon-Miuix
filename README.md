@@ -1,8 +1,23 @@
 # Mihon Miuix
 
-基于上游 [Mihon](https://github.com/mihonapp/mihon) 改造的 Miuix 界面分支，使用 [Miuix](https://github.com/compose-miuix-ui/miuix) 0.9.4 组件。
+基于上游 [Mihon](https://github.com/mihonapp/mihon) 改造的 Miuix 界面分支，使用 [Miuix](https://github.com/compose-miuix-ui/miuix) 主分支 `2855a36b`（`0.9.4-2855a36b-SNAPSHOT`）的 OS4 Glass 组件。
+
+### 构建
+
+OS4 组件尚未包含在 Maven Central 的 0.9.4 稳定版中，本仓库通过固定提交的 Git 子模块和 Gradle 复合构建使用上游源码，不需要 GitHub Packages 凭据。
+
+```sh
+git submodule update --init --recursive
+./gradlew --daemon :app:assembleRelease -Ptarget-abi=arm64-v8a -Pinclude-telemetry=false -Penable-updater=false
+```
+
+首次克隆可使用 `git clone --recurse-submodules`。Android 13 及以上启用玻璃材质；Android 8–12 按上游实现使用不透明降级表面。
+
+指定 `-Ptarget-abi=arm64-v8a` 时只生成 ARM64 安装包，产物位于 `app/build/outputs/apk/release/app-arm64-v8a-release.apk`。依赖缓存完整后可加 `--offline`，增量构建不需要 `clean`。未指定 `target-abi` 时保留上游四架构和通用包的构建方式。
 
 ### 更新日志
+
+- 顶部栏、底部导航、标签栏、对话框、底部弹层、菜单与下拉选择切换为 OS4 Glass 实现；没有 Glass 对应实现的控件保留 Miuix 基础组件。
 
 - 书架、图源、详情、设置及阅读器面板统一 Miuix 风格，优先使用原生组件。
 - 修正书架选中底栏、弹出菜单和开关，统一关闭图标大小。

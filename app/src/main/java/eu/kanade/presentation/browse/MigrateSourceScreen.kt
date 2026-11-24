@@ -1,6 +1,6 @@
 package eu.kanade.presentation.browse
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import eu.kanade.domain.source.interactor.SetMigrateSorting
 import eu.kanade.presentation.browse.components.SourceIcon
-import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.tachiyomi.ui.browse.migration.sources.MigrateSourceViewModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
@@ -33,9 +32,9 @@ import tachiyomi.i18n.information_empty_library
 import tachiyomi.i18n.migration_selection_prompt
 import tachiyomi.i18n.not_installed
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
-import tachiyomi.presentation.core.components.Scroller.STICKY_HEADER_KEY_PREFIX
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
@@ -51,8 +50,6 @@ fun MigrateSourceScreen(
     state: MigrateSourceViewModel.State,
     contentPadding: PaddingValues,
     onClickItem: (Source) -> Unit,
-    onToggleSortingDirection: () -> Unit,
-    onToggleSortingMode: () -> Unit,
 ) {
     val context = LocalContext.current
     when {
@@ -70,10 +67,6 @@ fun MigrateSourceScreen(
                     val sourceId = source.id.toString()
                     context.copyToClipboard(sourceId, sourceId)
                 },
-                sortingMode = state.sortingMode,
-                onToggleSortingMode = onToggleSortingMode,
-                sortingDirection = state.sortingDirection,
-                onToggleSortingDirection = onToggleSortingDirection,
             )
     }
 }
@@ -84,55 +77,10 @@ private fun MigrateSourceList(
     contentPadding: PaddingValues,
     onClickItem: (Source) -> Unit,
     onLongClickItem: (Source) -> Unit,
-    sortingMode: SetMigrateSorting.Mode,
-    onToggleSortingMode: () -> Unit,
-    sortingDirection: SetMigrateSorting.Direction,
-    onToggleSortingDirection: () -> Unit,
 ) {
     ScrollbarLazyColumn(
         contentPadding = contentPadding + topSmallPaddingValues,
     ) {
-        stickyHeader(key = STICKY_HEADER_KEY_PREFIX) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MiuixTheme.colorScheme.background)
-                    .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(MR.strings.migration_selection_prompt),
-                    modifier = Modifier.weight(1f),
-                    style = MiuixTheme.textStyles.subtitle,
-                )
-
-                IconButton(onClick = onToggleSortingMode) {
-                    when (sortingMode) {
-                        SetMigrateSorting.Mode.ALPHABETICAL -> AppBarIcon(
-                            imageVector = MaterialSymbols.Rounded.SortByAlpha,
-                            contentDescription = stringResource(MR.strings.action_sort_alpha),
-                        )
-                        SetMigrateSorting.Mode.TOTAL -> AppBarIcon(
-                            imageVector = MaterialSymbols.Rounded.Numbers,
-                            contentDescription = stringResource(MR.strings.action_sort_count),
-                        )
-                    }
-                }
-                IconButton(onClick = onToggleSortingDirection) {
-                    when (sortingDirection) {
-                        SetMigrateSorting.Direction.ASCENDING -> AppBarIcon(
-                            imageVector = MaterialSymbols.Rounded.ArrowUpward,
-                            contentDescription = stringResource(MR.strings.action_asc),
-                        )
-                        SetMigrateSorting.Direction.DESCENDING -> AppBarIcon(
-                            imageVector = MaterialSymbols.Rounded.ArrowDownward,
-                            contentDescription = stringResource(MR.strings.action_desc),
-                        )
-                    }
-                }
-            }
-        }
-
         items(
             items = list,
             key = { (source, _) -> "migrate-${source.id}" },
@@ -144,6 +92,54 @@ private fun MigrateSourceList(
                 onClickItem = { onClickItem(source) },
                 onLongClickItem = { onLongClickItem(source) },
             )
+        }
+    }
+}
+
+/** Kept with the browse tabs so it remains reachable while the source list passes underneath. */
+@Composable
+fun MigrateSourceSortingHeader(
+    sortingMode: SetMigrateSorting.Mode,
+    onToggleSortingMode: () -> Unit,
+    sortingDirection: SetMigrateSorting.Direction,
+    onToggleSortingDirection: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(MR.strings.migration_selection_prompt),
+            modifier = Modifier.weight(1f),
+            style = MiuixTheme.textStyles.subtitle,
+        )
+
+        CompactIconButton(onClick = onToggleSortingMode) {
+            when (sortingMode) {
+                SetMigrateSorting.Mode.ALPHABETICAL -> CompactActionIcon(
+                    imageVector = MaterialSymbols.Rounded.SortByAlpha,
+                    contentDescription = stringResource(MR.strings.action_sort_alpha),
+                )
+                SetMigrateSorting.Mode.TOTAL -> CompactActionIcon(
+                    imageVector = MaterialSymbols.Rounded.Numbers,
+                    contentDescription = stringResource(MR.strings.action_sort_count),
+                )
+            }
+        }
+        CompactIconButton(onClick = onToggleSortingDirection) {
+            when (sortingDirection) {
+                SetMigrateSorting.Direction.ASCENDING -> CompactActionIcon(
+                    imageVector = MaterialSymbols.Rounded.ArrowUpward,
+                    contentDescription = stringResource(MR.strings.action_asc),
+                )
+                SetMigrateSorting.Direction.DESCENDING -> CompactActionIcon(
+                    imageVector = MaterialSymbols.Rounded.ArrowDownward,
+                    contentDescription = stringResource(MR.strings.action_desc),
+                )
+            }
         }
     }
 }

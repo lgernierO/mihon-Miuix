@@ -1,6 +1,8 @@
 package eu.kanade.presentation.category.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -23,11 +25,11 @@ import tachiyomi.i18n.action_move_to_bottom
 import tachiyomi.i18n.action_move_to_top
 import tachiyomi.i18n.action_rename_category
 import tachiyomi.i18n.action_sort
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 
 @Composable
 fun ReorderableCollectionItemScope.CategoryListItem(
@@ -81,19 +83,21 @@ fun ReorderableCollectionItemScope.CategoryListItem(
                 }
             },
             endActions = {
-                IconButton(onClick = onRename, minWidth = 48.dp, minHeight = 48.dp) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.Edit,
-                        contentDescription = stringResource(MR.strings.action_rename_category),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                IconButton(onClick = onDelete, minWidth = 48.dp, minHeight = 48.dp) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.Delete,
-                        contentDescription = stringResource(MR.strings.action_delete),
-                        modifier = Modifier.size(20.dp),
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CompactIconButton(onClick = onRename) {
+                        Icon(
+                            imageVector = MaterialSymbols.Rounded.Edit,
+                            contentDescription = stringResource(MR.strings.action_rename_category),
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    CompactIconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = MaterialSymbols.Rounded.Delete,
+                            contentDescription = stringResource(MR.strings.action_delete),
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
             },
         )

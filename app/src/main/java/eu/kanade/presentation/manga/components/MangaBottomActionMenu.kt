@@ -42,12 +42,13 @@ import tachiyomi.i18n.action_move_category
 import tachiyomi.i18n.action_remove_bookmark
 import tachiyomi.i18n.label_more
 import tachiyomi.i18n.migrate
+import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.TooltipAnchorPosition
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -55,7 +56,6 @@ import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Download
 import top.yukonga.miuix.kmp.icon.extended.Folder
 import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -295,8 +295,6 @@ private fun SelectionActionButton(action: BottomAction, enabled: Boolean) {
             IconButton(
                 onClick = { action.onClick?.invoke() },
                 enabled = enabled,
-                minHeight = 48.dp,
-                minWidth = 48.dp,
                 content = icon,
             )
         }

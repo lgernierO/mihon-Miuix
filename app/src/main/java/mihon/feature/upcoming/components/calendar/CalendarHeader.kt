@@ -29,10 +29,10 @@ import mihon.icons.materialsymbols.rounded.KeyboardArrowRight
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.upcoming_calendar_next
 import tachiyomi.i18n.upcoming_calendar_prev
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.time.Clock
@@ -61,13 +61,19 @@ fun CalenderHeader(
             )
         }
         Row {
-            IconButton(onClick = onPreviousClick) {
+            CompactIconButton(onClick = onPreviousClick) {
                 @Suppress("DEPRECATION")
-                Icon(MaterialSymbols.Rounded.KeyboardArrowLeft, stringResource(MR.strings.upcoming_calendar_prev))
+                CompactActionIcon(
+                    imageVector = MaterialSymbols.Rounded.KeyboardArrowLeft,
+                    contentDescription = stringResource(MR.strings.upcoming_calendar_prev),
+                )
             }
-            IconButton(onClick = onNextClick) {
+            CompactIconButton(onClick = onNextClick) {
                 @Suppress("DEPRECATION")
-                Icon(MaterialSymbols.Rounded.KeyboardArrowRight, stringResource(MR.strings.upcoming_calendar_next))
+                CompactActionIcon(
+                    imageVector = MaterialSymbols.Rounded.KeyboardArrowRight,
+                    contentDescription = stringResource(MR.strings.upcoming_calendar_next),
+                )
             }
         }
     }

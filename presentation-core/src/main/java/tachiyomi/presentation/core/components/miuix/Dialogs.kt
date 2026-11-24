@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowDialog
 import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 
@@ -31,7 +30,7 @@ import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 val LocalDialogButtonPrimary = compositionLocalOf { false }
 
 /**
- * Keeps the application's existing title/body/action slots while Miuix owns the dialog window,
+ * Keeps the application's existing title/body/action slots while Miuix owns the glass surface,
  * adaptive placement, shape, insets and predictive-back interaction.
  */
 @Composable

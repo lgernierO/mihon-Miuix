@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
-import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.presentation.track.components.TrackLogoIcon
 import eu.kanade.tachiyomi.data.track.Tracker
@@ -50,9 +49,12 @@ import tachiyomi.i18n.status
 import tachiyomi.i18n.track_finished_reading_date
 import tachiyomi.i18n.track_started_reading_date
 import tachiyomi.i18n.tracked_privately
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButtonSize
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
+import tachiyomi.presentation.core.components.miuix.WindowIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.basic.Badge
@@ -63,7 +65,6 @@ import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import java.time.format.DateTimeFormatter
 
@@ -340,8 +341,10 @@ private fun TrackInfoItemMenu(
         ),
         minWidth = 48.dp,
         minHeight = 48.dp,
+        size = CompactIconButtonSize,
+        glass = false,
     ) {
-        AppBarIcon(
+        CompactActionIcon(
             imageVector = MiuixIcons.More,
             contentDescription = stringResource(MR.strings.label_more),
         )

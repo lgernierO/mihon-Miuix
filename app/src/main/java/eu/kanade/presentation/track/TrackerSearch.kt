@@ -98,7 +98,7 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import tachiyomi.presentation.core.components.miuix.AppSmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
@@ -126,7 +126,7 @@ fun TrackerSearch(
     Scaffold(
         topBar = {
             Column {
-                SmallTopAppBar(
+                AppSmallTopAppBar(
                     title = "",
                     titlePadding = 0.dp,
                     navigationIconPadding = 0.dp,

@@ -36,9 +36,9 @@ import tachiyomi.i18n.action_settings
 import tachiyomi.i18n.pref_crop_borders
 import tachiyomi.i18n.rotation_type
 import tachiyomi.i18n.viewer
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDefaults
 import top.yukonga.miuix.kmp.basic.Text

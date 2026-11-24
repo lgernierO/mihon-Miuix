@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.coil
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.core.graphics.drawable.toBitmap
 import coil3.ImageLoader
@@ -32,6 +33,7 @@ class ExtensionIconFetcher(
     private val context: Context,
     private val getPkgName: suspend () -> String?,
     private val density: Int?,
+    private val trimPadding: Boolean = false,
 ) : Fetcher {
 
     override suspend fun fetch(): FetchResult {
@@ -45,9 +47,10 @@ class ExtensionIconFetcher(
                 .getDrawableForDensity(appInfo.icon, density, null)
                 ?: error("Extension $pkgName has no icon")
         }
-        // Adaptive icons aren't bitmaps, and only bitmaps are kept in the memory cache
+        // Adaptive icons aren't bitmaps, and only bitmaps are kept in the memory cache.
+        val bitmap = drawable.toBitmap()
         return ImageFetchResult(
-            image = drawable.toBitmap().asImage(),
+            image = (if (trimPadding) bitmap.trimTransparentPadding() else bitmap).asImage(),
             isSampled = false,
             dataSource = DataSource.DISK,
         )
@@ -68,9 +71,33 @@ class ExtensionIconFetcher(
                 context = context,
                 getPkgName = { extensionManager.value.getExtensionPackage(data.sourceId) },
                 density = null,
+                trimPadding = true,
             )
         }
     }
+}
+
+/** Remove only transparent outer pixels so the source row clips the artwork, not its empty border. */
+private fun Bitmap.trimTransparentPadding(): Bitmap {
+    if (!hasAlpha()) return this
+    val pixels = IntArray(width * height)
+    getPixels(pixels, 0, width, 0, 0, width, height)
+    var left = width
+    var top = height
+    var right = -1
+    var bottom = -1
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            if (pixels[y * width + x] ushr 24 == 0) continue
+            left = minOf(left, x)
+            top = minOf(top, y)
+            right = maxOf(right, x)
+            bottom = maxOf(bottom, y)
+        }
+    }
+    if (right < left || bottom < top) return this
+    if (left == 0 && top == 0 && right == width - 1 && bottom == height - 1) return this
+    return Bitmap.createBitmap(this, left, top, right - left + 1, bottom - top + 1)
 }
 
 class InstalledExtensionIconKeyer : Keyer<InstalledExtensionIcon> {
@@ -81,6 +108,6 @@ class InstalledExtensionIconKeyer : Keyer<InstalledExtensionIcon> {
 
 class InstalledSourceIconKeyer : Keyer<InstalledSourceIcon> {
     override fun key(data: InstalledSourceIcon, options: Options): String {
-        return "source;${data.sourceId}"
+        return "source;${data.sourceId};trimmed-v1"
     }
 }

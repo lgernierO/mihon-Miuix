@@ -15,7 +15,6 @@ import mihon.icons.materialsymbols.rounded.Preview
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -38,10 +37,10 @@ fun TextPreferenceWidget(
         .semantics(mergeDescendants = true) { if (!enabled) disabled() }
     val startAction: (@Composable () -> Unit)? = icon?.let {
         {
-            Icon(
+            PreferenceIcon(
                 imageVector = it,
-                tint = if (enabled) iconTint else MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                contentDescription = null,
+                tint = iconTint,
+                enabled = enabled,
             )
         }
     }

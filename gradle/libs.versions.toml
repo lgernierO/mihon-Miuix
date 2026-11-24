@@ -56,7 +56,8 @@ markdown = "0.46.0"
 material = "1.14.0"
 materialKolor = "5.0.1"
 metro = "1.5.2"
-miuix = "0.9.4"
+# Source substitution in settings.gradle.kts uses the pinned vendor/miuix commit.
+miuix = "0.9.4-2855a36b-SNAPSHOT"
 mockk = "1.14.12"
 moko-resources = "0.27.1"
 okhttp = "5.5.1"
@@ -167,6 +168,8 @@ materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "ma
 metro-runtime = { module = "dev.zacsweers.metro:runtime", version.ref = "metro" }
 metrox-viewmodel = { module = "dev.zacsweers.metro:metrox-viewmodel", version.ref = "metro" }
 metrox-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
+miuix-glass = { module = "top.yukonga.miuix.kmp:miuix-glass-android", version.ref = "miuix" }
+miuix-glass-icons = { module = "top.yukonga.miuix.kmp:miuix-glass-icons-android", version.ref = "miuix" }
 miuix-ui = { module = "top.yukonga.miuix.kmp:miuix-ui-android", version.ref = "miuix" }
 miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons-android", version.ref = "miuix" }
 miuix-preference = { module = "top.yukonga.miuix.kmp:miuix-preference-android", version.ref = "miuix" }

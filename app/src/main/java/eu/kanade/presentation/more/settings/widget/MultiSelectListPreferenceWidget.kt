@@ -19,13 +19,13 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_ok
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.TextButton
+import tachiyomi.presentation.core.components.miuix.WindowDialog
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun <T> MultiSelectListPreferenceWidget(

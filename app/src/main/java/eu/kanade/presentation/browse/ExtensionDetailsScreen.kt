@@ -39,7 +39,6 @@ import eu.kanade.presentation.browse.components.ExtensionIcon
 import eu.kanade.presentation.browse.components.ExtensionPill
 import eu.kanade.presentation.browse.components.label
 import eu.kanade.presentation.components.AppBar
-import eu.kanade.presentation.components.AppBarActionIconSize
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -71,7 +70,8 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Button
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.OutlinedButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
@@ -436,12 +436,11 @@ private fun SourceSwitchPreference(
         onCheckedChange = { onClickSource(source.source.id) },
         endActions = {
             if (source.source is ConfigurableSource) {
-                IconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
-                    Icon(
+                CompactIconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
+                    CompactActionIcon(
                         imageVector = MaterialSymbols.Rounded.Settings,
                         contentDescription = stringResource(MR.strings.label_settings),
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(AppBarActionIconSize),
                     )
                 }
             }

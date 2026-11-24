@@ -18,12 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
-import top.yukonga.miuix.kmp.window.WindowBottomSheet
-import top.yukonga.miuix.kmp.window.WindowDialog
+import tachiyomi.presentation.core.components.miuix.WindowBottomSheet
+import tachiyomi.presentation.core.components.miuix.WindowDialog
 
 /**
- * Miuix owns the adaptive popup window, gestures and insets. The screen's existing tablet policy
- * chooses a centered dialog or the framework bottom sheet without another outer platform Dialog.
+ * Miuix owns popup gestures and insets. The screen's existing tablet policy chooses a centered
+ * glass dialog or a glass bottom sheet in the activity's root popup host.
  */
 @Composable
 fun AdaptiveSheet(

@@ -38,7 +38,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
@@ -63,8 +62,9 @@ import tachiyomi.i18n.action_sort
 import tachiyomi.i18n.cancel_all_for_series
 import tachiyomi.presentation.core.components.ListGroupHeader
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.components.miuix.Text
@@ -417,8 +417,8 @@ private fun DownloadQueueItemMenu(
     var expanded by remember { mutableStateOf(false) }
     val closeMenu = { expanded = false }
     Box {
-        IconButton(onClick = { expanded = true }) {
-            AppBarIcon(
+        CompactIconButton(onClick = { expanded = true }) {
+            CompactActionIcon(
                 imageVector = MiuixIcons.More,
                 contentDescription = stringResource(MR.strings.action_menu),
             )

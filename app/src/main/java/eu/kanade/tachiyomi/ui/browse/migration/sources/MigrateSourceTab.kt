@@ -9,6 +9,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import eu.kanade.presentation.browse.MigrateSourceScreen
+import eu.kanade.presentation.browse.MigrateSourceSortingHeader
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
 import eu.kanade.tachiyomi.ui.browse.migration.manga.MigrateMangaScreen
@@ -37,6 +38,16 @@ fun Screen.migrateSourceTab(): TabContent {
                 },
             ),
         ),
+        headerContent = {
+            if (!state.isLoading && !state.isEmpty) {
+                MigrateSourceSortingHeader(
+                    sortingMode = state.sortingMode,
+                    onToggleSortingMode = viewModel::toggleSortingMode,
+                    sortingDirection = state.sortingDirection,
+                    onToggleSortingDirection = viewModel::toggleSortingDirection,
+                )
+            }
+        },
         content = { contentPadding, _ ->
             MigrateSourceScreen(
                 state = state,
@@ -44,8 +55,6 @@ fun Screen.migrateSourceTab(): TabContent {
                 onClickItem = { source ->
                     navigator.push(MigrateMangaScreen(source.id))
                 },
-                onToggleSortingDirection = viewModel::toggleSortingDirection,
-                onToggleSortingMode = viewModel::toggleSortingMode,
             )
         },
     )

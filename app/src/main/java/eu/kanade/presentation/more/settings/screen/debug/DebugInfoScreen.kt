@@ -29,10 +29,10 @@ import mihon.icons.materialsymbols.rounded.Autorenew
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_reset
 import tachiyomi.i18n.pref_debug_info
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import top.yukonga.miuix.kmp.basic.Icon
 
 class DebugInfoScreen : Screen() {
 
@@ -85,14 +85,14 @@ class DebugInfoScreen : Screen() {
                     title = "Installation ID",
                     subtitle = installationId,
                     widget = {
-                        IconButton(
+                        CompactIconButton(
                             onClick = {
                                 scope.launch {
                                     installationIdPref.set(FeatureFlags.newInstallationId())
                                 }
                             },
                         ) {
-                            Icon(
+                            CompactActionIcon(
                                 imageVector = MaterialSymbols.Rounded.Autorenew,
                                 tint = MaterialTheme.colorScheme.primary,
                                 contentDescription = stringResource(MR.strings.action_reset),

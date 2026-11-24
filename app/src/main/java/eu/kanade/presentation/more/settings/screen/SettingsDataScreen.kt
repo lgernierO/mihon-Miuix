@@ -96,13 +96,12 @@ import tachiyomi.i18n.update_48hour
 import tachiyomi.i18n.update_6hour
 import tachiyomi.i18n.update_weekly
 import tachiyomi.i18n.used_cache
-import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Help
 import top.yukonga.miuix.kmp.preference.CheckboxPreference

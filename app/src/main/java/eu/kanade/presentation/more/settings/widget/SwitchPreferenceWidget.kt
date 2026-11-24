@@ -9,7 +9,6 @@ import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Preview
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 
@@ -28,7 +27,7 @@ fun SwitchPreferenceWidget(
         title = title,
         summary = subtitle?.takeUnless { it.isBlank() },
         startAction = icon?.let {
-            { Icon(imageVector = it, contentDescription = null) }
+            { PreferenceIcon(imageVector = it, enabled = enabled) }
         },
         checked = checked,
         onCheckedChange = onCheckedChanged,

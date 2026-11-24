@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -80,15 +79,20 @@ import tachiyomi.i18n.username
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Button
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.OutlinedButton
+import tachiyomi.presentation.core.components.miuix.OutlinedSecureTextField
 import tachiyomi.presentation.core.components.miuix.OutlinedTextField
 import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 
 object SettingsTrackingScreen : SearchableSettings {
 
@@ -249,8 +253,8 @@ object SettingsTrackingScreen : SearchableSettings {
                         text = stringResource(MR.strings.login_title, tracker.name),
                         modifier = Modifier.weight(1f),
                     )
-                    IconButton(onClick = onDismissRequest) {
-                        AppBarIcon(
+                    CompactIconButton(onClick = onDismissRequest) {
+                        CompactActionIcon(
                             imageVector = MiuixIcons.Close,
                             contentDescription = stringResource(MR.strings.action_close),
                         )
@@ -279,19 +283,26 @@ object SettingsTrackingScreen : SearchableSettings {
                             .semantics { contentType = ContentType.Password },
                         state = password,
                         enabled = !processing,
-                        label = { Text(text = stringResource(MR.strings.password)) },
+                        labelText = stringResource(MR.strings.password),
                         trailingIcon = {
-                            IconButton(
+                            MiuixIconButton(
                                 onClick = { hidePassword = !hidePassword },
                                 enabled = !processing,
+                                minWidth = 48.dp,
+                                minHeight = 48.dp,
                             ) {
-                                Icon(
+                                CompactActionIcon(
                                     imageVector = if (hidePassword) {
                                         MaterialSymbols.RoundedFilled.Visibility
                                     } else {
                                         MaterialSymbols.RoundedFilled.VisibilityOff
                                     },
                                     contentDescription = stringResource(MR.strings.password),
+                                    tint = if (processing) {
+                                        MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                                    } else {
+                                        MiuixTheme.colorScheme.onSecondaryContainer
+                                    },
                                 )
                             }
                         },
@@ -301,6 +312,7 @@ object SettingsTrackingScreen : SearchableSettings {
                             TextObfuscationMode.Visible
                         },
                         keyboardOptions = KeyboardOptions(
+                            autoCorrectEnabled = false,
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done,
                         ),
@@ -309,7 +321,7 @@ object SettingsTrackingScreen : SearchableSettings {
                 }
             },
             confirmButton = {
-                Button(
+                TextButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !processing && username.text.isNotBlank() && password.text.isNotBlank(),
                     onClick = {

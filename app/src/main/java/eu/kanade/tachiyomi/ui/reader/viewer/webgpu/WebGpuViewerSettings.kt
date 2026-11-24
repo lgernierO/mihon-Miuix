@@ -103,8 +103,9 @@ import tachiyomi.presentation.core.components.HeadingItem
 import tachiyomi.presentation.core.components.SettingsChipRow
 import tachiyomi.presentation.core.components.SliderItem
 import tachiyomi.presentation.core.components.miuix.AlertDialog
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.FilterChip
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
@@ -416,11 +417,10 @@ private fun SamplerItem(labelRes: StringResource, defaultName: String, pref: Pre
         onClick = pick,
         endActions = {
             shader?.let {
-                IconButton(onClick = { WebGpuShaders.remove(context, pref, it) }) {
-                    Icon(
+                CompactIconButton(onClick = { WebGpuShaders.remove(context, pref, it) }) {
+                    CompactActionIcon(
                         imageVector = MaterialSymbols.Rounded.Delete,
                         contentDescription = stringResource(MR.strings.action_remove),
-                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
@@ -510,30 +510,28 @@ private fun ShaderList(labelRes: StringResource, pref: Preference<List<WebGpuSha
                         },
                         endActions = {
                             if (params.isNotEmpty()) {
-                                IconButton(
+                                CompactIconButton(
                                     onClick = { expanded = !expanded },
                                     modifier = Modifier.semantics {
                                         stateDescription = if (expanded) collapseLabel else expandLabel
                                     },
                                 ) {
-                                    Icon(
+                                    CompactActionIcon(
                                         imageVector = if (expanded) {
                                             MaterialSymbols.Rounded.KeyboardArrowUp
                                         } else {
                                             MaterialSymbols.Rounded.KeyboardArrowDown
                                         },
                                         contentDescription = parametersLabel,
-                                        modifier = Modifier.size(24.dp),
                                     )
                                 }
                             }
-                            IconButton(
+                            CompactIconButton(
                                 onClick = { WebGpuShaders.remove(context, pref, shader) },
                             ) {
-                                Icon(
+                                CompactActionIcon(
                                     imageVector = MaterialSymbols.Rounded.Delete,
                                     contentDescription = stringResource(MR.strings.action_delete),
-                                    modifier = Modifier.size(24.dp),
                                 )
                             }
                         },
@@ -592,14 +590,13 @@ private fun ShaderParams(
             val subtitle = listOf(param.description, meta).filter { it.isNotEmpty() }.joinToString("\n")
 
             val resetAction: @Composable () -> Unit = {
-                IconButton(
+                CompactIconButton(
                     onClick = { set(null) },
                     enabled = param.name in shader.values,
                 ) {
-                    Icon(
+                    CompactActionIcon(
                         imageVector = MaterialSymbols.Rounded.Refresh,
                         contentDescription = stringResource(MR.strings.action_reset),
-                        modifier = Modifier.size(24.dp),
                     )
                 }
             }

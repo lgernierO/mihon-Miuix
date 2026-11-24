@@ -311,6 +311,7 @@ private fun MangaScreenSmallImpl(
                 onInvertSelection = { onInvertSelection() },
                 titleAlphaProvider = { titleAlpha },
                 backgroundAlphaProvider = { backgroundAlpha },
+                isContentScrolled = !isFirstItemVisible || isFirstItemScrolled,
             )
         },
         bottomBar = {
@@ -513,6 +514,10 @@ fun MangaScreenLargeImpl(
     var topBarHeight by remember { mutableIntStateOf(0) }
 
     val chapterListState = rememberLazyListState()
+    val infoScrollState = rememberScrollState()
+    val isContentScrolled by remember(chapterListState, infoScrollState) {
+        derivedStateOf { chapterListState.canScrollBackward || infoScrollState.canScrollBackward }
+    }
 
     BackHandler(enabled = isAnySelected) {
         onAllChapterSelected(false)
@@ -538,6 +543,7 @@ fun MangaScreenLargeImpl(
                 onInvertSelection = { onInvertSelection() },
                 titleAlphaProvider = { 1f },
                 backgroundAlphaProvider = { 1f },
+                isContentScrolled = isContentScrolled,
             )
         },
         bottomBar = {
@@ -595,7 +601,7 @@ fun MangaScreenLargeImpl(
                 startContent = {
                     Column(
                         modifier = Modifier
-                            .miuixVerticalScroll(rememberScrollState())
+                            .miuixVerticalScroll(infoScrollState)
                             .padding(bottom = contentPadding.calculateBottomPadding()),
                     ) {
                         MangaInfoBox(

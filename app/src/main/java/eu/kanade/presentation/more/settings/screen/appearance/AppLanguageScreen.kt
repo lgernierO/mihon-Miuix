@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
@@ -34,6 +33,7 @@ import tachiyomi.i18n.pref_app_language
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
+import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.preference.RadioButtonLocation
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
@@ -70,11 +70,10 @@ class AppLanguageScreen : Screen() {
         ) { contentPadding ->
             LazyColumn(
                 modifier = Modifier
-                    .padding(contentPadding)
                     .fillMaxSize()
                     .selectableGroup()
                     .miuixScroll(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                contentPadding = contentPadding + PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 overscrollEffect = null,
             ) {

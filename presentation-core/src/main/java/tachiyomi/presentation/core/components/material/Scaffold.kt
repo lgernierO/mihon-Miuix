@@ -1,9 +1,12 @@
 package tachiyomi.presentation.core.components.material
 
+import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.material3.contentColorFor
@@ -21,12 +24,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
+import tachiyomi.presentation.core.components.miuix.LocalMiuixNavigationBarPadding
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import androidx.compose.foundation.layout.padding as foundationPadding
 
 @Composable
 fun Scaffold(
@@ -46,33 +54,52 @@ fun Scaffold(
 ) {
     var fabHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    val backdrop = rememberLayerBackdrop()
+    val supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val navigationBarPadding = LocalMiuixNavigationBarPadding.current
+    val safeContentInsets = contentWindowInsets.union(WindowInsets(bottom = navigationBarPadding))
 
-    // Navigation/banners also use this shell without a TopAppBar. Start with no collapse range;
-    // a real Miuix app bar supplies its measured range instead of an invisible parent eating drags.
-    top.yukonga.miuix.kmp.basic.Scaffold(
-        modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
-        topBar = { topBar(topBarScrollBehavior) },
-        bottomBar = bottomBar,
-        snackbarHost = snackbarHost,
-        floatingActionButton = {
-            Box(Modifier.onSizeChanged { fabHeight = it.height }) {
-                floatingActionButton()
+    // Chrome samples the page body, never the chrome itself. Popups use the activity scene.
+    CompositionLocalProvider(LocalMiuixBackdrop provides backdrop.takeIf { supported }) {
+        top.yukonga.miuix.kmp.basic.Scaffold(
+            modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
+            topBar = { topBar(topBarScrollBehavior) },
+            // Reserve the top-level floating navigation slot for this page's content and actions.
+            bottomBar = {
+                Box(Modifier.foundationPadding(bottom = navigationBarPadding)) {
+                    bottomBar()
+                }
+            },
+            snackbarHost = snackbarHost,
+            floatingActionButton = {
+                Box(Modifier.onSizeChanged { fabHeight = it.height }) {
+                    floatingActionButton()
+                }
+            },
+            floatingActionButtonPosition = floatingActionButtonPosition,
+            containerColor = containerColor,
+            contentWindowInsets = safeContentInsets,
+        ) { contentPadding ->
+            val paddingValues = remember(contentPadding, density) {
+                FabAwarePaddingValues(contentPadding) {
+                    if (fabHeight == 0) 0.dp else with(density) { fabHeight.toDp() } + FabSpacing
+                }
             }
-        },
-        floatingActionButtonPosition = floatingActionButtonPosition,
-        containerColor = containerColor,
-        contentWindowInsets = contentWindowInsets,
-    ) { contentPadding ->
-        val paddingValues = remember(contentPadding, density) {
-            FabAwarePaddingValues(contentPadding) {
-                if (fabHeight == 0) 0.dp else with(density) { fabHeight.toDp() } + FabSpacing
+            CompositionLocalProvider(
+                LocalContentColor provides contentColor,
+                androidx.compose.material3.LocalContentColor provides contentColor,
+                // Controls inside the body must not sample that same body recording.
+                LocalMiuixBackdrop provides null,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (supported) Modifier.layerBackdrop(backdrop) else Modifier)
+                        .background(containerColor),
+                ) {
+                    content(paddingValues)
+                }
             }
-        }
-        CompositionLocalProvider(
-            LocalContentColor provides contentColor,
-            androidx.compose.material3.LocalContentColor provides contentColor,
-        ) {
-            content(paddingValues)
         }
     }
 }
