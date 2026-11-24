@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -101,6 +100,7 @@ object SettingsMainScreen : Screen() {
         }
 
         Scaffold(
+            topBarScrollBehavior = scrollBehavior,
             topBar = {
                 AppGlassTopAppBar(
                     title = stringResource(MR.strings.label_settings),
@@ -128,9 +128,7 @@ object SettingsMainScreen : Screen() {
                 LazyColumn(
                     state = state,
                     contentPadding = contentPadding,
-                    modifier = Modifier
-                        .miuixScroll()
-                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    modifier = Modifier.miuixScroll(),
                     overscrollEffect = null,
                 ) {
                     itemsIndexed(

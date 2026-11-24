@@ -131,6 +131,7 @@ import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
 import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.LocalMiuixPopupBackdrop
 import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.ToolbarGlassVisibility
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
 
@@ -214,6 +215,7 @@ class ReaderActivity : BaseActivity() {
 
             val backgroundColor = remember(general.theme) { Color(baseContext.readerBackgroundColor(general.theme)) }
             val activeViewer by viewerFlow.collectAsState()
+            var readerContentDragged by remember(activeViewer) { mutableStateOf(false) }
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
@@ -260,6 +262,22 @@ class ReaderActivity : BaseActivity() {
                     Box(
                         Modifier
                             .fillMaxSize()
+                            .pointerInput(activeViewer) {
+                                val touchSlop = viewConfiguration.touchSlop
+                                awaitEachGesture {
+                                    val down = awaitFirstDown(
+                                        requireUnconsumed = false,
+                                        pass = PointerEventPass.Initial,
+                                    )
+                                    do {
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                        val pointer = event.changes.firstOrNull { it.id == down.id }
+                                        if (pointer != null && (pointer.position - down.position).getDistance() > touchSlop) {
+                                            readerContentDragged = true
+                                        }
+                                    } while (event.changes.any { it.pressed })
+                                }
+                            }
                             .then(readerBackdrop.modifier)
                             .background(backgroundColor),
                     ) {
@@ -297,7 +315,12 @@ class ReaderActivity : BaseActivity() {
                     CompositionLocalProvider(
                         LocalMiuixBackdrop provides readerBackdrop.source.takeIf { gpuChrome == null },
                     ) {
-                        AppBars(state = state, gpuChrome = gpuChrome)
+                        ToolbarGlassVisibility(
+                            visible = readerContentDragged,
+                            preblurredBackdrop = gpuChrome?.usesGpuBlur == true,
+                        ) {
+                            AppBars(state = state, gpuChrome = gpuChrome)
+                        }
                     }
                 }
 

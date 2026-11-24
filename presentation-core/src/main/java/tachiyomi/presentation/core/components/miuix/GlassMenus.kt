@@ -203,7 +203,7 @@ fun WindowIconDropdownMenu(
         buttonBackdrop
     }
     val radius = cornerRadius.coerceIn(0.dp, size / 2)
-    val fill = if (backgroundColor.isSpecified) backgroundColor else GlassTopAppBarDefaults.buttonFill()
+    val fill = if (backgroundColor.isSpecified) backgroundColor else toolbarButtonFill()
     val sizing = GlassPopupSizing(maxHeight = maxHeight ?: GlassPopupDefaults.MaxHeight)
     val setExpanded: (Boolean) -> Unit = remember {
         { next ->

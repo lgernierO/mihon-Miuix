@@ -2,6 +2,9 @@ package tachiyomi.presentation.core.components.miuix
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -21,8 +24,15 @@ fun AppGlassTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
+    val isContentScrolled by remember(scrollBehavior) {
+        derivedStateOf {
+            // A short list can collapse the title before the body consumes any scroll.
+            scrollBehavior?.state?.let { it.contentOffset < 0f || it.heightOffset < 0f } ?: true
+        }
+    }
     GlassTopAppBar(
         title = title,
+        isContentScrolled = isContentScrolled,
         modifier = modifier,
         subtitle = subtitle,
         backdrop = LocalMiuixBackdrop.current,

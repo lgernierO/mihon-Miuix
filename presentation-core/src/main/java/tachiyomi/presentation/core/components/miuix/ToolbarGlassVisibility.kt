@@ -5,16 +5,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.material.GlassMaterial
 
 /** Fixed-height detail toolbars have no native GlassTopAppBar material context. */
 internal val LocalMiuixToolbarGlassProgress = compositionLocalOf<State<Float>?> { null }
+private val LocalPreblurredToolbar = compositionLocalOf { false }
 
 @Composable
 fun ToolbarGlassVisibility(
     visible: Boolean,
+    preblurredBackdrop: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val progress = animateFloatAsState(
@@ -22,7 +25,19 @@ fun ToolbarGlassVisibility(
         animationSpec = GlassMotion.topBarButtonFloat(),
         label = "detailToolbarGlass",
     )
-    CompositionLocalProvider(LocalMiuixToolbarGlassProgress provides progress, content = content)
+    CompositionLocalProvider(
+        LocalMiuixToolbarGlassProgress provides progress,
+        LocalPreblurredToolbar provides preblurredBackdrop,
+        content = content,
+    )
+}
+
+@Composable
+internal fun toolbarButtonFill(): Color {
+    val fill = GlassTopAppBarDefaults.buttonFill()
+    // WebGPU already blurs the live scene beneath these buttons. Retain that view through the
+    // button's material instead of covering it with the opaque unsupported-backdrop fallback.
+    return if (LocalPreblurredToolbar.current) fill.copy(alpha = 0.35f) else fill
 }
 
 @Composable

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBarActionSpacing
 import eu.kanade.presentation.components.UpIcon
@@ -26,6 +24,7 @@ fun PreferenceScaffold(
 ) {
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
+        topBarScrollBehavior = scrollBehavior,
         containerColor = MiuixTheme.colorScheme.surface,
         topBar = {
             AppGlassTopAppBar(
@@ -50,7 +49,6 @@ fun PreferenceScaffold(
         content = { contentPadding ->
             PreferenceScreen(
                 items = itemsProvider(),
-                modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                 contentPadding = contentPadding,
             )
         },

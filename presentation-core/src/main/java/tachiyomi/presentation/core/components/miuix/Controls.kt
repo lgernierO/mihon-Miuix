@@ -101,7 +101,7 @@ fun IconButton(
                 backdrop = LocalMiuixBackdrop.current.takeUnless { backgroundColor.isSpecified || surfaceProgress == 0f },
                 surfaceAlpha = surfaceProgress,
                 material = animatedToolbarButtonMaterial(),
-                fill = if (backgroundColor.isSpecified) backgroundColor else GlassTopAppBarDefaults.buttonFill(),
+                fill = if (backgroundColor.isSpecified) backgroundColor else toolbarButtonFill(),
                 stroke = if (backgroundColor.isSpecified) null else GlassTopAppBarDefaults.buttonStroke(),
                 shadow = if (backgroundColor.isSpecified) null else GlassShadows.Regular,
             ) {
