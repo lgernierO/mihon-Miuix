@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -26,23 +29,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
-import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
-import mihon.icons.custommaterialsymbols.rounded.CropOff
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Crop
-import mihon.icons.materialsymbols.rounded.Settings
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_settings
 import tachiyomi.i18n.pref_crop_borders
 import tachiyomi.i18n.rotation_type
 import tachiyomi.i18n.viewer
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.NavigationBarDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TooltipBox
+import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
+import top.yukonga.miuix.kmp.icon.glass.Trim
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -57,17 +59,23 @@ fun ReaderBottomBar(
     modifier: Modifier = Modifier,
     chapterNavigator: (@Composable () -> Unit)? = null,
 ) {
-    // These are reading actions, so keep their button semantics inside Miuix's bottom-bar
-    // shell rather than introducing a page-selection state for NavigationBarItem.
-    NavigationBar(
+    // Preserve both reader rows; the upstream toolbar owns shape, tint, blur and shadow.
+    GlassFloatingToolbar(
         modifier = modifier,
-        showDivider = false,
+        backdrop = LocalMiuixBackdrop.current,
+        outSidePadding = PaddingValues(0.dp),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            chapterNavigator?.invoke()
+            if (chapterNavigator != null) {
+                Box(Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+                    chapterNavigator()
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,17 +96,18 @@ fun ReaderBottomBar(
                     icon = orientation.icon,
                     title = stringResource(MR.strings.rotation_type),
                     onClick = onClickOrientation,
+                    iconRotation = orientation.iconRotation,
                 )
                 ReaderBarAction(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    icon = if (cropEnabled) MaterialSymbols.Rounded.Crop else CustomMaterialSymbols.Rounded.CropOff,
+                    icon = MiuixIcons.Glass.Trim,
                     title = stringResource(MR.strings.pref_crop_borders),
                     onClick = onClickCropBorder,
                     selected = cropEnabled,
                 )
                 ReaderBarAction(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    icon = MaterialSymbols.Rounded.Settings,
+                    icon = MiuixIcons.Glass.SettingsOutline,
                     title = stringResource(MR.strings.action_settings),
                     onClick = onClickSettings,
                 )
@@ -114,14 +123,19 @@ private fun ReaderBarAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    iconRotation: Float = 0f,
 ) {
     Box(modifier) {
         TooltipBox(text = title) {
+            val colors = MiuixTheme.colorScheme
+            val contentColor = if (selected) colors.onTertiaryContainer else colors.onSurfaceContainer
+            // The icon and its label remain one action target; selected is a toggle state,
+            // not the transient holdDownState used by Miuix's press feedback.
             IconButton(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight().semantics { this.selected = selected },
                 onClick = onClick,
+                backgroundColor = if (selected) colors.tertiaryContainer else Color.Transparent,
             ) {
-                val color = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,12 +147,12 @@ private fun ReaderBarAction(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        modifier = Modifier.size(NavigationBarDefaults.IconSize),
-                        tint = color,
+                        modifier = Modifier.size(28.dp).rotate(iconRotation),
+                        tint = contentColor,
                     )
                     Text(
                         text = title,
-                        color = color,
+                        color = contentColor,
                         style = MiuixTheme.textStyles.footnote2,
                         fontSize = NavigationBarDefaults.LabelFontSize,
                         textAlign = TextAlign.Center,

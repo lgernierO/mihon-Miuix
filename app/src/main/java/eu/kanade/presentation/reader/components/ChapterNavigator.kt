@@ -44,24 +44,25 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.presentation.util.isTabletUi
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.SkipNext
-import mihon.icons.materialsymbols.rounded.SkipPrevious
+import kotlin.math.roundToInt
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_next_chapter
 import tachiyomi.i18n.action_previous_chapter
+import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Slider
 import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.VerticalSlider
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.JumpNext
+import top.yukonga.miuix.kmp.icon.glass.JumpPrevious
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import kotlin.math.roundToInt
 
 enum class ChapterNavigatorType {
     HORIZONTAL_LTR,
@@ -179,6 +180,7 @@ private fun HorizontalChapterNavigator(
     mainAxisPadding: Dp,
     modifier: Modifier = Modifier,
 ) {
+    // beta03 JumpNext points left and JumpPrevious points right in LTR coordinates.
     val layoutDirection = if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
 
     // The reading direction remains independent from the system layout direction.
@@ -200,7 +202,7 @@ private fun HorizontalChapterNavigator(
                 NavigatorButton(
                     enabled = if (isRtl) enabledNext else enabledPrevious,
                     onClick = if (isRtl) onNextChapter else onPreviousChapter,
-                    imageVector = MaterialSymbols.Rounded.SkipPrevious,
+                    imageVector = MiuixIcons.Glass.JumpNext,
                     contentDescription = stringResource(
                         if (isRtl) MR.strings.action_next_chapter else MR.strings.action_previous_chapter,
                     ),
@@ -233,7 +235,7 @@ private fun HorizontalChapterNavigator(
                 NavigatorButton(
                     enabled = if (isRtl) enabledPrevious else enabledNext,
                     onClick = if (isRtl) onPreviousChapter else onNextChapter,
-                    imageVector = MaterialSymbols.Rounded.SkipNext,
+                    imageVector = MiuixIcons.Glass.JumpPrevious,
                     contentDescription = stringResource(
                         if (isRtl) MR.strings.action_previous_chapter else MR.strings.action_next_chapter,
                     ),
@@ -276,7 +278,7 @@ private fun VerticalChapterNavigator(
             NavigatorButton(
                 enabled = enabledPrevious,
                 onClick = onPreviousChapter,
-                imageVector = MaterialSymbols.Rounded.SkipPrevious,
+                imageVector = MiuixIcons.Glass.JumpNext,
                 contentDescription = stringResource(MR.strings.action_previous_chapter),
                 iconModifier = Modifier.rotate(90f),
             )
@@ -307,7 +309,7 @@ private fun VerticalChapterNavigator(
             NavigatorButton(
                 enabled = enabledNext,
                 onClick = onNextChapter,
-                imageVector = MaterialSymbols.Rounded.SkipNext,
+                imageVector = MiuixIcons.Glass.JumpPrevious,
                 contentDescription = stringResource(MR.strings.action_next_chapter),
                 iconModifier = Modifier.rotate(90f),
             )
@@ -323,26 +325,28 @@ private fun NavigatorButton(
     contentDescription: String,
     iconModifier: Modifier = Modifier,
 ) {
+    val colors = ButtonDefaults.buttonColors()
     IconButton(
         onClick = onClick,
         enabled = enabled,
-        minWidth = 48.dp,
-        minHeight = 48.dp,
         modifier = Modifier.semantics {
             role = Role.Button
             if (!enabled) disabled()
         },
     ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            modifier = iconModifier.size(24.dp),
-            tint = if (enabled) {
-                LocalContentColor.current
-            } else {
-                MiuixTheme.colorScheme.disabledOnSurface
-            },
-        )
+        // Physical arrow directions must not mirror when the vertical bar is on the right.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = contentDescription,
+                modifier = iconModifier.size(28.dp),
+                tint = if (enabled) {
+                    colors.contentColor
+                } else {
+                    colors.disabledContentColor
+                },
+            )
+        }
     }
 }
 

@@ -24,7 +24,7 @@ import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Copy
+import top.yukonga.miuix.kmp.icon.glass.Copy
 
 class BackupSchemaScreen : Screen() {
 
@@ -49,7 +49,7 @@ class BackupSchemaScreen : Screen() {
                             listOf(
                                 AppBar.Action(
                                     title = stringResource(MR.strings.action_copy_to_clipboard),
-                                    icon = MiuixIcons.Copy,
+                                    icon = MiuixIcons.Glass.Copy,
                                     onClick = {
                                         context.copyToClipboard(TITLE, schema)
                                     },
@@ -64,9 +64,9 @@ class BackupSchemaScreen : Screen() {
             Text(
                 text = schema,
                 modifier = Modifier
-                    .padding(contentPadding)
                     .consumeWindowInsets(contentPadding)
                     .miuixVerticalScroll(rememberScrollState())
+                    .padding(contentPadding)
                     .padding(16.dp),
                 fontFamily = FontFamily.Monospace,
             )

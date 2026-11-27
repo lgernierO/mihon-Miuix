@@ -8,8 +8,6 @@ import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
-import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
-import mihon.icons.custommaterialsymbols.rounded.CompactGrid
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_display_comfortable_grid
@@ -19,16 +17,17 @@ import tachiyomi.i18n.action_display_mode
 import tachiyomi.i18n.action_open_in_web_view
 import tachiyomi.i18n.action_settings
 import tachiyomi.i18n.label_help
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.source.local.LocalSource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.GridView
-import top.yukonga.miuix.kmp.icon.extended.ListView
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
-import top.yukonga.miuix.kmp.basic.ScrollBehavior as TopAppBarScrollBehavior
+import top.yukonga.miuix.kmp.icon.glass.GridView
+import top.yukonga.miuix.kmp.icon.glass.ListView
+import top.yukonga.miuix.kmp.icon.glass.Thumbnail
 
 @Composable
 fun BrowseSourceToolbar(
@@ -58,7 +57,7 @@ fun BrowseSourceToolbar(
         onClickCloseSearch = navigateUp,
         actions = {
             TooltipBox(text = stringResource(MR.strings.action_display_mode)) {
-                WindowIconDropdownMenu(
+                AppGlassIconDropdownMenu(
                     entry = DropdownEntry(
                         items = listOf(
                             DropdownItem(
@@ -84,11 +83,11 @@ fun BrowseSourceToolbar(
                 ) {
                     AppBarIcon(
                         imageVector = when (displayMode) {
-                            LibraryDisplayMode.List -> MiuixIcons.ListView
-                            LibraryDisplayMode.ComfortableGrid -> MiuixIcons.GridView
+                            LibraryDisplayMode.List -> MiuixIcons.Glass.ListView
+                            LibraryDisplayMode.ComfortableGrid -> MiuixIcons.Glass.GridView
                             LibraryDisplayMode.CompactGrid,
                             LibraryDisplayMode.CoverOnlyGrid,
-                            -> CustomMaterialSymbols.Rounded.CompactGrid
+                            -> MiuixIcons.Glass.Thumbnail
                         },
                         contentDescription = stringResource(MR.strings.action_display_mode),
                     )

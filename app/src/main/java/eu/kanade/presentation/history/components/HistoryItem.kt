@@ -1,6 +1,7 @@
 package eu.kanade.presentation.history.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -20,22 +21,22 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.util.lang.toTimestampString
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.Favorite
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import tachiyomi.domain.history.model.HistoryWithRelations
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_delete
 import tachiyomi.i18n.add_to_library
 import tachiyomi.i18n.recent_manga_time
 import tachiyomi.presentation.core.components.material.padding
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.FavoriteOutline
 
 private val HistoryItemHeight = 96.dp
 
@@ -92,22 +93,24 @@ fun HistoryItem(
             )
         }
 
-        if (!history.coverData.isMangaFavorite) {
-            IconButton(onClick = onClickFavorite) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.Favorite,
-                    contentDescription = stringResource(MR.strings.add_to_library),
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!history.coverData.isMangaFavorite) {
+                CompactIconButton(onClick = onClickFavorite) {
+                    CompactActionIcon(
+                        imageVector = MiuixIcons.Glass.FavoriteOutline,
+                        contentDescription = stringResource(MR.strings.add_to_library),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+
+            CompactIconButton(onClick = onClickDelete) {
+                CompactActionIcon(
+                    imageVector = MiuixIcons.Glass.Delete,
+                    contentDescription = stringResource(MR.strings.action_delete),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
-        }
-
-        IconButton(onClick = onClickDelete) {
-            Icon(
-                imageVector = MaterialSymbols.Rounded.Delete,
-                contentDescription = stringResource(MR.strings.action_delete),
-                tint = MaterialTheme.colorScheme.onSurface,
-            )
         }
     }
 }

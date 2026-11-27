@@ -7,26 +7,26 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import dev.icerock.moko.resources.StringResource
-import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.SnackbarHost
 import tachiyomi.presentation.core.components.miuix.TabRow
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.rememberPagerTabSelection
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
+import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
-import top.yukonga.miuix.kmp.utils.springAnimateToPage
 
 @Composable
 fun TabbedScreen(
@@ -37,8 +37,9 @@ fun TabbedScreen(
     onChangeSearchQuery: (String?) -> Unit = {},
 ) {
     if (tabs.isEmpty()) return
-    val scope = rememberCoroutineScope()
+    val selection = rememberPagerTabSelection(state, tabs.map { it.titleRes })
     val snackbarHostState = remember { SnackbarHostState() }
+    val flingBehavior = PagerDefaults.flingBehavior(state, snapAnimationSpec = PagerNavigationSpringSpec)
 
     Scaffold(
         topBar = {
@@ -52,44 +53,54 @@ fun TabbedScreen(
                 onChangeSearchQuery = onChangeSearchQuery,
                 actions = { AppBarActions(tab.actions) },
                 scrollBehavior = it,
+                bottomContent = {
+                    Column {
+                        TabRow(
+                            tabs = tabs.map { tab ->
+                                val title = stringResource(tab.titleRes)
+                                tab.badgeNumber?.let { "$title ($it)" } ?: title
+                            },
+                            selectedTabIndex = selection.selectedIndex,
+                            onTabSelected = selection::select,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            maxWidth = 180.dp,
+                            height = 48.dp,
+                        )
+                        tab.headerContent()
+                    }
+                },
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { contentPadding ->
-        Column(
-            modifier = Modifier.padding(
-                top = contentPadding.calculateTopPadding(),
-                start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
-                end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
-            ),
-        ) {
-            TabRow(
-                tabs = tabs.map { tab ->
-                    val title = stringResource(tab.titleRes)
-                    tab.badgeNumber?.let { "$title ($it)" } ?: title
-                },
-                selectedTabIndex = state.currentPage,
-                onTabSelected = { index -> scope.launch { state.springAnimateToPage(index) } },
-                modifier = Modifier
-                    .zIndex(1f)
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                maxWidth = 180.dp,
-                height = 48.dp,
-            )
-
-            HorizontalPager(
-                modifier = Modifier.fillMaxSize().pagerGestureOverride(pagerState = state),
-                state = state,
-                verticalAlignment = Alignment.Top,
-                userScrollEnabled = false,
-                pageNestedScrollConnection = PagerGestureNestedScrollConnection,
-                overscrollEffect = null,
-            ) { page ->
-                tabs[page].content(
-                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
-                    snackbarHostState,
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
                 )
-            }
+                .pagerGestureOverride(
+                    pagerState = state,
+                    flingBehavior = flingBehavior,
+                    mode = PagerInterceptionMode.CrossAxis,
+                    onTriggered = selection::cancel,
+                ),
+            state = state,
+            flingBehavior = flingBehavior,
+            verticalAlignment = Alignment.Top,
+            userScrollEnabled = false,
+            pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+            overscrollEffect = null,
+        ) { page ->
+            tabs[page].content(
+                PaddingValues(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = contentPadding.calculateBottomPadding(),
+                ),
+                snackbarHostState,
+            )
         }
     }
 }
@@ -99,5 +110,6 @@ data class TabContent(
     val badgeNumber: Int? = null,
     val searchEnabled: Boolean = false,
     val actions: List<AppBar.AppBarAction> = listOf(),
+    val headerContent: @Composable () -> Unit = {},
     val content: @Composable (contentPadding: PaddingValues, snackbarHostState: SnackbarHostState) -> Unit,
 )

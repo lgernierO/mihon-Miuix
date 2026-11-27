@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.preference.CheckboxLocation
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
@@ -23,7 +22,7 @@ fun CheckboxPreferenceWidget(
         title = title,
         summary = subtitle?.takeUnless { it.isBlank() },
         startAction = icon?.let {
-            { Icon(imageVector = it, contentDescription = null) }
+            { PreferenceIcon(imageVector = it, enabled = enabled) }
         },
         checked = checked,
         onCheckedChange = onCheckedChanged,

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
+import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -23,15 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowDialog
-import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
-import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 
 /** Lets the shared button adapter give a dialog's confirmation the primary Miuix role. */
 val LocalDialogButtonPrimary = compositionLocalOf { false }
 
 /**
- * Keeps the application's existing title/body/action slots while Miuix owns the dialog window,
+ * Keeps the application's existing title/body/action slots while Miuix owns the glass surface,
  * adaptive placement, shape, insets and predictive-back interaction.
  */
 @Composable
@@ -44,15 +43,17 @@ fun AlertDialog(
     title: (@Composable () -> Unit)? = null,
     text: (@Composable () -> Unit)? = null,
     properties: DialogProperties = DialogProperties(),
+    largeScreen: Boolean? = null,
 ) {
     var show by remember { mutableStateOf(true) }
     // Miuix exposes a shared back/outside callback. The application's locked progress dialogs
     // disable both; ordinary dialogs enable both.
     val implicitDismiss = properties.dismissOnBackPress && properties.dismissOnClickOutside
 
-    WindowDialog(
+    AppGlassDialog(
         show = show,
         modifier = modifier,
+        largeScreen = largeScreen,
         onDismissRequest = if (implicitDismiss) {
             { show = false }
         } else {

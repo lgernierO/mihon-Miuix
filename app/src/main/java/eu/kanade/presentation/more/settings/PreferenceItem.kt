@@ -1,6 +1,6 @@
 package eu.kanade.presentation.more.settings
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,6 +29,7 @@ import eu.kanade.presentation.more.settings.widget.TrackingPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.highlightBackground
 import eu.kanade.tachiyomi.data.track.RefreshResult
 import eu.kanade.tachiyomi.util.system.toast
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.i18n.stringResource
@@ -38,7 +39,6 @@ import tachiyomi.i18n.refresh_tracker_success
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.sliderValue
 import top.yukonga.miuix.kmp.preference.SliderPreference
-import kotlin.time.Duration.Companion.seconds
 
 val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
 val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 56.dp }
@@ -59,7 +59,7 @@ fun StatusWrapper(
             bringIntoViewRequester.bringIntoView()
         }
     }
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester),
         visible = enabled,
         enter = expandVertically() + fadeIn(),

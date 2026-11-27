@@ -17,12 +17,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.data.download.model.Download
-import mihon.icons.custommaterialsymbols.CustomMaterialSymbols
-import mihon.icons.custommaterialsymbols.rounded.DownloadArrow
-import mihon.icons.custommaterialsymbols.rounded.DownloadCircle
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Error
-import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_delete
@@ -32,11 +26,16 @@ import tachiyomi.i18n.downloading_with_progress
 import tachiyomi.i18n.label_downloaded
 import tachiyomi.i18n.manga_download
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Download
+import top.yukonga.miuix.kmp.icon.glass.Error
+import top.yukonga.miuix.kmp.icon.glass.FileDownloads
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class ChapterDownloadAction {
@@ -86,14 +85,14 @@ private fun NotDownloadedIndicator(
     modifier: Modifier = Modifier,
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
-    IconButton(
+    CompactIconButton(
         modifier = modifier.secondaryItemAlpha(),
         enabled = enabled,
         onClick = { onClick(ChapterDownloadAction.START) },
         onLongClick = { onClick(ChapterDownloadAction.START_NOW) },
     ) {
         Icon(
-            imageVector = CustomMaterialSymbols.Rounded.DownloadCircle,
+            imageVector = MiuixIcons.Glass.FileDownloads,
             contentDescription = stringResource(MR.strings.manga_download),
             modifier = Modifier.size(IndicatorSize),
             tint = if (enabled) {
@@ -120,7 +119,7 @@ private fun DownloadingIndicator(
     val downloadProgress = downloadProgressProvider()
     val description = stringResource(MR.strings.manga_download)
     val progressDescription = stringResource(MR.strings.downloading_with_progress, downloadProgress)
-    IconButton(
+    CompactIconButton(
         modifier = modifier.semantics {
             contentDescription = description
             stateDescription = progressDescription
@@ -176,7 +175,7 @@ private fun DownloadingIndicator(
             )
         }
         Icon(
-            imageVector = CustomMaterialSymbols.Rounded.DownloadArrow,
+            imageVector = MiuixIcons.Glass.Download,
             contentDescription = null,
             modifier = ArrowModifier,
             tint = color,
@@ -195,14 +194,14 @@ private fun DownloadedIndicator(
         if (!enabled) isMenuExpanded = false
     }
     val description = stringResource(MR.strings.label_downloaded)
-    IconButton(
+    CompactIconButton(
         modifier = modifier.semantics { stateDescription = description },
         enabled = enabled,
         onClick = { isMenuExpanded = true },
         onLongClick = { isMenuExpanded = true },
     ) {
         Icon(
-            imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
+            imageVector = MiuixIcons.Glass.Ok,
             contentDescription = stringResource(MR.strings.action_delete),
             modifier = Modifier.size(IndicatorSize),
             tint = if (enabled) {
@@ -230,14 +229,14 @@ private fun ErrorIndicator(
     modifier: Modifier = Modifier,
     onClick: (ChapterDownloadAction) -> Unit,
 ) {
-    IconButton(
+    CompactIconButton(
         modifier = modifier,
         enabled = enabled,
         onClick = { onClick(ChapterDownloadAction.START) },
         onLongClick = { onClick(ChapterDownloadAction.START) },
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.Error,
+            imageVector = MiuixIcons.Glass.Error,
             contentDescription = stringResource(MR.strings.chapter_error),
             modifier = Modifier.size(IndicatorSize),
             tint = if (enabled) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.disabledOnSurface,
@@ -245,7 +244,7 @@ private fun ErrorIndicator(
     }
 }
 
-private val IndicatorSize = 26.dp
+private val IndicatorSize = 24.dp
 private val IndicatorPadding = 1.dp
 
 private val IndicatorStrokeWidth = 2.dp

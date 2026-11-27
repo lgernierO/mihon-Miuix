@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,10 +44,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mihon.feature.migration.list.MigrationListScreen
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
-import mihon.icons.materialsymbols.rounded.Deselect
-import mihon.icons.materialsymbols.rounded.DragHandle
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
@@ -75,7 +71,10 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.SelectAll
+import top.yukonga.miuix.kmp.icon.glass.Forward
+import top.yukonga.miuix.kmp.icon.glass.Menu
+import top.yukonga.miuix.kmp.icon.glass.MultiSelect
+import top.yukonga.miuix.kmp.icon.glass.SelectAll
 import top.yukonga.miuix.kmp.preference.CheckboxLocation
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
@@ -113,7 +112,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
 
         val (selectedSources, availableSources) = state.sources.partition { it.isSelected }
         val showLanguage by remember(state) {
-            derivedStateOf {
+            computedStateOf {
                 state.sources.distinctBy { it.source.lang }.size > 1
             }
         }
@@ -130,12 +129,12 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                             listOf(
                                 AppBar.Action(
                                     title = stringResource(MR.strings.migrationConfigScreen_selectAllLabel),
-                                    icon = MiuixIcons.SelectAll,
+                                    icon = MiuixIcons.Glass.SelectAll,
                                     onClick = { viewModel.toggleSelection(Model.SelectionConfig.All) },
                                 ),
                                 AppBar.Action(
                                     title = stringResource(MR.strings.migrationConfigScreen_selectNoneLabel),
-                                    icon = MaterialSymbols.Rounded.Deselect,
+                                    icon = MiuixIcons.Glass.MultiSelect,
                                     onClick = { viewModel.toggleSelection(Model.SelectionConfig.None) },
                                 ),
                                 AppBar.OverflowAction(
@@ -155,7 +154,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                 SmallExtendedFloatingActionButton(
                     text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
                     icon = {
-                        Icon(imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward, contentDescription = null)
+                        Icon(imageVector = MiuixIcons.Glass.Forward, contentDescription = null)
                     },
                     onClick = {
                         viewModel.saveSources()
@@ -276,7 +275,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            imageVector = MaterialSymbols.Rounded.DragHandle,
+                            imageVector = MiuixIcons.Glass.Menu,
                             contentDescription = stringResource(MR.strings.action_sort),
                             modifier = Modifier.size(20.dp),
                         )

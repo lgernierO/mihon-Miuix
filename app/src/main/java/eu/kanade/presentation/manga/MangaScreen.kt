@@ -2,7 +2,6 @@ package eu.kanade.presentation.manga
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,7 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -49,12 +48,10 @@ import eu.kanade.presentation.manga.components.MangaToolbar
 import eu.kanade.presentation.manga.components.MissingChapterCountListItem
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.source.getNameForMangaInfo
 import eu.kanade.tachiyomi.ui.manga.ChapterList
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.util.system.copyToClipboard
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.PlayArrow
+import kotlin.time.Instant
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.model.Manga
@@ -78,7 +75,8 @@ import tachiyomi.presentation.core.util.shouldExpandFAB
 import tachiyomi.source.local.isLocal
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import kotlin.time.Instant
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Play
 
 @Composable
 fun MangaScreen(
@@ -279,20 +277,16 @@ private fun MangaScreenSmallImpl(
     }
 
     Scaffold(
-        topBar = {
+        topBar = { scrollBehavior ->
             val isFirstItemVisible by remember {
-                derivedStateOf { chapterListState.firstVisibleItemIndex == 0 }
+                computedStateOf { chapterListState.firstVisibleItemIndex == 0 }
             }
             val isFirstItemScrolled by remember {
-                derivedStateOf { chapterListState.firstVisibleItemScrollOffset > 0 }
+                computedStateOf { chapterListState.firstVisibleItemScrollOffset > 1 }
             }
-            val titleAlpha by animateFloatAsState(
+            val titleAlpha = animateFloatAsState(
                 if (!isFirstItemVisible) 1f else 0f,
                 label = "Top Bar Title",
-            )
-            val backgroundAlpha by animateFloatAsState(
-                if (!isFirstItemVisible || isFirstItemScrolled) 1f else 0f,
-                label = "Top Bar Background",
             )
             MangaToolbar(
                 title = state.manga.title,
@@ -309,8 +303,9 @@ private fun MangaScreenSmallImpl(
                 onCancelActionMode = { onAllChapterSelected(false) },
                 onSelectAll = { onAllChapterSelected(true) },
                 onInvertSelection = { onInvertSelection() },
-                titleAlphaProvider = { titleAlpha },
-                backgroundAlphaProvider = { backgroundAlpha },
+                titleAlphaProvider = { titleAlpha.value },
+                scrollBehavior = scrollBehavior,
+                isContentScrolled = !isFirstItemVisible || isFirstItemScrolled,
             )
         },
         bottomBar = {
@@ -335,7 +330,7 @@ private fun MangaScreenSmallImpl(
                         ),
                     )
                 },
-                icon = { Icon(imageVector = MaterialSymbols.RoundedFilled.PlayArrow, contentDescription = null) },
+                icon = { Icon(imageVector = MiuixIcons.Glass.Play, contentDescription = null) },
                 onClick = onContinueReading,
                 expanded = chapterListState.shouldExpandFAB(),
                 modifier = Modifier.animateFloatingActionButton(
@@ -513,13 +508,17 @@ fun MangaScreenLargeImpl(
     var topBarHeight by remember { mutableIntStateOf(0) }
 
     val chapterListState = rememberLazyListState()
+    val infoScrollState = rememberScrollState()
+    val isContentScrolled by remember(chapterListState, infoScrollState) {
+        computedStateOf { chapterListState.canScrollBackward || infoScrollState.canScrollBackward }
+    }
 
     BackHandler(enabled = isAnySelected) {
         onAllChapterSelected(false)
     }
 
     Scaffold(
-        topBar = {
+        topBar = { scrollBehavior ->
             MangaToolbar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
                 title = state.manga.title,
@@ -537,7 +536,8 @@ fun MangaScreenLargeImpl(
                 onSelectAll = { onAllChapterSelected(true) },
                 onInvertSelection = { onInvertSelection() },
                 titleAlphaProvider = { 1f },
-                backgroundAlphaProvider = { 1f },
+                scrollBehavior = scrollBehavior,
+                isContentScrolled = isContentScrolled,
             )
         },
         bottomBar = {
@@ -567,7 +567,7 @@ fun MangaScreenLargeImpl(
                         ),
                     )
                 },
-                icon = { Icon(imageVector = MaterialSymbols.RoundedFilled.PlayArrow, contentDescription = null) },
+                icon = { Icon(imageVector = MiuixIcons.Glass.Play, contentDescription = null) },
                 onClick = onContinueReading,
                 expanded = chapterListState.shouldExpandFAB(),
                 modifier = Modifier.animateFloatingActionButton(
@@ -595,7 +595,7 @@ fun MangaScreenLargeImpl(
                 startContent = {
                     Column(
                         modifier = Modifier
-                            .miuixVerticalScroll(rememberScrollState())
+                            .miuixVerticalScroll(infoScrollState)
                             .padding(bottom = contentPadding.calculateBottomPadding()),
                     ) {
                         MangaInfoBox(

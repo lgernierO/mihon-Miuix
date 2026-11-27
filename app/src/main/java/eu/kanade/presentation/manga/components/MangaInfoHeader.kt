@@ -73,25 +73,12 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getNameForMangaInfo
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.copyToClipboard
+import kotlin.math.roundToInt
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.AttachMoney
-import mihon.icons.materialsymbols.rounded.Block
-import mihon.icons.materialsymbols.rounded.Check
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.Favorite
-import mihon.icons.materialsymbols.rounded.HourglassEmpty
-import mihon.icons.materialsymbols.rounded.Person
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.materialsymbols.rounded.Schedule
-import mihon.icons.materialsymbols.rounded.Sync
-import mihon.icons.materialsymbols.roundedfilled.Brush
-import mihon.icons.materialsymbols.roundedfilled.Favorite
-import mihon.icons.materialsymbols.roundedfilled.Pause
-import mihon.icons.materialsymbols.roundedfilled.Warning
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.findChildOfType
@@ -131,11 +118,23 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Contacts
+import top.yukonga.miuix.kmp.icon.glass.Currency
+import top.yukonga.miuix.kmp.icon.glass.DoodlePen
+import top.yukonga.miuix.kmp.icon.glass.Error
+import top.yukonga.miuix.kmp.icon.glass.FavoriteOutline
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.MarkAllAsRead
+import top.yukonga.miuix.kmp.icon.glass.Ok
+import top.yukonga.miuix.kmp.icon.glass.Pause
+import top.yukonga.miuix.kmp.icon.glass.Prohibit
+import top.yukonga.miuix.kmp.icon.glass.Refresh
+import top.yukonga.miuix.kmp.icon.glass.Schedule
+import top.yukonga.miuix.kmp.icon.glass.Timer
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import kotlin.math.roundToInt
-import kotlin.time.Clock
-import kotlin.time.Instant
 
 @Composable
 fun MangaInfoBox(
@@ -238,7 +237,7 @@ fun MangaActionRow(
             } else {
                 stringResource(MR.strings.add_to_library)
             },
-            icon = if (favorite) MaterialSymbols.RoundedFilled.Favorite else MaterialSymbols.Rounded.Favorite,
+            icon = if (favorite) MiuixIcons.Glass.Ok else MiuixIcons.Glass.FavoriteOutline,
             color = if (favorite) MiuixTheme.colorScheme.primary else defaultActionButtonColor,
             onClick = onAddToLibraryClicked,
             onLongClick = onEditCategory,
@@ -253,7 +252,7 @@ fun MangaActionRow(
                     nextUpdateDays,
                 )
             },
-            icon = MaterialSymbols.Rounded.HourglassEmpty,
+            icon = MiuixIcons.Glass.Timer,
             color = if (isUserIntervalMode) MiuixTheme.colorScheme.primary else defaultActionButtonColor,
             onClick = { onEditIntervalClicked?.invoke() },
             enabled = onEditIntervalClicked != null,
@@ -264,14 +263,14 @@ fun MangaActionRow(
             } else {
                 pluralStringResource(MR.plurals.num_trackers, count = trackingCount, trackingCount)
             },
-            icon = if (trackingCount == 0) MaterialSymbols.Rounded.Sync else MaterialSymbols.Rounded.Check,
+            icon = if (trackingCount == 0) MiuixIcons.Glass.Refresh else MiuixIcons.Glass.Ok,
             color = if (trackingCount == 0) defaultActionButtonColor else MiuixTheme.colorScheme.primary,
             onClick = onTrackingClicked,
         )
         if (onWebViewClicked != null) {
             MangaActionButton(
                 title = stringResource(MR.strings.action_web_view),
-                icon = MaterialSymbols.Rounded.Public,
+                icon = MiuixIcons.Glass.GlobalVpn,
                 color = defaultActionButtonColor,
                 onClick = onWebViewClicked,
                 onLongClick = onWebViewLongClicked,
@@ -469,7 +468,7 @@ private fun ColumnScope.MangaContentInfo(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.Person,
+            imageVector = MiuixIcons.Glass.Contacts,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
         )
@@ -500,7 +499,7 @@ private fun ColumnScope.MangaContentInfo(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = MaterialSymbols.RoundedFilled.Brush,
+                imageVector = MiuixIcons.Glass.DoodlePen,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
             )
@@ -525,13 +524,13 @@ private fun ColumnScope.MangaContentInfo(
     ) {
         Icon(
             imageVector = when (status) {
-                SManga.ONGOING.toLong() -> MaterialSymbols.Rounded.Schedule
-                SManga.COMPLETED.toLong() -> MaterialSymbols.Rounded.DoneAll
-                SManga.LICENSED.toLong() -> MaterialSymbols.Rounded.AttachMoney
-                SManga.PUBLISHING_FINISHED.toLong() -> MaterialSymbols.Rounded.Check
-                SManga.CANCELLED.toLong() -> MaterialSymbols.Rounded.Close
-                SManga.ON_HIATUS.toLong() -> MaterialSymbols.RoundedFilled.Pause
-                else -> MaterialSymbols.Rounded.Block
+                SManga.ONGOING.toLong() -> MiuixIcons.Glass.Schedule
+                SManga.COMPLETED.toLong() -> MiuixIcons.Glass.MarkAllAsRead
+                SManga.LICENSED.toLong() -> MiuixIcons.Glass.Currency
+                SManga.PUBLISHING_FINISHED.toLong() -> MiuixIcons.Glass.Ok
+                SManga.CANCELLED.toLong() -> MiuixIcons.Glass.Close
+                SManga.ON_HIATUS.toLong() -> MiuixIcons.Glass.Pause
+                else -> MiuixIcons.Glass.Prohibit
             },
             contentDescription = null,
             modifier = Modifier
@@ -555,7 +554,7 @@ private fun ColumnScope.MangaContentInfo(
             DotSeparatorText()
             if (isStubSource) {
                 Icon(
-                    imageVector = MaterialSymbols.RoundedFilled.Warning,
+                    imageVector = MiuixIcons.Glass.Error,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = 4.dp)

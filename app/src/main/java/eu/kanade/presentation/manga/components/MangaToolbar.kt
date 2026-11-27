@@ -4,15 +4,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.components.downloadDropdownEntry
 import eu.kanade.presentation.manga.DownloadAction
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.FlipToBack
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_edit_categories
 import tachiyomi.i18n.action_filter
@@ -23,14 +20,16 @@ import tachiyomi.i18n.action_select_inverse
 import tachiyomi.i18n.action_share
 import tachiyomi.i18n.action_webview_refresh
 import tachiyomi.i18n.manga_download
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Download
-import top.yukonga.miuix.kmp.icon.extended.Filter
-import top.yukonga.miuix.kmp.icon.extended.SelectAll
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.icon.glass.Download
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.MultiSelect
+import top.yukonga.miuix.kmp.icon.glass.SelectAll
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 @Composable
@@ -53,31 +52,32 @@ fun MangaToolbar(
     onInvertSelection: () -> Unit,
 
     titleAlphaProvider: () -> Float,
-    backgroundAlphaProvider: () -> Float,
+    scrollBehavior: ScrollBehavior,
+    isContentScrolled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val isActionMode = actionModeCounter > 0
     AppBar(
         title = title,
-        titleColor = MaterialTheme.colorScheme.onSurface.copy(
-            alpha = if (isActionMode) 1f else titleAlphaProvider(),
-        ),
+        isContentScrolled = isActionMode || isContentScrolled,
+        titleAlpha = { if (isActionMode) 1f else titleAlphaProvider() },
+        scrollBehavior = scrollBehavior,
+        expandable = false,
         modifier = modifier,
         backgroundColor = MaterialTheme.colorScheme
-            .surfaceColorAtElevation(3.dp)
-            .copy(alpha = if (isActionMode) 1f else backgroundAlphaProvider()),
+            .surfaceColorAtElevation(3.dp),
         navigateUp = navigateUp,
         actionModeActions = {
             AppBarActions(
                 listOf(
                     AppBar.Action(
                         title = stringResource(MR.strings.action_select_all),
-                        icon = MiuixIcons.SelectAll,
+                        icon = MiuixIcons.Glass.SelectAll,
                         onClick = onSelectAll,
                     ),
                     AppBar.Action(
                         title = stringResource(MR.strings.action_select_inverse),
-                        icon = MaterialSymbols.Rounded.FlipToBack,
+                        icon = MiuixIcons.Glass.MultiSelect,
                         onClick = onInvertSelection,
                     ),
                 ),
@@ -86,13 +86,13 @@ fun MangaToolbar(
         actions = {
             if (onClickDownload != null && !isActionMode) {
                 TooltipBox(text = stringResource(MR.strings.manga_download)) {
-                    WindowIconDropdownMenu(
+                    AppGlassIconDropdownMenu(
                         entry = downloadDropdownEntry(onClickDownload),
                         minWidth = 48.dp,
                         minHeight = 48.dp,
                     ) {
                         AppBarIcon(
-                            imageVector = MiuixIcons.Download,
+                            imageVector = MiuixIcons.Glass.Download,
                             contentDescription = stringResource(MR.strings.manga_download),
                         )
                     }
@@ -106,14 +106,14 @@ fun MangaToolbar(
                         add(
                             AppBar.Action(
                                 title = stringResource(MR.strings.action_select_all),
-                                icon = MiuixIcons.SelectAll,
+                                icon = MiuixIcons.Glass.SelectAll,
                                 onClick = onSelectAll,
                             ),
                         )
                         add(
                             AppBar.Action(
                                 title = stringResource(MR.strings.action_select_inverse),
-                                icon = MaterialSymbols.Rounded.FlipToBack,
+                                icon = MiuixIcons.Glass.MultiSelect,
                                 onClick = onInvertSelection,
                             ),
                         )
@@ -122,7 +122,7 @@ fun MangaToolbar(
                     add(
                         AppBar.Action(
                             title = stringResource(MR.strings.action_filter),
-                            icon = MiuixIcons.Filter,
+                            icon = MiuixIcons.Glass.Filter,
                             iconTint = filterTint,
                             onClick = onClickFilter,
                         ),

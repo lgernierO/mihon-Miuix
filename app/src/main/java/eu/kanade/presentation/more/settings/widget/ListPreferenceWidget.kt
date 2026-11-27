@@ -18,15 +18,14 @@ import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
+import tachiyomi.presentation.core.components.miuix.AppGlassDialog
+import tachiyomi.presentation.core.components.miuix.AppGlassDropdownPreference
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.RadioButtonPreference
-import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun <T> ListPreferenceWidget(
@@ -38,14 +37,14 @@ fun <T> ListPreferenceWidget(
     onValueChange: (T) -> Unit,
 ) {
     val options = remember(entries) { entries.entries.toList() }
-    WindowDropdownPreference(
+    AppGlassDropdownPreference(
         modifier = Modifier.highlightBackground(LocalPreferenceHighlighted.current),
         items = options.map { it.value },
         selectedIndex = options.indexOfFirst { it.key == value },
         title = title,
         summary = subtitle,
         showValue = false,
-        startAction = icon?.let { { Icon(imageVector = it, contentDescription = null) } },
+        startAction = icon?.let { { PreferenceIcon(imageVector = it) } },
         onSelectedIndexChange = { index -> options.getOrNull(index)?.let { onValueChange(it.key) } },
     )
 }
@@ -61,7 +60,7 @@ fun <T> ListPreferenceDialog(
 ) {
     var show by remember { mutableStateOf(true) }
     val dismiss = { show = false }
-    WindowDialog(
+    AppGlassDialog(
         modifier = Modifier.selectionSheetHeight(),
         show = show,
         onDismissRequest = dismiss,

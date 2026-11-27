@@ -4,6 +4,7 @@ import android.util.DisplayMetrics
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,15 +20,18 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.coil.InstalledExtensionIcon
 import eu.kanade.tachiyomi.data.coil.InstalledSourceIcon
 import eu.kanade.tachiyomi.extension.model.Extension
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Dangerous
-import mihon.icons.materialsymbols.roundedfilled.Warning
 import tachiyomi.domain.source.model.Source
 import tachiyomi.source.local.isLocal
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Error
+import top.yukonga.miuix.kmp.squircle.squircleClip
 
 private val defaultModifier = Modifier
     .height(40.dp)
     .aspectRatio(1f)
+
+private val SourceIconPadding = 4.dp
+private val SourceIconCornerRadius = 10.dp
 
 @Composable
 fun SourceIcon(
@@ -37,7 +41,7 @@ fun SourceIcon(
     when {
         source.isStub -> {
             Image(
-                imageVector = MaterialSymbols.RoundedFilled.Warning,
+                imageVector = MiuixIcons.Glass.Error,
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
                 modifier = modifier.then(defaultModifier),
@@ -47,7 +51,10 @@ fun SourceIcon(
             Image(
                 painter = painterResource(R.mipmap.ic_local_source),
                 contentDescription = null,
-                modifier = modifier.then(defaultModifier),
+                modifier = modifier
+                    .then(defaultModifier)
+                    .padding(SourceIconPadding)
+                    .squircleClip(SourceIconCornerRadius),
             )
         }
         else -> {
@@ -57,7 +64,10 @@ fun SourceIcon(
                 contentDescription = null,
                 placeholder = defaultIcon,
                 error = defaultIcon,
-                modifier = modifier.then(defaultModifier),
+                modifier = modifier
+                    .then(defaultModifier)
+                    .padding(SourceIconPadding)
+                    .squircleClip(SourceIconCornerRadius),
             )
         }
     }
@@ -91,7 +101,7 @@ fun ExtensionIcon(
             )
         }
         is Extension.NotLoaded -> Image(
-            imageVector = MaterialSymbols.RoundedFilled.Dangerous,
+            imageVector = MiuixIcons.Glass.Error,
             contentDescription = null,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
             modifier = modifier.then(defaultModifier),

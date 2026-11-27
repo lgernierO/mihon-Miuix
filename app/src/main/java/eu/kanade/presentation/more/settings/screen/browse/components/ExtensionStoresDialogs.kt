@@ -8,7 +8,7 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -44,7 +44,7 @@ fun ExtensionStoreCreateDialog(
 ) {
     val state = rememberTextFieldState()
     val storeAlreadyExists by remember(storeIndexUrls) {
-        derivedStateOf {
+        computedStateOf {
             val indexUrl = state.text.toString()
             storeIndexUrls.contains(indexUrl)
         }

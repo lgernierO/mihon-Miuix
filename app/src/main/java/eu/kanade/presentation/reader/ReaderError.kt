@@ -13,9 +13,6 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_open_in_web_view
 import tachiyomi.i18n.action_retry
@@ -23,6 +20,9 @@ import tachiyomi.i18n.decode_image_error
 import tachiyomi.presentation.core.components.ActionButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -53,7 +53,7 @@ fun ReaderError(
         ActionButton(
             onClick = onRetry,
             title = stringResource(MR.strings.action_retry),
-            icon = MaterialSymbols.Rounded.Refresh,
+            icon = MiuixIcons.Glass.Refresh,
             buttonModifier = buttonModifier,
             primary = true,
         )
@@ -61,7 +61,7 @@ fun ReaderError(
             ActionButton(
                 onClick = onOpenInWebView,
                 title = stringResource(MR.strings.action_open_in_web_view),
-                icon = MaterialSymbols.Rounded.Public,
+                icon = MiuixIcons.Glass.GlobalVpn,
                 buttonModifier = buttonModifier,
             )
         }

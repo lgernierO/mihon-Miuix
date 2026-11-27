@@ -49,6 +49,13 @@ import eu.kanade.tachiyomi.ui.reader.viewer.mouseWheelPaging
 import eu.kanade.tachiyomi.ui.reader.viewer.position
 import eu.kanade.tachiyomi.util.system.createReaderThemeContext
 import eu.kanade.tachiyomi.util.system.readerBackgroundColor
+import java.io.FilterInputStream
+import java.lang.ref.WeakReference
+import java.util.TreeSet
+import java.util.concurrent.Executors
+import kotlin.math.abs
+import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -65,13 +72,6 @@ import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import mihon.app.di.appGraph
 import tachiyomi.core.common.util.system.logcat
-import java.io.FilterInputStream
-import java.lang.ref.WeakReference
-import java.util.TreeSet
-import java.util.concurrent.Executors
-import kotlin.math.abs
-import kotlin.math.min
-import kotlin.time.Duration.Companion.milliseconds
 
 private const val STREAM_CHUNK = 1 shl 18
 
@@ -796,11 +796,7 @@ open class WebGpuViewer(
         viewerState.apply {
             fetchPage = fetch@{ index ->
                 val current = currentPage ?: return@fetch null
-
-                // For index 0, return the current spread
-                if (index == 0) {
-                    return@fetch buildSpreadPage(getSpreadAnchor(current))
-                }
+                if (index == 0) return@fetch buildSpreadPage(getSpreadAnchor(current))
 
                 // Navigate by spreads from current
                 var page = current
@@ -858,7 +854,9 @@ open class WebGpuViewer(
             if (old?.fastRenderingOnly != new.fastRenderingOnly) {
                 viewerState.enableTiles = !new.fastRenderingOnly
             }
-            if (old?.holdUntilFinal != new.holdUntilFinal) viewerState.holdUntilFinal = new.holdUntilFinal
+            if (old?.holdUntilFinal != new.holdUntilFinal) {
+                viewerState.holdUntilFinal = new.holdUntilFinal
+            }
             if (old?.imageFilters != new.imageFilters) imageFilters.update(new.imageFilters)
             if (old?.tileFilters != new.tileFilters) tileFilters.update(new.tileFilters)
             if (old?.upscaler != new.upscaler) upscaler.update(new.upscaler)
@@ -1052,7 +1050,10 @@ open class WebGpuViewer(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        ImageViewer(modifier = modifier.mouseWheelPaging(this), state = viewerState)
+        ImageViewer(
+            modifier = modifier.mouseWheelPaging(this),
+            state = viewerState,
+        )
     }
 
     private val cropBorders: Boolean

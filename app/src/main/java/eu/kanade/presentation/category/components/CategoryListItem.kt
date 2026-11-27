@@ -1,6 +1,8 @@
 package eu.kanade.presentation.category.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -11,10 +13,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.DragHandle
-import mihon.icons.materialsymbols.rounded.Edit
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
@@ -23,11 +21,15 @@ import tachiyomi.i18n.action_move_to_bottom
 import tachiyomi.i18n.action_move_to_top
 import tachiyomi.i18n.action_rename_category
 import tachiyomi.i18n.action_sort
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.Edit
+import top.yukonga.miuix.kmp.icon.glass.Menu
 
 @Composable
 fun ReorderableCollectionItemScope.CategoryListItem(
@@ -74,26 +76,28 @@ fun ReorderableCollectionItemScope.CategoryListItem(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = MaterialSymbols.Rounded.DragHandle,
+                        imageVector = MiuixIcons.Glass.Menu,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                     )
                 }
             },
             endActions = {
-                IconButton(onClick = onRename, minWidth = 48.dp, minHeight = 48.dp) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.Edit,
-                        contentDescription = stringResource(MR.strings.action_rename_category),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                IconButton(onClick = onDelete, minWidth = 48.dp, minHeight = 48.dp) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.Delete,
-                        contentDescription = stringResource(MR.strings.action_delete),
-                        modifier = Modifier.size(20.dp),
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CompactIconButton(onClick = onRename) {
+                        Icon(
+                            imageVector = MiuixIcons.Glass.Edit,
+                            contentDescription = stringResource(MR.strings.action_rename_category),
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    CompactIconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = MiuixIcons.Glass.Delete,
+                            contentDescription = stringResource(MR.strings.action_delete),
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
             },
         )

@@ -1,19 +1,22 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.content.Context
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +39,7 @@ import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.track.model.AutoTrackState
 import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.presentation.util.isTabletUi
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.Tracker
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
@@ -52,9 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Visibility
-import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_close
@@ -80,15 +81,23 @@ import tachiyomi.i18n.username
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Button
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.OutlinedButton
+import tachiyomi.presentation.core.components.miuix.OutlinedSecureTextField
 import tachiyomi.presentation.core.components.miuix.OutlinedTextField
 import tachiyomi.presentation.core.components.miuix.Text
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
+import tachiyomi.presentation.core.util.miuixVerticalScroll
+import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Help
+import top.yukonga.miuix.kmp.icon.glass.Hide
+import top.yukonga.miuix.kmp.icon.glass.Show
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 object SettingsTrackingScreen : SearchableSettings {
 
@@ -101,7 +110,7 @@ object SettingsTrackingScreen : SearchableSettings {
         val uriHandler = LocalUriHandler.current
         IconButton(onClick = { uriHandler.openUri("https://mihon.app/docs/guides/tracking") }) {
             AppBarIcon(
-                imageVector = MiuixIcons.Help,
+                imageVector = MiuixIcons.Glass.Help,
                 contentDescription = stringResource(MR.strings.tracking_guide),
             )
         }
@@ -241,24 +250,46 @@ object SettingsTrackingScreen : SearchableSettings {
         var processing by remember { mutableStateOf(false) }
         var inputError by remember { mutableStateOf(false) }
 
+        val window = LocalActivity.current?.window
+        DisposableEffect(window) {
+            val previousSoftInputMode = window?.attributes?.softInputMode
+            if (window != null && previousSoftInputMode != null) {
+                // The root-hosted GlassDialog applies IME insets itself. Keep Android from
+                // panning/resizing the same window a second time while this editor is open.
+                window.setSoftInputMode(
+                    (previousSoftInputMode and WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST.inv()) or
+                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING,
+                )
+            }
+            onDispose {
+                if (window != null && previousSoftInputMode != null) {
+                    window.setSoftInputMode(previousSoftInputMode)
+                }
+            }
+        }
+
         AlertDialog(
             onDismissRequest = onDismissRequest,
+            largeScreen = isTabletUi(),
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(MR.strings.login_title, tracker.name),
                         modifier = Modifier.weight(1f),
                     )
-                    IconButton(onClick = onDismissRequest) {
-                        AppBarIcon(
-                            imageVector = MiuixIcons.Close,
+                    CompactIconButton(onClick = onDismissRequest) {
+                        CompactActionIcon(
+                            imageVector = MiuixIcons.Glass.Close,
                             contentDescription = stringResource(MR.strings.action_close),
                         )
                     }
                 }
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier.miuixVerticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         fieldModifier = Modifier.semantics {
@@ -279,19 +310,26 @@ object SettingsTrackingScreen : SearchableSettings {
                             .semantics { contentType = ContentType.Password },
                         state = password,
                         enabled = !processing,
-                        label = { Text(text = stringResource(MR.strings.password)) },
+                        labelText = stringResource(MR.strings.password),
                         trailingIcon = {
-                            IconButton(
+                            MiuixIconButton(
                                 onClick = { hidePassword = !hidePassword },
                                 enabled = !processing,
+                                minWidth = 48.dp,
+                                minHeight = 48.dp,
                             ) {
-                                Icon(
+                                CompactActionIcon(
                                     imageVector = if (hidePassword) {
-                                        MaterialSymbols.RoundedFilled.Visibility
+                                        MiuixIcons.Glass.Show
                                     } else {
-                                        MaterialSymbols.RoundedFilled.VisibilityOff
+                                        MiuixIcons.Glass.Hide
                                     },
                                     contentDescription = stringResource(MR.strings.password),
+                                    tint = if (processing) {
+                                        MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                                    } else {
+                                        MiuixTheme.colorScheme.onSecondaryContainer
+                                    },
                                 )
                             }
                         },
@@ -301,6 +339,7 @@ object SettingsTrackingScreen : SearchableSettings {
                             TextObfuscationMode.Visible
                         },
                         keyboardOptions = KeyboardOptions(
+                            autoCorrectEnabled = false,
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done,
                         ),
@@ -309,7 +348,7 @@ object SettingsTrackingScreen : SearchableSettings {
                 }
             },
             confirmButton = {
-                Button(
+                TextButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !processing && username.text.isNotBlank() && password.text.isNotBlank(),
                     onClick = {

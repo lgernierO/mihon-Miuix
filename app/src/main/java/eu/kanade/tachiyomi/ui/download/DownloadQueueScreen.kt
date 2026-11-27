@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,9 +25,6 @@ import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.download.DownloadQueueList
 import eu.kanade.presentation.util.Screen
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Pause
-import mihon.icons.materialsymbols.roundedfilled.PlayArrow
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_asc
 import tachiyomi.i18n.action_cancel_all
@@ -42,6 +39,7 @@ import tachiyomi.i18n.action_sort
 import tachiyomi.i18n.information_no_downloads
 import tachiyomi.i18n.label_download_queue
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.components.miuix.SmallExtendedFloatingActionButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
@@ -52,8 +50,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TooltipBox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Sort
-import top.yukonga.miuix.kmp.menu.WindowIconCascadingDropdownMenu
+import top.yukonga.miuix.kmp.icon.glass.Pause
+import top.yukonga.miuix.kmp.icon.glass.Play
+import top.yukonga.miuix.kmp.icon.glass.Sort
 
 object DownloadQueueScreen : Screen() {
 
@@ -63,7 +62,7 @@ object DownloadQueueScreen : Screen() {
         val viewModel = metroViewModel<DownloadQueueViewModel>()
         val downloadList by viewModel.state.collectAsStateWithLifecycle()
         val downloadCount by remember {
-            derivedStateOf { downloadList.sumOf { it.downloads.size } }
+            computedStateOf { downloadList.sumOf { it.downloads.size } }
         }
 
         val scrollBehavior = MiuixScrollBehavior()
@@ -88,7 +87,7 @@ object DownloadQueueScreen : Screen() {
                     actions = {
                         if (downloadList.isNotEmpty()) {
                             TooltipBox(text = stringResource(MR.strings.action_sort)) {
-                                WindowIconCascadingDropdownMenu(
+                                AppGlassIconDropdownMenu(
                                     entry = DropdownEntry(
                                         items = listOf(
                                             DropdownItem(
@@ -131,7 +130,7 @@ object DownloadQueueScreen : Screen() {
                                     minHeight = 48.dp,
                                 ) {
                                     AppBarIcon(
-                                        imageVector = MiuixIcons.Sort,
+                                        imageVector = MiuixIcons.Glass.Sort,
                                         contentDescription = stringResource(MR.strings.action_sort),
                                     )
                                 }
@@ -163,9 +162,9 @@ object DownloadQueueScreen : Screen() {
                     },
                     icon = {
                         val icon = if (isRunning) {
-                            MaterialSymbols.RoundedFilled.Pause
+                            MiuixIcons.Glass.Pause
                         } else {
-                            MaterialSymbols.RoundedFilled.PlayArrow
+                            MiuixIcons.Glass.Play
                         }
                         Icon(imageVector = icon, contentDescription = null)
                     },

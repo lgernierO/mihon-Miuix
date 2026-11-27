@@ -8,8 +8,8 @@ import ca.mpreg.webgpuviewer.viewer.ImageViewerContinuousState
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.mouseWheelPaging
-import kotlinx.coroutines.launch
 import kotlin.math.max
+import kotlinx.coroutines.launch
 
 class WebGpuViewerContinuous(activity: ReaderActivity, val useGap: Boolean = false) :
     WebGpuViewer(activity, isReversed = false, isVertical = true, viewerState = ImageViewerContinuousState()) {
@@ -27,7 +27,10 @@ class WebGpuViewerContinuous(activity: ReaderActivity, val useGap: Boolean = fal
 
     @Composable
     override fun Content(modifier: Modifier) {
-        ImageViewerContinuous(modifier = modifier.mouseWheelPaging(this), state = state)
+        ImageViewerContinuous(
+            modifier = modifier.mouseWheelPaging(this),
+            state = state,
+        )
     }
 
     init {

@@ -30,15 +30,15 @@ import tachiyomi.i18n.action_ok
 import tachiyomi.i18n.exclude
 import tachiyomi.i18n.include
 import tachiyomi.i18n.not_selected
+import tachiyomi.presentation.core.components.miuix.AppGlassDialog
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Checkbox
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 private enum class State {
     CHECKED,
@@ -79,7 +79,7 @@ fun <T> TriStateListDialog(
             selected.getOrPut(keyFor(item)) { stateFor(item) }
         }
     }
-    WindowDialog(
+    AppGlassDialog(
         modifier = Modifier.selectionSheetHeight(),
         show = show,
         onDismissRequest = dismiss,

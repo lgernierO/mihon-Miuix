@@ -3,9 +3,10 @@ package eu.kanade.presentation.components
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -20,18 +21,17 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_reset
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.rememberSyncedTextFieldState
 import tachiyomi.presentation.core.i18n.stringResource
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.glass.Clear
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-/**
- * InputField in Miuix 0.9.4 has a fixed capsule and relies on its leading icon for text padding.
- * The public TextField supports the toolbar's smaller corners and an inset for the entire editor.
- */
+/** The editor keeps its selection while query updates remain owned by the screen. */
 @Composable
 internal fun ToolbarSearchField(
     query: String,
@@ -42,9 +42,9 @@ internal fun ToolbarSearchField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val focusRequester = remember { FocusRequester() }
+    val state = rememberSyncedTextFieldState(query, onQueryChange)
     TextField(
-        value = query,
-        onValueChange = onQueryChange,
+        state = state,
         modifier = modifier
             .heightIn(min = ToolbarSearchFieldDefaults.MinHeight)
             .focusRequester(focusRequester)
@@ -57,15 +57,24 @@ internal fun ToolbarSearchField(
         label = label,
         useLabelAsPlaceholder = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { onSearch(query) }),
-        singleLine = true,
+        onKeyboardAction = { onSearch(state.text.toString()) },
+        lineLimits = TextFieldLineLimits.SingleLine,
         interactionSource = interactionSource,
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    AppBarIcon(
-                        imageVector = MiuixIcons.Close,
+                // The field already owns its surface; embedded actions use the native compact
+                // IconButton defaults rather than the floating glass toolbar treatment.
+                IconButton(
+                    onClick = {
+                        onQueryChange("")
+                        focusRequester.requestFocus()
+                    },
+                ) {
+                    Icon(
+                        imageVector = MiuixIcons.Glass.Clear,
                         contentDescription = stringResource(MR.strings.action_reset),
+                        modifier = Modifier.size(ToolbarSearchFieldDefaults.ClearIconSize),
+                        tint = MiuixTheme.colorScheme.onSurfaceContainerHighest,
                     )
                 }
             } else {
@@ -83,6 +92,8 @@ internal object ToolbarSearchFieldDefaults {
     val MinHeight = 48.dp
     val CornerRadius = 12.dp
     val InsideMargin = DpSize(12.dp, 8.dp)
+
+    val ClearIconSize = 28.dp
 
     @Composable
     fun colors() = TextFieldDefaults.textFieldColors(

@@ -1,14 +1,18 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -22,6 +26,9 @@ import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.isTabletUi
 import tachiyomi.presentation.core.components.TwoPanelBox
+import tachiyomi.presentation.core.components.miuix.LocalTopBarStartInset
+import tachiyomi.presentation.core.components.miuix.navigationRailContentPadding
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 class SettingsScreen(
     private val destination: Int? = null,
@@ -64,17 +71,23 @@ class SettingsScreen(
                 onBackPressed = null,
             ) {
                 val insets = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                TwoPanelBox(
-                    modifier = Modifier
-                        .windowInsetsPadding(insets)
-                        .consumeWindowInsets(insets),
-                    startContent = {
-                        CompositionLocalProvider(LocalBackPress provides parentNavigator::pop) {
-                            SettingsMainScreen.Content(twoPane = true)
+                Box(Modifier.fillMaxSize().background(MiuixTheme.colorScheme.surface)) {
+                    Box(Modifier.fillMaxSize().navigationRailContentPadding()) {
+                        CompositionLocalProvider(LocalTopBarStartInset provides { 0.dp }) {
+                            TwoPanelBox(
+                                modifier = Modifier
+                                    .windowInsetsPadding(insets)
+                                    .consumeWindowInsets(insets),
+                                startContent = {
+                                    CompositionLocalProvider(LocalBackPress provides parentNavigator::pop) {
+                                        SettingsMainScreen.Content(twoPane = true)
+                                    }
+                                },
+                                endContent = { DefaultNavigatorScreenTransition(navigator = it) },
+                            )
                         }
-                    },
-                    endContent = { DefaultNavigatorScreenTransition(navigator = it) },
-                )
+                    }
+                }
             }
         }
     }

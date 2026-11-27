@@ -7,10 +7,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Preview
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Show
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
@@ -28,7 +27,7 @@ fun SwitchPreferenceWidget(
         title = title,
         summary = subtitle?.takeUnless { it.isBlank() },
         startAction = icon?.let {
-            { Icon(imageVector = it, contentDescription = null) }
+            { PreferenceIcon(imageVector = it, enabled = enabled) }
         },
         checked = checked,
         onCheckedChange = onCheckedChanged,
@@ -45,7 +44,7 @@ private fun SwitchPreferenceWidgetPreview() {
                 SwitchPreferenceWidget(
                     title = "Text preference with icon",
                     subtitle = "Text preference summary",
-                    icon = MaterialSymbols.Rounded.Preview,
+                    icon = MiuixIcons.Glass.Show,
                     checked = true,
                     onCheckedChanged = {},
                 )

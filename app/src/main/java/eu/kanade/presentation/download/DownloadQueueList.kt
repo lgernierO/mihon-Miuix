@@ -38,7 +38,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
@@ -46,8 +45,6 @@ import eu.kanade.tachiyomi.ui.download.DownloadQueueSection
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.DragHandle
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -63,8 +60,9 @@ import tachiyomi.i18n.action_sort
 import tachiyomi.i18n.cancel_all_for_series
 import tachiyomi.presentation.core.components.ListGroupHeader
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.LinearProgressIndicator
 import tachiyomi.presentation.core.components.miuix.Surface
 import tachiyomi.presentation.core.components.miuix.Text
@@ -72,7 +70,8 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.glass.Menu
+import top.yukonga.miuix.kmp.icon.glass.More
 
 @Composable
 fun DownloadQueueList(
@@ -398,7 +397,7 @@ private fun ReorderableCollectionItemScope.DragHandle(onDragStarted: () -> Unit,
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.DragHandle,
+            imageVector = MiuixIcons.Glass.Menu,
             contentDescription = stringResource(MR.strings.action_sort),
             modifier = Modifier.size(20.dp),
         )
@@ -417,9 +416,9 @@ private fun DownloadQueueItemMenu(
     var expanded by remember { mutableStateOf(false) }
     val closeMenu = { expanded = false }
     Box {
-        IconButton(onClick = { expanded = true }) {
-            AppBarIcon(
-                imageVector = MiuixIcons.More,
+        CompactIconButton(onClick = { expanded = true }) {
+            CompactActionIcon(
+                imageVector = MiuixIcons.Glass.More,
                 contentDescription = stringResource(MR.strings.action_menu),
             )
         }

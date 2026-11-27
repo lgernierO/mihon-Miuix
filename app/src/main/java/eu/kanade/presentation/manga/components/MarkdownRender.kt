@@ -45,8 +45,6 @@ import com.mikepenz.markdown.model.NoOpImageTransformerImpl
 import com.mikepenz.markdown.model.markdownAlertPadding
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.parseMarkdown
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Image
 import org.intellij.markdown.MarkdownTokenTypes.Companion.HTML_TAG
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
@@ -67,6 +65,8 @@ import org.intellij.markdown.parser.markerblocks.providers.ListMarkerProvider
 import org.intellij.markdown.parser.markerblocks.providers.SetextHeaderProvider
 import tachiyomi.presentation.core.components.material.padding
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.ImageOutline
 
 const val MARKDOWN_INLINE_IMAGE_TAG = "MARKDOWN_INLINE_IMAGE"
 
@@ -244,7 +244,7 @@ private fun getMarkdownInlineContent() = DefaultMarkdownInlineContent(
             ),
             children = {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.Image,
+                    imageVector = MiuixIcons.Glass.ImageOutline,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                 )

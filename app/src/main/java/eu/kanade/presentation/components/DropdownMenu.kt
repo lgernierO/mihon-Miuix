@@ -13,18 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.ArrowRight
-import mihon.icons.materialsymbols.rounded.RadioButtonChecked
-import mihon.icons.materialsymbols.rounded.RadioButtonUnchecked
-import tachiyomi.i18n.MR
-import tachiyomi.i18n.not_selected
 import tachiyomi.i18n.selected
-import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
-import tachiyomi.presentation.core.i18n.stringResource
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import tachiyomi.presentation.core.components.miuix.DropdownMenu as MiuixDropdownMenu
+import tachiyomi.presentation.core.components.miuix.DropdownMenuItem
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.RadioButton
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.ChevronForward
 
 /**
  * DropdownMenu but overlaps anchor and has width constraints to better
@@ -62,18 +57,7 @@ fun RadioMenuItem(
         text = text,
         onClick = onClick,
         trailingIcon = {
-            if (isChecked) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.RadioButtonChecked,
-                    contentDescription = stringResource(MR.strings.selected),
-                    tint = MiuixTheme.colorScheme.primary,
-                )
-            } else {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.RadioButtonUnchecked,
-                    contentDescription = stringResource(MR.strings.not_selected),
-                )
-            }
+            RadioButton(selected = isChecked, onClick = null)
         },
         modifier = modifier,
     )
@@ -94,7 +78,7 @@ fun NestedMenuItem(
             onClick = { nestedExpanded = true },
             trailingIcon = {
                 Icon(
-                    imageVector = MaterialSymbols.AutoMirroredRounded.ArrowRight,
+                    imageVector = MiuixIcons.Glass.ChevronForward,
                     contentDescription = null,
                 )
             },

@@ -1,5 +1,6 @@
 package eu.kanade.presentation.updates
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
@@ -35,9 +37,6 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.relativeTimeSpanString
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Bookmark
-import mihon.icons.materialsymbols.roundedfilled.Circle
 import tachiyomi.domain.updates.model.UpdatesWithRelations
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_filter_bookmarked
@@ -51,6 +50,8 @@ import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.BookmarkOutline
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 internal fun LazyListScope.updatesLastUpdatedItem(
@@ -196,18 +197,16 @@ private fun UpdatesUiItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 var textHeight by remember { mutableIntStateOf(0) }
                 if (!update.read) {
-                    Icon(
-                        imageVector = MaterialSymbols.RoundedFilled.Circle,
-                        contentDescription = stringResource(MR.strings.unread),
-                        modifier = Modifier
-                            .height(8.dp)
-                            .padding(end = 4.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+                    val unreadDescription = stringResource(MR.strings.unread)
+                    val unreadColor = MaterialTheme.colorScheme.primary
+                    Canvas(
+                        Modifier.padding(end = 4.dp).size(8.dp)
+                            .semantics { contentDescription = unreadDescription },
+                    ) { drawCircle(unreadColor) }
                 }
                 if (update.bookmark) {
                     Icon(
-                        imageVector = MaterialSymbols.RoundedFilled.Bookmark,
+                        imageVector = MiuixIcons.Glass.BookmarkOutline,
                         contentDescription = stringResource(MR.strings.action_filter_bookmarked),
                         modifier = Modifier
                             .sizeIn(maxHeight = with(LocalDensity.current) { textHeight.toDp() - 2.dp }),

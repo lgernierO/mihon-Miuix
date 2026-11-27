@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import mihon.app.di.appGraph
+import tachiyomi.presentation.core.components.miuix.MiuixGlassHost
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 inline fun ComponentActivity.setComposeContent(
@@ -36,7 +37,7 @@ inline fun ComponentActivity.setComposeContent(
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
                 LocalMetroViewModelFactory provides appGraph.viewModelFactory,
             ) {
-                content()
+                MiuixGlassHost { content() }
             }
         }
     }

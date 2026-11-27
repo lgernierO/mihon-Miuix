@@ -61,6 +61,7 @@ jobs:
           subprocess.run([
               sdkmanager,
               f"platforms;android-{versions['android-sdk-compile']}",
+              'platforms;android-37.0',
               'build-tools;37.0.0',
               f"ndk;{versions['android-ndk']}",
           ], check=True)

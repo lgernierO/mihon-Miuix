@@ -24,16 +24,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Newspaper
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.miuix.Button
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
 import tachiyomi.presentation.core.components.miuix.OutlinedButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.glass.GlassFloatingToolbar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Document
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -51,7 +52,10 @@ fun InfoScreen(
 ) {
     Scaffold(
         bottomBar = {
-            NavigationBar(showDivider = false) {
+            GlassFloatingToolbar(
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
+                backdrop = LocalMiuixBackdrop.current,
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -132,7 +136,7 @@ fun InfoScreen(
 @Composable
 private fun InfoScaffoldPreview() {
     InfoScreen(
-        icon = MaterialSymbols.Rounded.Newspaper,
+        icon = MiuixIcons.Glass.Document,
         headingText = "Heading",
         subtitleText = "Subtitle",
         acceptText = "Accept",

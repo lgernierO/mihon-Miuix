@@ -30,6 +30,11 @@ if (Config.includeTelemetry) {
 }
 
 val keystorePropertiesFile = layout.settingsDirectory.file("keystore.properties").asFile
+val supportedAbis = listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+val targetAbi = providers.gradleProperty("target-abi").orNull
+require(targetAbi == null || targetAbi in supportedAbis) {
+    "Unknown -Ptarget-abi=$targetAbi, expected one of ${supportedAbis.joinToString()}"
+}
 
 android {
     namespace = "eu.kanade.tachiyomi"
@@ -126,9 +131,9 @@ android {
     splits {
         abi {
             isEnable = true
-            isUniversalApk = true
+            isUniversalApk = targetAbi == null
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include(*(targetAbi?.let { listOf(it) } ?: supportedAbis).toTypedArray())
         }
     }
 
@@ -232,7 +237,7 @@ dependencies {
     implementation(libs.androidx.navigationEvent)
 
     implementation(libs.miuix.ui)
-    implementation(libs.miuix.icons)
+    implementation(libs.miuix.glass.icons)
     implementation(libs.miuix.preference)
 
     implementation(libs.androidx.interpolator)

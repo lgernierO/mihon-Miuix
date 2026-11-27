@@ -39,7 +39,6 @@ import eu.kanade.presentation.browse.components.ExtensionIcon
 import eu.kanade.presentation.browse.components.ExtensionPill
 import eu.kanade.presentation.browse.components.label
 import eu.kanade.presentation.components.AppBar
-import eu.kanade.presentation.components.AppBarActionIconSize
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -47,9 +46,6 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsViewModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Eyeglasses2
-import mihon.icons.materialsymbols.rounded.Settings
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_disable_all
 import tachiyomi.i18n.action_enable_all
@@ -71,12 +67,16 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.Button
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.OutlinedButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Glasses
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
@@ -371,7 +371,7 @@ private fun DetailsHeader(
             onCheckedChange = onExtIncognitoChange,
             startAction = {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.Eyeglasses2,
+                    imageVector = MiuixIcons.Glass.Glasses,
                     contentDescription = null,
                 )
             },
@@ -436,12 +436,11 @@ private fun SourceSwitchPreference(
         onCheckedChange = { onClickSource(source.source.id) },
         endActions = {
             if (source.source is ConfigurableSource) {
-                IconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
-                    Icon(
-                        imageVector = MaterialSymbols.Rounded.Settings,
+                CompactIconButton(onClick = { onClickSourcePreferences(source.source.id) }) {
+                    CompactActionIcon(
+                        imageVector = MiuixIcons.Glass.SettingsOutline,
                         contentDescription = stringResource(MR.strings.label_settings),
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(AppBarActionIconSize),
                     )
                 }
             }

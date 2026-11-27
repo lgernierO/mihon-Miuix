@@ -11,12 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.more.settings.widget.PreferenceIcon
 import mihon.domain.extension.model.ExtensionStore
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Label
-import mihon.icons.materialsymbols.rounded.ContentCopy
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.Public
 import mihon.icons.simpleicons.Discord
 import mihon.icons.simpleicons.SimpleIcons
 import tachiyomi.i18n.MR
@@ -24,12 +21,17 @@ import tachiyomi.i18n.action_copy_to_clipboard
 import tachiyomi.i18n.action_delete
 import tachiyomi.i18n.action_open_in_browser
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.ElevatedCard
-import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixScroll
-import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Copy
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.Tags
 
 @Composable
 fun ExtensionStoresContent(
@@ -86,7 +88,7 @@ private fun ExtensionStoresListItem(
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(imageVector = MaterialSymbols.AutoMirroredRounded.Label, contentDescription = null)
+            PreferenceIcon(imageVector = MiuixIcons.Glass.Tags)
             Text(
                 text = store.name,
                 modifier = Modifier.weight(1f).padding(start = MaterialTheme.padding.medium),
@@ -96,34 +98,34 @@ private fun ExtensionStoresListItem(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
         ) {
-            IconButton(onClick = onOpenWebsite) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.Public,
+            CompactIconButton(onClick = onOpenWebsite) {
+                CompactActionIcon(
+                    imageVector = MiuixIcons.Glass.GlobalVpn,
                     contentDescription = stringResource(MR.strings.action_open_in_browser),
                 )
             }
 
             if (store.contact.discord != null) {
-                IconButton(onClick = onOpenDiscord) {
-                    Icon(
+                CompactIconButton(onClick = onOpenDiscord) {
+                    CompactActionIcon(
                         imageVector = SimpleIcons.Discord,
                         contentDescription = "Discord",
                     )
                 }
             }
 
-            IconButton(onClick = onCopy) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.ContentCopy,
+            CompactIconButton(onClick = onCopy) {
+                CompactActionIcon(
+                    imageVector = MiuixIcons.Glass.Copy,
                     contentDescription = stringResource(MR.strings.action_copy_to_clipboard),
                 )
             }
 
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.Delete,
+            CompactIconButton(onClick = onDelete) {
+                CompactActionIcon(
+                    imageVector = MiuixIcons.Glass.Delete,
                     contentDescription = stringResource(MR.strings.action_delete),
                 )
             }

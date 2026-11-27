@@ -31,16 +31,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.components.AppBarIcon
 import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.presentation.util.rememberResourceBitmapPainter
 import eu.kanade.tachiyomi.R
 import mihon.feature.migration.list.models.MigratingManga
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.ArrowForward
-import mihon.icons.materialsymbols.rounded.CopyAll
-import mihon.icons.materialsymbols.rounded.DoneAll
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.label_more
@@ -60,8 +55,11 @@ import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
+import tachiyomi.presentation.core.components.miuix.CompactIconButtonSize
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
@@ -70,11 +68,12 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Copy
-import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Copy
+import top.yukonga.miuix.kmp.icon.glass.Forward
+import top.yukonga.miuix.kmp.icon.glass.MarkAllAsRead
+import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -105,9 +104,9 @@ fun MigrationListScreenContent(
                                 icon = if (items.size ==
                                     1
                                 ) {
-                                    MiuixIcons.Copy
+                                    MiuixIcons.Glass.Copy
                                 } else {
-                                    MaterialSymbols.Rounded.CopyAll
+                                    MiuixIcons.Glass.Copy
                                 },
                                 onClick = { openMigrationDialog(true) },
                                 enabled = migrationComplete,
@@ -117,9 +116,9 @@ fun MigrationListScreenContent(
                                 icon = if (items.size ==
                                     1
                                 ) {
-                                    MiuixIcons.Ok
+                                    MiuixIcons.Glass.Ok
                                 } else {
-                                    MaterialSymbols.Rounded.DoneAll
+                                    MiuixIcons.Glass.MarkAllAsRead
                                 },
                                 onClick = { openMigrationDialog(false) },
                                 enabled = migrationComplete,
@@ -160,7 +159,7 @@ fun MigrationListScreenContent(
                     )
 
                     Icon(
-                        imageVector = MaterialSymbols.AutoMirroredRounded.ArrowForward,
+                        imageVector = MiuixIcons.Glass.Forward,
                         contentDescription = null,
                         modifier = Modifier.padding(horizontal = 4.dp).size(18.dp),
                     )
@@ -337,15 +336,15 @@ private fun MigrationListItemAction(
     Box(modifier, contentAlignment = Alignment.Center) {
         when (result) {
             MigratingManga.SearchResult.Searching -> {
-                IconButton(onClick = onSkip) {
-                    AppBarIcon(
-                        imageVector = MiuixIcons.Close,
+                CompactIconButton(onClick = onSkip) {
+                    CompactActionIcon(
+                        imageVector = MiuixIcons.Glass.Close,
                         contentDescription = stringResource(MR.strings.migrationListScreen_skipActionLabel),
                     )
                 }
             }
             MigratingManga.SearchResult.NotFound, is MigratingManga.SearchResult.Success -> {
-                WindowIconDropdownMenu(
+                AppGlassIconDropdownMenu(
                     entry = DropdownEntry(
                         items = buildList {
                             add(
@@ -378,9 +377,10 @@ private fun MigrationListItemAction(
                     ),
                     minWidth = 48.dp,
                     minHeight = 48.dp,
+                    size = CompactIconButtonSize,
                 ) {
-                    AppBarIcon(
-                        imageVector = MiuixIcons.More,
+                    CompactActionIcon(
+                        imageVector = MiuixIcons.Glass.More,
                         contentDescription = stringResource(MR.strings.label_more),
                     )
                 }

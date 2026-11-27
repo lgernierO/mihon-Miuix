@@ -9,6 +9,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import eu.kanade.presentation.browse.MigrateSourceScreen
+import eu.kanade.presentation.browse.MigrateSourceSortingHeader
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
 import eu.kanade.tachiyomi.ui.browse.migration.manga.MigrateMangaScreen
@@ -17,7 +18,7 @@ import tachiyomi.i18n.label_migration
 import tachiyomi.i18n.migration_help_guide
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.icon.glass.Help
 
 @Composable
 fun Screen.migrateSourceTab(): TabContent {
@@ -31,12 +32,22 @@ fun Screen.migrateSourceTab(): TabContent {
         actions = listOf(
             AppBar.Action(
                 title = stringResource(MR.strings.migration_help_guide),
-                icon = MiuixIcons.Help,
+                icon = MiuixIcons.Glass.Help,
                 onClick = {
                     uriHandler.openUri("https://mihon.app/docs/guides/source-migration")
                 },
             ),
         ),
+        headerContent = {
+            if (!state.isLoading && !state.isEmpty) {
+                MigrateSourceSortingHeader(
+                    sortingMode = state.sortingMode,
+                    onToggleSortingMode = viewModel::toggleSortingMode,
+                    sortingDirection = state.sortingDirection,
+                    onToggleSortingDirection = viewModel::toggleSortingDirection,
+                )
+            }
+        },
         content = { contentPadding, _ ->
             MigrateSourceScreen(
                 state = state,
@@ -44,8 +55,6 @@ fun Screen.migrateSourceTab(): TabContent {
                 onClickItem = { source ->
                     navigator.push(MigrateMangaScreen(source.id))
                 },
-                onToggleSortingDirection = viewModel::toggleSortingDirection,
-                onToggleSortingMode = viewModel::toggleSortingMode,
             )
         },
     )

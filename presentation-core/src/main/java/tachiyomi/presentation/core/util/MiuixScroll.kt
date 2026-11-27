@@ -2,11 +2,15 @@ package tachiyomi.presentation.core.util
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
@@ -18,22 +22,50 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Velocity
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
+
+/** The page supplies one behavior; its scroll container attaches it inside the overscroll effect. */
+internal val LocalMiuixScrollBehavior = compositionLocalOf<ScrollBehavior?> { null }
 
 /**
  * Miuix owns the spring. Observe the child's boundary before the spring or a refresh parent
  * consumes it. Unlike Miuix's fling-only haptic, this also covers dragging and short pages.
  * Lazy containers must set overscrollEffect = null to avoid a second spring.
  */
-fun Modifier.miuixScroll(enabled: Boolean = true): Modifier =
-    if (enabled) overScrollVertical().then(ScrollBoundaryHapticElement) else this
+@Composable
+fun Modifier.miuixScroll(enabled: Boolean = true): Modifier {
+    if (!enabled) return this
+    val scrollBehavior = LocalMiuixScrollBehavior.current
+    val onOverscrollChanged: ((Float) -> Unit)? = remember(scrollBehavior) {
+        scrollBehavior?.let { behavior -> { offset -> behavior.state.overscrollOffset = offset } }
+    }
+    val scrollConnection = remember(scrollBehavior) {
+        scrollBehavior?.let { behavior ->
+            object : NestedScrollConnection by behavior.nestedScrollConnection {
+                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                    val barConsumed = behavior.nestedScrollConnection.onPostScroll(consumed, available, source)
+                    // The list reached its start. Clear rounding drift even when there is no fling.
+                    if (available.y > 0f) behavior.state.contentOffset = 0f
+                    return barConsumed
+                }
+            }
+        }
+    }
+    // The bar must see the list's remaining delta before the spring consumes it. Otherwise
+    // rebound is counted as content scrolling and the collapsed bar cannot expand at the top.
+    return overScrollVertical(onOffsetChanged = onOverscrollChanged)
+        .then(scrollConnection?.let { Modifier.nestedScroll(it) } ?: Modifier)
+        .then(ScrollBoundaryHapticElement)
+}
 
 /**
  * The same page pattern for ordinary columns, with Foundation's second overscroll effect disabled.
  */
+@Composable
 fun Modifier.miuixVerticalScroll(state: ScrollState, enabled: Boolean = true): Modifier =
     miuixScroll(enabled).verticalScroll(state = state, enabled = enabled, overscrollEffect = null)
 

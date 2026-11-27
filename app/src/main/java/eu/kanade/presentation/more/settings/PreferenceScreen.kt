@@ -1,10 +1,9 @@
 package eu.kanade.presentation.more.settings
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,10 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.screen.SearchableSettings
 import eu.kanade.presentation.more.settings.widget.PreferenceGroupHeader
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
-import top.yukonga.miuix.kmp.basic.Card
-import kotlin.time.Duration.Companion.seconds
+import tachiyomi.presentation.core.components.groupedCardItems
 
 /**
  * Preference Screen composable which contains a list of [Preference] items
@@ -31,8 +30,8 @@ fun PreferenceScreen(
     items: List<Preference>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    state: LazyListState = rememberLazyListState(),
 ) {
-    val state = rememberLazyListState()
     val highlightKey = remember { SearchableSettings.highlightKey }
     var highlightReady by remember { mutableStateOf(false) }
     val sections = items.toSections()
@@ -43,7 +42,9 @@ fun PreferenceScreen(
                 section.title == highlightKey || section.items.any { it.visible && it.title == highlightKey }
             }
             if (i >= 0) {
-                state.animateScrollToItem(i)
+                val firstRow = sections.take(i).sumOf { it.items.size + 2 }
+                val row = sections[i].items.indexOfFirst { it.title == highlightKey }
+                state.animateScrollToItem(firstRow + if (row >= 0) row + 1 else 0)
             }
             highlightReady = true
             SearchableSettings.highlightKey = null
@@ -56,26 +57,24 @@ fun PreferenceScreen(
         contentPadding = contentPadding,
     ) {
         sections.forEachIndexed { index, section ->
-            item {
-                Column {
-                    if (index == 0 && section.title == null) {
-                        Spacer(modifier = Modifier.height(PreferenceGroupMargin))
-                    }
-                    if (section.title != null) {
-                        PreferenceGroupHeader(
-                            title = section.title,
-                            highlighted = highlightReady && section.title == highlightKey,
-                        )
-                    }
-                    Card(
-                        modifier = Modifier.padding(horizontal = PreferenceGroupMargin),
-                    ) {
-                        section.items.forEach { item ->
-                            PreferenceItem(item = item, highlightKey = highlightKey.takeIf { highlightReady })
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(PreferenceGroupMargin))
+            item(key = "section:$index:header", contentType = "header") {
+                if (section.title != null) {
+                    PreferenceGroupHeader(
+                        title = section.title,
+                        highlighted = highlightReady && section.title == highlightKey,
+                    )
+                } else if (index == 0) {
+                    Spacer(Modifier.height(PreferenceGroupMargin))
                 }
+            }
+            groupedCardItems(
+                items = section.items,
+                key = { "section:$index:${it.lazyKey()}" },
+            ) { item ->
+                PreferenceItem(item = item, highlightKey = highlightKey.takeIf { highlightReady })
+            }
+            item(key = "section:$index:footer", contentType = "spacing") {
+                Spacer(Modifier.height(PreferenceGroupMargin))
             }
         }
     }
@@ -90,7 +89,7 @@ private fun List<Preference>.toSections(): List<PreferenceSection> = buildList {
     val ungrouped = mutableListOf<Preference.PreferenceItem<*, *>>()
     fun flushUngrouped() {
         if (ungrouped.any { it.visible }) {
-            add(PreferenceSection(title = null, items = ungrouped.toList()))
+            add(PreferenceSection(title = null, items = ungrouped.filter { it.visible }))
         }
         ungrouped.clear()
     }
@@ -99,7 +98,7 @@ private fun List<Preference>.toSections(): List<PreferenceSection> = buildList {
             is Preference.PreferenceGroup -> {
                 flushUngrouped()
                 if (preference.visible && preference.preferenceItems.any { it.visible }) {
-                    add(PreferenceSection(preference.title, preference.preferenceItems))
+                    add(PreferenceSection(preference.title, preference.preferenceItems.filter { it.visible }))
                 }
             }
             is Preference.PreferenceItem<*, *> -> ungrouped.add(preference)
@@ -109,3 +108,13 @@ private fun List<Preference>.toSections(): List<PreferenceSection> = buildList {
 }
 
 private val PreferenceGroupMargin = 12.dp
+
+private fun Preference.PreferenceItem<*, *>.lazyKey(): String = when (this) {
+    is Preference.PreferenceItem.TrackerPreference -> "tracker:${tracker.id}"
+    is Preference.PreferenceItem.SwitchPreference -> preference.key()
+    is Preference.PreferenceItem.SliderPreference -> preference.key()
+    is Preference.PreferenceItem.ListPreference<*> -> preference.key()
+    is Preference.PreferenceItem.MultiSelectListPreference<*> -> preference.key()
+    is Preference.PreferenceItem.EditTextPreference -> preference.key()
+    else -> "${this::class.simpleName}:$title"
+}

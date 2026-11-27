@@ -2,27 +2,22 @@ package eu.kanade.presentation.components
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tachiyomi.i18n.MR
@@ -31,26 +26,28 @@ import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_menu_overflow_description
 import tachiyomi.i18n.action_search
 import tachiyomi.i18n.action_search_hint
+import tachiyomi.presentation.core.components.miuix.AppGlassIconDropdownMenu
+import tachiyomi.presentation.core.components.miuix.AppGlassTopAppBar
 import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TooltipBox
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Search
-import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
+import top.yukonga.miuix.kmp.icon.glass.Back
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.More
+import top.yukonga.miuix.kmp.icon.glass.Search
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-val AppBarActionIconSize = 24.dp
+val AppBarActionIconSize = 28.dp
+
+// 48dp touch slots plus this gap keep compact circular surfaces visually separate.
+val AppBarActionSpacing = 2.dp
 
 @Composable
 fun AppBar(
@@ -65,90 +62,41 @@ fun AppBar(
     onCancelActionMode: () -> Unit = {},
     actionModeActions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
-    titleColor: Color = MiuixTheme.colorScheme.onSurface,
+    expandable: Boolean = scrollBehavior != null || navigateUp == null,
+    isContentScrolled: Boolean? = null,
+    titleAlpha: () -> Float = { 1f },
+    backgroundAlpha: () -> Float = { 1f },
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val actionMode = actionModeCounter > 0
     val navigation: @Composable () -> Unit = {
         AppBarNavigation(actionMode, onCancelActionMode, navigateUp, navigationIcon)
     }
     val barActions: @Composable RowScope.() -> Unit = {
-        if (actionMode) actionModeActions() else actions()
+        // Space the complete sequence, including SearchToolbar's leading search button and menus.
+        // AppBarActions intentionally emits its children directly into this row.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(AppBarActionSpacing),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (actionMode) actionModeActions() else actions()
+        }
     }
     val color = backgroundColor ?: MiuixTheme.colorScheme.surface
-    if (!actionMode && (scrollBehavior != null || navigateUp == null)) {
-        TopAppBar(
-            title = title.orEmpty(),
-            modifier = modifier,
-            subtitle = subtitle.orEmpty(),
-            color = color,
-            titleColor = titleColor,
-            largeTitleColor = titleColor,
-            navigationIcon = navigation,
-            actions = barActions,
-            scrollBehavior = scrollBehavior,
-        )
-    } else {
-        val centerTitle = !actionMode && !subtitle.isNullOrBlank()
-        var navigationWidth by remember { mutableIntStateOf(0) }
-        var actionsWidth by remember { mutableIntStateOf(0) }
-        val sideWidth = with(LocalDensity.current) { maxOf(navigationWidth, actionsWidth).toDp() }
-        SmallTopAppBar(
-            title = if (actionMode) actionModeCounter.toString() else title.orEmpty(),
-            modifier = modifier,
-            subtitle = "",
-            color = color,
-            titleColor = titleColor,
-            titlePadding = if (centerTitle) 0.dp else TopAppBarDefaults.TitlePadding,
-            navigationIcon = {
-                if (centerTitle) {
-                    Box(
-                        modifier = Modifier.widthIn(min = sideWidth),
-                        contentAlignment = Alignment.CenterStart,
-                    ) {
-                        Box(Modifier.onSizeChanged { navigationWidth = it.width }) {
-                            navigation()
-                        }
-                    }
-                } else {
-                    navigation()
-                }
-            },
-            actions = {
-                if (centerTitle) {
-                    Box(
-                        modifier = Modifier.widthIn(min = sideWidth),
-                        contentAlignment = Alignment.CenterEnd,
-                    ) {
-                        Row(
-                            modifier = Modifier.onSizeChanged { actionsWidth = it.width },
-                            verticalAlignment = Alignment.CenterVertically,
-                            content = barActions,
-                        )
-                    }
-                } else {
-                    barActions()
-                }
-            },
-            scrollBehavior = scrollBehavior,
-            bottomContent = {
-                if (!actionMode && !subtitle.isNullOrBlank()) {
-                    Text(
-                        text = subtitle,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = TopAppBarDefaults.TitlePadding,
-                                end = TopAppBarDefaults.TitlePadding,
-                                bottom = TopAppBarDefaults.SubtitleBottomPadding,
-                            ),
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        style = MiuixTheme.textStyles.body2,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            },
-        )
-    }
+    AppGlassTopAppBar(
+        title = if (actionMode) actionModeCounter.toString() else title.orEmpty(),
+        modifier = modifier,
+        subtitle = if (actionMode) "" else subtitle.orEmpty(),
+        color = color,
+        expandable = !actionMode && expandable,
+        isContentScrolled = if (actionMode) true else isContentScrolled,
+        scrollBehavior = scrollBehavior,
+        titleAlpha = titleAlpha,
+        backgroundAlpha = backgroundAlpha,
+        navigationIcon = navigation,
+        actions = barActions,
+        bottomContent = bottomContent,
+    )
 }
 
 @Composable
@@ -163,7 +111,7 @@ private fun AppBarNavigation(
             onClick = onCancelActionMode,
         ) {
             AppBarIcon(
-                imageVector = MiuixIcons.Close,
+                imageVector = MiuixIcons.Glass.Close,
                 contentDescription = stringResource(MR.strings.action_cancel),
             )
         }
@@ -224,7 +172,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
     val overflow = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflow.isNotEmpty()) {
         TooltipBox(text = stringResource(MR.strings.action_menu_overflow_description)) {
-            WindowIconDropdownMenu(
+            AppGlassIconDropdownMenu(
                 entry = DropdownEntry(
                     items = overflow.map { action ->
                         DropdownItem(text = action.title, onClick = action.onClick)
@@ -234,7 +182,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
                 minHeight = 48.dp,
             ) {
                 AppBarIcon(
-                    imageVector = MiuixIcons.More,
+                    imageVector = MiuixIcons.Glass.More,
                     contentDescription = stringResource(MR.strings.action_menu_overflow_description),
                 )
             }
@@ -256,6 +204,7 @@ fun SearchToolbar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -266,7 +215,7 @@ fun SearchToolbar(
                     onClick = { onChangeSearchQuery("") },
                 ) {
                     AppBarIcon(
-                        imageVector = MiuixIcons.Search,
+                        imageVector = MiuixIcons.Glass.Search,
                         contentDescription = stringResource(MR.strings.action_search),
                     )
                 }
@@ -281,17 +230,17 @@ fun SearchToolbar(
             navigateUp = navigateUp,
             actions = searchAction,
             scrollBehavior = scrollBehavior,
+            bottomContent = bottomContent,
         )
     } else {
-        SmallTopAppBar(
+        AppGlassTopAppBar(
             title = "",
             modifier = modifier,
-            titlePadding = 0.dp,
-            navigationIconPadding = 0.dp,
+            expandable = false,
             actions = {
                 // The framework measures navigation and actions independently.
                 // Keep the close button and expanding input in the same Row.
-                Box(Modifier.padding(start = TopAppBarDefaults.NavigationIconPadding)) {
+                Box(Modifier.padding(start = TopAppBarDefaults.NavigationIconPadding, end = 8.dp)) {
                     AppBarNavigation(false, {}, onClickCloseSearch, null)
                 }
                 ToolbarSearchField(
@@ -308,9 +257,14 @@ fun SearchToolbar(
                     modifier = Modifier.weight(1f).padding(end = 8.dp),
                     interactionSource = interactionSource,
                 )
-                actions()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(AppBarActionSpacing),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = actions,
+                )
             },
             scrollBehavior = scrollBehavior,
+            bottomContent = bottomContent,
         )
     }
 }
@@ -321,7 +275,7 @@ fun UpIcon(
     navigationIcon: ImageVector? = null,
 ) {
     AppBarIcon(
-        imageVector = navigationIcon ?: MiuixIcons.Back,
+        imageVector = navigationIcon ?: MiuixIcons.Glass.Back,
         contentDescription = stringResource(MR.strings.action_bar_up_description),
         modifier = modifier,
         autoMirror = navigationIcon == null,

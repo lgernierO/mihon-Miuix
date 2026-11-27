@@ -1,6 +1,6 @@
 package eu.kanade.presentation.reader.appbars
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -72,7 +72,7 @@ fun ReaderAppBars(
     chapterId: Long? = null,
 ) {
     Column(modifier = Modifier.fillMaxHeight()) {
-        AnimatedVisibility(
+        CapturedAnimatedVisibility(
             visible = visible,
             enter = slideInVertically(readerBarsSlideAnimationSpec) { -it } + fadeIn(readerBarsFadeAnimationSpec),
             exit = slideOutVertically(readerBarsSlideAnimationSpec) { -it } + fadeOut(readerBarsFadeAnimationSpec),
@@ -101,7 +101,7 @@ fun ReaderAppBars(
                         .weight(1f)
                         .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
                 ) {
-                    AnimatedVisibility(
+                    CapturedAnimatedVisibility(
                         visible = visible,
                         enter = slideInHorizontally(readerBarsSlideAnimationSpec) { if (sliderOnLeft) -it else it } +
                             fadeIn(readerBarsFadeAnimationSpec),
@@ -138,7 +138,7 @@ fun ReaderAppBars(
             Spacer(Modifier.weight(1f))
         }
 
-        AnimatedVisibility(
+        CapturedAnimatedVisibility(
             visible = visible,
             enter = slideInVertically(readerBarsSlideAnimationSpec) { it } + fadeIn(readerBarsFadeAnimationSpec),
             exit = slideOutVertically(readerBarsSlideAnimationSpec) { it } + fadeOut(readerBarsFadeAnimationSpec),

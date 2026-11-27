@@ -40,8 +40,8 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Filter
-import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.icon.glass.Filter
+import top.yukonga.miuix.kmp.icon.glass.Help
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 @Composable
@@ -113,13 +113,13 @@ private fun UpcomingToolbar(
                 listOf(
                     AppBar.Action(
                         title = stringResource(MR.strings.action_filter),
-                        icon = MiuixIcons.Filter,
+                        icon = MiuixIcons.Glass.Filter,
                         iconTint = if (hasFilters) MaterialTheme.colorScheme.active else LocalContentColor.current,
                         onClick = onClickFilter,
                     ),
                     AppBar.Action(
                         title = stringResource(MR.strings.upcoming_guide),
-                        icon = MiuixIcons.Help,
+                        icon = MiuixIcons.Glass.Help,
                         onClick = { uriHandler.openUri(Constants.URL_HELP_UPCOMING) },
                     ),
                 ),

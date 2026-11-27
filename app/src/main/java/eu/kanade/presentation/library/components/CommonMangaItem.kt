@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -35,8 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.manga.components.MangaCover
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.PlayArrow
+import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_resume
 import tachiyomi.presentation.core.components.BadgeGroup
@@ -44,13 +42,11 @@ import tachiyomi.presentation.core.components.miuix.IconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButtonDefaults
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Play
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
 object CommonMangaItemDefaults {
     val GridHorizontalSpacer = 4.dp
@@ -397,25 +393,14 @@ private fun ContinueReadingButton(
     IconButton(
         onClick = onClick,
         modifier = modifier.semantics { contentDescription = description },
+        backgroundColor = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+        size = size,
     ) {
-        Card(
-            modifier = Modifier.size(size),
-            cornerRadius = IconButtonDefaults.CornerRadius,
-            colors = CardDefaults.defaultColors(
-                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                contentColor = MiuixTheme.colorScheme.onPrimaryContainer,
-            ),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = MaterialSymbols.RoundedFilled.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(iconSize),
-                )
-            }
-        }
+        Icon(
+            imageVector = MiuixIcons.Glass.Play,
+            contentDescription = null,
+            modifier = Modifier.size(iconSize),
+            tint = MiuixTheme.colorScheme.onPrimaryContainer,
+        )
     }
 }

@@ -1,6 +1,6 @@
 package eu.kanade.presentation.reader
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,7 +30,7 @@ fun ReaderNavigationOverlay(
     state: ReaderNavigationOverlayState,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = state.visible,
         modifier = modifier,
         enter = fadeIn(tween(FADE_DURATION)),

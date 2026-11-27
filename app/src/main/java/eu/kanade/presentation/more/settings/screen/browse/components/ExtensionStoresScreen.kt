@@ -23,7 +23,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Refresh
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 
 @Composable
 fun ExtensionStoresScreen(
@@ -46,7 +46,7 @@ fun ExtensionStoresScreen(
                 actions = {
                     IconButton(onClick = onClickRefresh) {
                         AppBarIcon(
-                            imageVector = MiuixIcons.Refresh,
+                            imageVector = MiuixIcons.Glass.Refresh,
                             contentDescription = stringResource(resource = MR.strings.action_webview_refresh),
                         )
                     }

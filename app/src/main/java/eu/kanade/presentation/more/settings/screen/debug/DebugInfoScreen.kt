@@ -24,15 +24,15 @@ import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 import mihon.app.di.appGraph
 import mihon.core.common.FeatureFlags
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Autorenew
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_reset
 import tachiyomi.i18n.pref_debug_info
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Refresh
 
 class DebugInfoScreen : Screen() {
 
@@ -85,15 +85,15 @@ class DebugInfoScreen : Screen() {
                     title = "Installation ID",
                     subtitle = installationId,
                     widget = {
-                        IconButton(
+                        CompactIconButton(
                             onClick = {
                                 scope.launch {
                                     installationIdPref.set(FeatureFlags.newInstallationId())
                                 }
                             },
                         ) {
-                            Icon(
-                                imageVector = MaterialSymbols.Rounded.Autorenew,
+                            CompactActionIcon(
+                                imageVector = MiuixIcons.Glass.Refresh,
                                 tint = MaterialTheme.colorScheme.primary,
                                 contentDescription = stringResource(MR.strings.action_reset),
                             )

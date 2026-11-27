@@ -2,7 +2,6 @@ package eu.kanade.presentation.browse
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,14 +42,6 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
 import mihon.domain.extension.model.ExtensionStore
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.Download
-import mihon.icons.materialsymbols.rounded.Info
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.materialsymbols.rounded.Refresh
-import mihon.icons.materialsymbols.rounded.Settings
-import mihon.icons.materialsymbols.rounded.VerifiedUser
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_cancel
@@ -93,9 +81,10 @@ import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.components.miuix.AlertDialog
-import tachiyomi.presentation.core.components.miuix.Button
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
-import tachiyomi.presentation.core.components.miuix.IconButton
+import tachiyomi.presentation.core.components.miuix.CompactActionIcon
+import tachiyomi.presentation.core.components.miuix.CompactButton
+import tachiyomi.presentation.core.components.miuix.CompactIconButton
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
@@ -104,7 +93,15 @@ import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.plus
-import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Close
+import top.yukonga.miuix.kmp.icon.glass.Download
+import top.yukonga.miuix.kmp.icon.glass.GlobalVpn
+import top.yukonga.miuix.kmp.icon.glass.Info
+import top.yukonga.miuix.kmp.icon.glass.Refresh
+import top.yukonga.miuix.kmp.icon.glass.SecurityStatus
+import top.yukonga.miuix.kmp.icon.glass.SettingsOutline
 
 @Composable
 fun ExtensionScreen(
@@ -143,7 +140,7 @@ fun ExtensionScreen(
                     actions = listOf(
                         EmptyScreenAction(
                             stringRes = MR.strings.extensionStores,
-                            icon = MaterialSymbols.Rounded.Settings,
+                            icon = MiuixIcons.Glass.SettingsOutline,
                             onClick = { navigator.push(ExtensionStoresScreen()) },
                         ),
                     ),
@@ -210,13 +207,11 @@ private fun ExtensionContent(
                         val action: @Composable RowScope.() -> Unit =
                             if (header.textRes == MR.strings.ext_updates_pending) {
                                 {
-                                    Button(onClick = { onClickUpdateAll() }) {
-                                        Text(
-                                            text = stringResource(MR.strings.ext_update_all),
-                                            style = LocalTextStyle.current.copy(
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                        )
+                                    CompactButton(
+                                        onClick = onClickUpdateAll,
+                                        colors = ButtonDefaults.buttonColorsPrimary(),
+                                    ) {
+                                        Text(text = stringResource(MR.strings.ext_update_all))
                                     }
                                 }
                             } else {
@@ -499,9 +494,9 @@ private fun ExtensionItemActions(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (!installStep.isCompleted()) {
-            IconButton(onClick = { onClickItemCancel(extension) }) {
-                Icon(
-                    imageVector = MaterialSymbols.Rounded.Close,
+            CompactIconButton(onClick = { onClickItemCancel(extension) }) {
+                CompactActionIcon(
+                    imageVector = MiuixIcons.Glass.Close,
                     contentDescription = stringResource(MR.strings.action_cancel),
                 )
             }
@@ -510,33 +505,33 @@ private fun ExtensionItemActions(
 
         val secondaryAction = when (extension) {
             is Extension.Available -> {
-                (MaterialSymbols.Rounded.Public to MR.strings.action_open_in_web_view)
+                (MiuixIcons.Glass.GlobalVpn to MR.strings.action_open_in_web_view)
                     .takeIf { extension.sources.isNotEmpty() }
             }
-            is Extension.Loaded -> MaterialSymbols.Rounded.Settings to MR.strings.action_settings
+            is Extension.Loaded -> MiuixIcons.Glass.SettingsOutline to MR.strings.action_settings
             is Extension.NotLoaded -> if (extension.reason is Extension.NotLoaded.Reason.Untrusted) {
-                MaterialSymbols.Rounded.VerifiedUser to MR.strings.ext_trust
+                MiuixIcons.Glass.SecurityStatus to MR.strings.ext_trust
             } else {
-                MaterialSymbols.Rounded.Info to MR.strings.ext_not_loaded_details
+                MiuixIcons.Glass.Info to MR.strings.ext_not_loaded_details
             }
         }
         secondaryAction?.let { (icon, label) ->
-            IconButton(onClick = { onClickItemSecondaryAction(extension) }) {
-                Icon(imageVector = icon, contentDescription = stringResource(label))
+            CompactIconButton(onClick = { onClickItemSecondaryAction(extension) }) {
+                CompactActionIcon(imageVector = icon, contentDescription = stringResource(label))
             }
         }
 
         val action = when {
-            installStep == InstallStep.Error -> MaterialSymbols.Rounded.Refresh to MR.strings.action_retry
-            extension is Extension.Available -> MaterialSymbols.Rounded.Download to MR.strings.ext_install
+            installStep == InstallStep.Error -> MiuixIcons.Glass.Refresh to MR.strings.action_retry
+            extension is Extension.Available -> MiuixIcons.Glass.Download to MR.strings.ext_install
             extension is Extension.Installed && extension.hasUpdate -> {
-                MaterialSymbols.Rounded.Download to MR.strings.ext_update
+                MiuixIcons.Glass.Download to MR.strings.ext_update
             }
             else -> null
         }
         action?.let { (icon, label) ->
-            IconButton(onClick = { onClickItemAction(extension) }) {
-                Icon(imageVector = icon, contentDescription = stringResource(label))
+            CompactIconButton(onClick = { onClickItemAction(extension) }) {
+                CompactActionIcon(imageVector = icon, contentDescription = stringResource(label))
             }
         }
     }

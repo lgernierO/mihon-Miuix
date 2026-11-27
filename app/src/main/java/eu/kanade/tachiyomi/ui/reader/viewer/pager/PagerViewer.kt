@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.content.Context
 import android.graphics.ColorFilter
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.widget.FrameLayout
@@ -52,6 +53,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      * top of this class.
      */
     val pager = createPager()
+
+    // Drawing the parent applies the pager's native scroll and transform before drawing its pages.
+    override val backdropView: View?
+        get() = pager.parent as? DisallowInterceptBarrier
 
     private val settingsViewModel = activity.settingsViewModel
 

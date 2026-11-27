@@ -54,6 +54,8 @@ import eu.kanade.tachiyomi.util.lang.convertEpochMillisZone
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,8 +74,6 @@ import kotlinx.datetime.toLocalDateTime
 import logcat.LogPriority
 import mihon.app.di.appGraph
 import mihon.core.metro.AppCoroutineScope
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.Delete
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.interactor.GetManga
@@ -103,8 +103,8 @@ import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
-import kotlin.time.Clock
-import kotlin.time.Instant
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Delete
 
 data class TrackInfoDialogHomeScreen(
     private val mangaId: Long,
@@ -653,7 +653,7 @@ data class TrackDateRemoverScreen(
         AlertDialogContent(
             icon = {
                 Icon(
-                    imageVector = MaterialSymbols.RoundedFilled.Delete,
+                    imageVector = MiuixIcons.Glass.Delete,
                     contentDescription = null,
                 )
             },
@@ -865,7 +865,7 @@ data class TrackerRemoveScreen(
         AlertDialogContent(
             icon = {
                 Icon(
-                    imageVector = MaterialSymbols.RoundedFilled.Delete,
+                    imageVector = MiuixIcons.Glass.Delete,
                     contentDescription = null,
                 )
             },

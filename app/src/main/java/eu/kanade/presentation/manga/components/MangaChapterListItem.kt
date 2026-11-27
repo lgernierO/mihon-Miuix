@@ -1,11 +1,13 @@
 package eu.kanade.presentation.manga.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -21,20 +23,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import me.saket.swipe.SwipeableActionsBox
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.BookmarkAdd
-import mihon.icons.materialsymbols.rounded.BookmarkRemove
-import mihon.icons.materialsymbols.rounded.Check
-import mihon.icons.materialsymbols.rounded.Delete
-import mihon.icons.materialsymbols.rounded.Download
-import mihon.icons.materialsymbols.rounded.FileDownloadOff
-import mihon.icons.materialsymbols.rounded.RemoveDone
-import mihon.icons.materialsymbols.roundedfilled.Bookmark
-import mihon.icons.materialsymbols.roundedfilled.Circle
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.action_filter_bookmarked
@@ -45,6 +39,14 @@ import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.AddBookmark
+import top.yukonga.miuix.kmp.icon.glass.BookmarkOutline
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.Download
+import top.yukonga.miuix.kmp.icon.glass.MarkAsUnread
+import top.yukonga.miuix.kmp.icon.glass.Ok
+import top.yukonga.miuix.kmp.icon.glass.Prohibit
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 @Composable
@@ -110,18 +112,16 @@ fun MangaChapterListItem(
                 ) {
                     var textHeight by remember { mutableIntStateOf(0) }
                     if (!read) {
-                        Icon(
-                            imageVector = MaterialSymbols.RoundedFilled.Circle,
-                            contentDescription = stringResource(MR.strings.unread),
-                            modifier = Modifier
-                                .height(8.dp)
-                                .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                        val unreadDescription = stringResource(MR.strings.unread)
+                        val unreadColor = MaterialTheme.colorScheme.primary
+                        Canvas(
+                            Modifier.padding(end = 4.dp).size(8.dp)
+                                .semantics { contentDescription = unreadDescription },
+                        ) { drawCircle(unreadColor) }
                     }
                     if (bookmark) {
                         Icon(
-                            imageVector = MaterialSymbols.RoundedFilled.Bookmark,
+                            imageVector = MiuixIcons.Glass.BookmarkOutline,
                             contentDescription = stringResource(MR.strings.action_filter_bookmarked),
                             modifier = Modifier
                                 .sizeIn(maxHeight = with(LocalDensity.current) { textHeight.toDp() - 2.dp }),
@@ -194,22 +194,22 @@ private fun getSwipeAction(
 ): me.saket.swipe.SwipeAction? {
     return when (action) {
         LibraryPreferences.ChapterSwipeAction.ToggleRead -> swipeAction(
-            icon = if (!read) MaterialSymbols.Rounded.Check else MaterialSymbols.Rounded.RemoveDone,
+            icon = if (!read) MiuixIcons.Glass.Ok else MiuixIcons.Glass.MarkAsUnread,
             background = background,
             isUndo = read,
             onSwipe = onSwipe,
         )
         LibraryPreferences.ChapterSwipeAction.ToggleBookmark -> swipeAction(
-            icon = if (!bookmark) MaterialSymbols.Rounded.BookmarkAdd else MaterialSymbols.Rounded.BookmarkRemove,
+            icon = if (!bookmark) MiuixIcons.Glass.AddBookmark else MiuixIcons.Glass.BookmarkOutline,
             background = background,
             isUndo = bookmark,
             onSwipe = onSwipe,
         )
         LibraryPreferences.ChapterSwipeAction.Download -> swipeAction(
             icon = when (downloadState) {
-                Download.State.NOT_DOWNLOADED, Download.State.ERROR -> MaterialSymbols.Rounded.Download
-                Download.State.QUEUE, Download.State.DOWNLOADING -> MaterialSymbols.Rounded.FileDownloadOff
-                Download.State.DOWNLOADED -> MaterialSymbols.Rounded.Delete
+                Download.State.NOT_DOWNLOADED, Download.State.ERROR -> MiuixIcons.Glass.Download
+                Download.State.QUEUE, Download.State.DOWNLOADING -> MiuixIcons.Glass.Prohibit
+                Download.State.DOWNLOADED -> MiuixIcons.Glass.Delete
             },
             background = background,
             onSwipe = onSwipe,

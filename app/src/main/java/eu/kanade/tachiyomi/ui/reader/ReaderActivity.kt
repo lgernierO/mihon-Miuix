@@ -72,6 +72,7 @@ import eu.kanade.presentation.reader.ReaderPageIndicator
 import eu.kanade.presentation.reader.ReadingModeSelectDialog
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
+import eu.kanade.presentation.reader.rememberReaderBackdrop
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -125,6 +126,8 @@ import tachiyomi.i18n.picture_saved
 import tachiyomi.i18n.share_page_info
 import tachiyomi.presentation.core.components.miuix.AlertDialog
 import tachiyomi.presentation.core.components.miuix.CircularProgressIndicator
+import tachiyomi.presentation.core.components.miuix.LocalMiuixBackdrop
+import tachiyomi.presentation.core.components.miuix.LocalMiuixPopupBackdrop
 import tachiyomi.presentation.core.components.miuix.Text
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
@@ -208,9 +211,19 @@ class ReaderActivity : BaseActivity() {
             val navigation = settingsViewModel.navigation.collectAsState().value
 
             val backgroundColor = remember(general.theme) { Color(baseContext.readerBackgroundColor(general.theme)) }
+            val activeViewer by viewerFlow.collectAsState()
             val colorOverlayBlendMode = remember(colorOverlayMode) {
                 ReaderPreferences.ColorFilterMode.getOrNull(colorOverlayMode)?.second
             }
+            val readerBackdrop = rememberReaderBackdrop(
+                viewer = activeViewer,
+                enabled = state.menuVisible ||
+                    state.dialog != null || state.isLoadingAdjacentChapter,
+                backgroundColor = backgroundColor,
+                brightness = brightness,
+                overlayColor = colorOverlay.takeIf { colorOverlayEnabled },
+                overlayBlendMode = colorOverlayBlendMode,
+            )
 
             LaunchedEffect(brightness) { setWindowBrightness(brightness) }
 
@@ -224,112 +237,128 @@ class ReaderActivity : BaseActivity() {
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .onPreviewKeyEvent(::onKeyEvent)
-                    .focusRequester(focusRequester)
-                    .focusable()
-                    .pointerInput(Unit) {
-                        awaitEachGesture {
-                            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                            navigationOverlayState.hide()
+            CompositionLocalProvider(LocalMiuixPopupBackdrop provides readerBackdrop.pageSource) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(backgroundColor)
+                        .onPreviewKeyEvent(::onKeyEvent)
+                        .focusRequester(focusRequester)
+                        .focusable()
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                                navigationOverlayState.hide()
+                            }
+                        }
+                        .then(if (general.keepScreenOn) Modifier.keepScreenOn() else Modifier),
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .then(readerBackdrop.modifier)
+                            .background(backgroundColor),
+                    ) {
+                        ReaderViewer()
+                        if (!isLoadingViewer) {
+                            ReaderContentOverlay(
+                                brightness = brightness,
+                                color = colorOverlay.takeIf { colorOverlayEnabled },
+                                colorBlendMode = colorOverlayBlendMode,
+                            )
                         }
                     }
-                    .then(if (general.keepScreenOn) Modifier.keepScreenOn() else Modifier),
-            ) {
-                ReaderViewer()
 
-                if (isLoadingViewer) {
-                    LoadingScreen()
-                    return@Box
-                }
-
-                ReaderContentOverlay(
-                    brightness = brightness,
-                    color = colorOverlay.takeIf { colorOverlayEnabled },
-                    colorBlendMode = colorOverlayBlendMode,
-                )
-
-                if (!state.menuVisible && showPageNumber) {
-                    ReaderPageIndicator(
-                        currentPage = state.currentPage,
-                        totalPages = state.totalPages,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding(),
-                    )
-                }
-
-                if (flashOnPageChange) {
-                    DisplayRefreshHost(hostState = displayRefreshHost)
-                }
-
-                ReaderNavigationOverlay(state = navigationOverlayState)
-
-                AppBars(state = state)
-            }
-
-            if (state.isLoadingAdjacentChapter) {
-                AlertDialog(
-                    onDismissRequest = {},
-                    confirmButton = {},
-                    text = {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            CircularProgressIndicator()
-                            Text(stringResource(MR.strings.loading))
+                    Box(Modifier.fillMaxSize().then(readerBackdrop.chromeModifier)) {
+                        if (isLoadingViewer) {
+                            LoadingScreen()
+                            return@Box
                         }
-                    },
-                )
-            }
 
-            val onDismissRequest = viewModel::closeDialog
-            when (state.dialog) {
-                is ReaderViewModel.Dialog.Settings -> {
-                    ReaderSettingsDialog(
-                        onDismissRequest = onDismissRequest,
-                        onShowMenus = { setMenuVisibility(true) },
-                        // The filter preview hides reading controls without changing the
-                        // system-bar insets beneath the open settings window.
-                        onHideMenus = { viewModel.showMenus(false) },
-                        viewModel = settingsViewModel,
-                    )
+                        if (!state.menuVisible && showPageNumber) {
+                            ReaderPageIndicator(
+                                currentPage = state.currentPage,
+                                totalPages = state.totalPages,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .navigationBarsPadding(),
+                            )
+                        }
+
+                        if (flashOnPageChange) {
+                            DisplayRefreshHost(hostState = displayRefreshHost)
+                        }
+
+                        ReaderNavigationOverlay(state = navigationOverlayState)
+
+                        CompositionLocalProvider(LocalMiuixBackdrop provides readerBackdrop.source) {
+                            key(activeViewer) {
+                                AppBars(state = state)
+                            }
+                        }
+                    }
                 }
-                is ReaderViewModel.Dialog.ReadingModeSelect -> {
-                    ReadingModeSelectDialog(
-                        onDismissRequest = onDismissRequest,
-                        viewModel = settingsViewModel,
-                        onChange = { stringRes ->
-                            menuToggleToast?.cancel()
-                            if (!readerPreferences.showReadingMode.get()) {
-                                menuToggleToast = toast(stringRes)
+
+                if (state.isLoadingAdjacentChapter) {
+                    AlertDialog(
+                        onDismissRequest = {},
+                        confirmButton = {},
+                        text = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                CircularProgressIndicator()
+                                Text(stringResource(MR.strings.loading))
                             }
                         },
                     )
                 }
-                is ReaderViewModel.Dialog.OrientationModeSelect -> {
-                    OrientationSelectDialog(
-                        onDismissRequest = onDismissRequest,
-                        viewModel = settingsViewModel,
-                        onChange = { stringRes ->
-                            menuToggleToast?.cancel()
-                            menuToggleToast = toast(stringRes)
-                        },
-                    )
+
+                val onDismissRequest = viewModel::closeDialog
+                when (state.dialog) {
+                    is ReaderViewModel.Dialog.Settings -> {
+                        ReaderSettingsDialog(
+                            onDismissRequest = onDismissRequest,
+                            onShowMenus = { setMenuVisibility(true) },
+                            // The filter preview hides reading controls without changing the
+                            // system-bar insets beneath the open settings window.
+                            onHideMenus = { viewModel.showMenus(false) },
+                            viewModel = settingsViewModel,
+                        )
+                    }
+                    is ReaderViewModel.Dialog.ReadingModeSelect -> {
+                        ReadingModeSelectDialog(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = settingsViewModel,
+                            onChange = { stringRes ->
+                                menuToggleToast?.cancel()
+                                if (!readerPreferences.showReadingMode.get()) {
+                                    menuToggleToast = toast(stringRes)
+                                }
+                            },
+                        )
+                    }
+                    is ReaderViewModel.Dialog.OrientationModeSelect -> {
+                        OrientationSelectDialog(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = settingsViewModel,
+                            onChange = { stringRes ->
+                                menuToggleToast?.cancel()
+                                menuToggleToast = toast(stringRes)
+                            },
+                        )
+                    }
+                    is ReaderViewModel.Dialog.PageActions -> {
+                        ReaderPageActionsDialog(
+                            onDismissRequest = onDismissRequest,
+                            onSetAsCover = viewModel::setAsCover,
+                            onShare = viewModel::shareImage,
+                            onSave = viewModel::saveImage,
+                        )
+                    }
+                    null -> {}
                 }
-                is ReaderViewModel.Dialog.PageActions -> {
-                    ReaderPageActionsDialog(
-                        onDismissRequest = onDismissRequest,
-                        onSetAsCover = viewModel::setAsCover,
-                        onShare = viewModel::shareImage,
-                        onSave = viewModel::saveImage,
-                    )
-                }
-                null -> {}
             }
         }
 

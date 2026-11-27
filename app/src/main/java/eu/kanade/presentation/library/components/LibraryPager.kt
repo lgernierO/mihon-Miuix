@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
@@ -30,6 +31,8 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import tachiyomi.presentation.core.util.plus
 import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
+import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 @Composable
@@ -48,9 +51,17 @@ fun LibraryPager(
     onLongClickManga: (Category, LibraryManga) -> Unit,
     onClickContinueReading: ((LibraryManga) -> Unit)?,
 ) {
+    val flingBehavior = PagerDefaults.flingBehavior(state, snapAnimationSpec = PagerNavigationSpringSpec)
     HorizontalPager(
-        modifier = Modifier.fillMaxSize().pagerGestureOverride(pagerState = state),
+        modifier = Modifier
+            .fillMaxSize()
+            .pagerGestureOverride(
+                pagerState = state,
+                flingBehavior = flingBehavior,
+                mode = PagerInterceptionMode.CrossAxis,
+            ),
         state = state,
+        flingBehavior = flingBehavior,
         verticalAlignment = Alignment.Top,
         userScrollEnabled = false,
         pageNestedScrollConnection = PagerGestureNestedScrollConnection,

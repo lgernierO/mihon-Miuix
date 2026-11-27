@@ -5,9 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Folder
 import tachiyomi.presentation.core.components.Badge
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.FolderOutline
 
 @Composable
 internal fun DownloadsBadge(count: Int) {
@@ -34,7 +34,7 @@ internal fun LanguageBadge(
 ) {
     if (isLocal) {
         Badge(
-            imageVector = MaterialSymbols.Rounded.Folder,
+            imageVector = MiuixIcons.Glass.FolderOutline,
             color = MaterialTheme.colorScheme.tertiary,
             iconColor = MaterialTheme.colorScheme.onTertiary,
         )

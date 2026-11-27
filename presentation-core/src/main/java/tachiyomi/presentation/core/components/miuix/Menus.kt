@@ -7,45 +7,41 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.DropdownDefaults
-import top.yukonga.miuix.kmp.basic.DropdownImpl
-import top.yukonga.miuix.kmp.basic.DropdownItem
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
+import top.yukonga.miuix.kmp.glass.GlassPopup
+import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
+import top.yukonga.miuix.kmp.glass.GlassPopupSizing
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowListPopup
 import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 
-/**
- * The public Miuix popup owns placement bounds, window lifetime and back gestures. The adapter
- * preserves composable menu content used by extension and chapter menus.
- */
+/** Composable menu slots on the OS4 glass popup, hosted outside the activity scene recording. */
 @Composable
 @Suppress("UNUSED_PARAMETER")
 fun DropdownMenu(
@@ -57,41 +53,42 @@ fun DropdownMenu(
     properties: PopupProperties = PopupProperties(focusable = true),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val density = LocalDensity.current
-    val offsetX = with(density) { offset.x.roundToPx() }
-    val offsetY = with(density) { offset.y.roundToPx() }
-    val positionProvider = remember(offsetX, offsetY) {
-        OffsetPopupPositionProvider(offsetX, offsetY)
+    var anchorBounds by remember { mutableStateOf(Rect.Zero) }
+    val backdrop = if (LocalMiuixPopupInRoot.current) {
+        LocalMiuixPopupBackdrop.current
+    } else {
+        LocalMiuixBackdrop.current
     }
-
-    WindowListPopup(
-        show = expanded,
-        onDismissRequest = if (properties.dismissOnBackPress && properties.dismissOnClickOutside) {
-            onDismissRequest
-        } else {
-            null
+    val density = LocalDensity.current
+    val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1 else 1
+    val translatedAnchor = with(density) {
+        anchorBounds.translate(offset.x.toPx() * direction, offset.y.toPx())
+    }
+    Box(
+        Modifier.onGloballyPositioned { coordinates ->
+            anchorBounds = (coordinates.parentLayoutCoordinates ?: coordinates).boundsInWindow()
         },
-        enableWindowDim = false,
-        popupPositionProvider = positionProvider,
-    ) {
-        MiuixPopupSystemBars()
-        ListPopupColumn {
-            Column(
-                modifier = modifier
-                    .sizeIn(minWidth = ListPopupDefaults.MinWidth, maxWidth = 320.dp),
+    )
+    GlassMenuHost(show = expanded) { menuShown ->
+        Box(Modifier.fillMaxSize()) {
+            GlassPopup(
+                show = menuShown,
+                onDismissRequest = {
+                    if (properties.dismissOnBackPress && properties.dismissOnClickOutside) onDismissRequest()
+                },
+                anchorBounds = translatedAnchor,
+                backdrop = backdrop,
+                modifier = modifier,
+                sizing = GlassPopupSizing(maxWidth = 320.dp),
             ) {
-                Spacer(Modifier.height(8.dp))
-                content()
-                Spacer(Modifier.height(8.dp))
+                CompositionLocalProvider(LocalMiuixBackdrop provides null) {
+                    content()
+                }
             }
         }
     }
 }
 
-/**
- * Plain action labels use the framework's actual popup row. The outer menu's 8dp first/last
- * spacing combines with the row's 12dp margin to match native dropdown groups.
- */
 @Composable
 fun DropdownMenuItem(
     text: String,
@@ -101,31 +98,24 @@ fun DropdownMenuItem(
     selected: Boolean = false,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
-    Box(modifier = modifier.semantics { role = if (selected) Role.RadioButton else Role.Button }) {
-        DropdownImpl(
-            item = DropdownItem(
+    DropdownMenuItem(
+        text = {
+            Text(
                 text = text,
-                enabled = enabled,
-                selected = selected,
-                icon = leadingIcon?.let { icon -> { modifier -> Box(modifier) { icon() } } },
-            ),
-            optionSize = 1,
-            isSelected = selected,
-            index = 0,
-            enabled = enabled,
-            isFirst = false,
-            isLast = false,
-            onSelectedIndexChange = { onClick() },
-        )
-    }
+                color = if (selected) MiuixTheme.colorScheme.primary else LocalContentColor.current,
+            )
+        },
+        onClick = onClick,
+        modifier = modifier.semantics {
+            role = if (selected) Role.RadioButton else Role.Button
+            this.selected = selected
+        },
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+    )
 }
 
-/**
- * Miuix menu entries accept plain text; application menus also need composable labels and icons.
- * BasicComponent still owns the Miuix row's interaction. Keep its leading/trailing slots in a
- * standard Row: ListPopupColumn asks for infinite intrinsic width, which overflows the internal
- * BasicComponent start/end allocation in 0.9.4 before the popup can choose its bounded width.
- */
+/** Rich labels remain application content; BasicComponent owns the row's enabled interaction. */
 @Composable
 fun DropdownMenuItem(
     text: @Composable () -> Unit,
@@ -135,8 +125,8 @@ fun DropdownMenuItem(
     trailingIcon: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(
-        horizontal = DropdownDefaults.InsideHorizontalPadding,
-        vertical = DropdownDefaults.MiddleVerticalPadding,
+        horizontal = GlassPopupDefaults.ItemPaddingHorizontal,
+        vertical = GlassPopupDefaults.ItemPaddingVertical,
     ),
 ) {
     val contentColor = if (enabled) {
@@ -173,43 +163,5 @@ fun DropdownMenuItem(
                 trailingIcon?.invoke()
             }
         }
-    }
-}
-
-private class OffsetPopupPositionProvider(
-    private val offsetX: Int,
-    private val offsetY: Int,
-) : PopupPositionProvider {
-    private val delegate = ListPopupDefaults.DropdownPositionProvider
-
-    override fun getMargins(): PaddingValues = delegate.getMargins()
-
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowBounds: IntRect,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize,
-        popupMargin: IntRect,
-        alignment: PopupPositionProvider.Align,
-    ): IntOffset {
-        val base = delegate.calculatePosition(
-            anchorBounds,
-            windowBounds,
-            layoutDirection,
-            popupContentSize,
-            popupMargin,
-            alignment,
-        )
-        val direction = if (layoutDirection == LayoutDirection.Rtl) -1 else 1
-        return IntOffset(
-            x = (base.x + offsetX * direction).coerceIn(
-                windowBounds.left,
-                (windowBounds.right - popupContentSize.width).coerceAtLeast(windowBounds.left),
-            ),
-            y = (base.y + offsetY).coerceIn(
-                windowBounds.top,
-                (windowBounds.bottom - popupContentSize.height).coerceAtLeast(windowBounds.top),
-            ),
-        )
     }
 }

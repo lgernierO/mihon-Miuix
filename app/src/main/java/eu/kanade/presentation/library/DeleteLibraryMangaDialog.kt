@@ -18,15 +18,15 @@ import tachiyomi.i18n.action_cancel
 import tachiyomi.i18n.action_remove
 import tachiyomi.i18n.downloaded_chapters
 import tachiyomi.i18n.manga_from_library
+import tachiyomi.presentation.core.components.miuix.AppGlassDialog
 import tachiyomi.presentation.core.components.miuix.MiuixPopupSystemBars
+import tachiyomi.presentation.core.components.miuix.TextButton
 import tachiyomi.presentation.core.components.selectionSheetHeight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.miuixVerticalScroll
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.CheckboxLocation
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun DeleteLibraryMangaDialog(
@@ -39,7 +39,7 @@ fun DeleteLibraryMangaDialog(
     var removeDownloads by remember(containsLocalManga) { mutableStateOf(false) }
     var pendingRemoval by remember { mutableStateOf<Pair<Boolean, Boolean>?>(null) }
     val dismiss = { show = false }
-    WindowDialog(
+    AppGlassDialog(
         show = show,
         modifier = Modifier.selectionSheetHeight(),
         title = stringResource(MR.strings.action_remove),

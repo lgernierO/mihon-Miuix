@@ -43,14 +43,14 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.theme.TachiyomiTheme
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.isDynamicColorAvailable
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.selected
 import tachiyomi.presentation.core.i18n.stringResource
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -179,7 +179,7 @@ fun AppThemePreviewItem(
             ) {
                 if (selected) {
                     Icon(
-                        imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
+                        imageVector = MiuixIcons.Glass.Ok,
                         contentDescription = stringResource(MR.strings.selected),
                         tint = MiuixTheme.colorScheme.primary,
                     )
